@@ -23,10 +23,18 @@
 	import NotesCard from '$lib/components/NotesCard.svelte';
 	import DateNav from '$lib/components/DateNav.svelte';
 	import WeekStrip from '$lib/components/WeekStrip.svelte';
+	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
+	import { user, logout } from '$lib/auth.js';
 
 	const todayK = dateKey();
 
 	onMount(load);
+
+	async function doLogout() {
+		await logout();
+		goto(`${base}/login`);
+	}
 
 	const SYNC_LABEL = {
 		loading: 'Loading…',
@@ -92,11 +100,20 @@
 			</span>
 			<div class="brand-txt">
 				<h1>Daily Tracker</h1>
-				<span class="greet">{greeting}</span>
+				<span class="greet">{greeting}{#if $user?.name}, {$user.name}{/if}</span>
 			</div>
-			{#if SYNC_LABEL[$syncState]}
-				<span class="sync {$syncState}">{SYNC_LABEL[$syncState]}</span>
-			{/if}
+			<div class="head-right">
+				{#if SYNC_LABEL[$syncState]}
+					<span class="sync {$syncState}">{SYNC_LABEL[$syncState]}</span>
+				{/if}
+				<button class="logout" on:click={doLogout} title="Sign out" aria-label="sign out">
+					<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+						<polyline points="16 17 21 12 16 7" />
+						<line x1="21" y1="12" x2="9" y2="12" />
+					</svg>
+				</button>
+			</div>
 		</div>
 		<DateNav dateK={$selectedDate} {todayK} on:prev={prev} on:next={next} on:today={goToday} />
 	</header>
@@ -195,8 +212,28 @@
 		font-size: 0.82rem;
 		color: var(--text-dim);
 	}
-	.sync {
+	.head-right {
 		margin-left: auto;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+	.logout {
+		width: 34px;
+		height: 34px;
+		border-radius: 10px;
+		display: grid;
+		place-items: center;
+		color: var(--text-dim);
+		background: var(--surface);
+		border: 1px solid var(--border);
+		transition: all 0.15s ease;
+	}
+	.logout:hover {
+		color: var(--red);
+		border-color: var(--red);
+	}
+	.sync {
 		font-size: 0.72rem;
 		font-weight: 600;
 		padding: 4px 10px;

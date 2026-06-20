@@ -1,103 +1,58 @@
-// SvelteKit server-side JSON-RPC proxy to Odoo (OPTIONAL — not used in
-// local-storage mode). This is the ONLY place Odoo credentials live. The
-// browser calls this route with a small { action, data } envelope and never
-// sees the URL/DB/key. Adapted from the svelte-odoo-pwa skill.
-//
-// NOTE: a pure static deploy can't run this route. To use Odoo, deploy to a
-// host that runs SvelteKit's server (Vercel/Render/Node), or run this proxy
-// elsewhere and point the client at it via PUBLIC_API_URL. See README.
+// Data proxy. Every call runs as the LOGGED-IN user via their Odoo web session
+// (not the admin key), so Odoo's multi-company record rules isolate each
+// tenant's x_dailytracker records. Returns 401 when there is no valid session.
 import { json } from '@sveltejs/kit';
-// Dynamic (not static) private env: the dev server still boots when .env is
-// absent, and a missing var surfaces as a clear runtime error on first call
-// instead of a build-time crash.
-import { env } from '$env/dynamic/private';
+import { assertConfigured, sessionCallKw, getModel } from '$lib/server/odoo.js';
+import { getSession, clearSessionCookie } from '$lib/server/session.js';
 
 // Must run as a serverless function, never prerendered (it's a POST proxy).
 export const prerender = false;
 
-const ODOO_URL = env.ODOO_URL;
-const ODOO_DB = env.ODOO_DB;
-const ODOO_USERNAME = env.ODOO_USERNAME;
-const ODOO_API_KEY = env.ODOO_API_KEY;
-const MODEL = env.ODOO_MODEL; // your Studio model technical name, e.g. x_dailytracker
-
-function assertConfigured() {
-	if (!ODOO_URL || !ODOO_DB || !ODOO_USERNAME || !ODOO_API_KEY || !MODEL) {
-		throw new Error(
-			'Odoo is not configured. Copy .env.example to .env and set ODOO_URL, ODOO_DB, ODOO_USERNAME, ODOO_API_KEY, ODOO_MODEL.'
-		);
-	}
-}
-
-/** @type {number|null} */
-let cachedUid = null;
-
-/** Low-level JSON-RPC call. */
-async function callOdoo(service, method, args) {
-	const response = await fetch(`${ODOO_URL}/jsonrpc`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({
-			jsonrpc: '2.0',
-			method: 'call',
-			params: { service, method, args },
-			id: Math.floor(Math.random() * 1000000)
-		})
-	});
-	const data = await response.json();
-	if (data.error) {
-		throw new Error(data.error.data?.message || data.error.message || 'Odoo API Error');
-	}
-	return data.result;
-}
-
-/** Authenticate once, cache the uid. API key goes in the password position. */
-async function authenticate() {
-	if (cachedUid) return cachedUid;
-	cachedUid = await callOdoo('common', 'login', [ODOO_DB, ODOO_USERNAME, ODOO_API_KEY]);
-	if (!cachedUid) throw new Error('Authentication failed');
-	return cachedUid;
-}
-
-/** Run an ORM method on a model. */
-async function execute(model, method, args = [], kwargs = {}) {
-	const uid = await authenticate();
-	return callOdoo('object', 'execute_kw', [ODOO_DB, uid, ODOO_API_KEY, model, method, args, kwargs]);
-}
-
-/** @type {import('./$types').RequestHandler} */
-export async function POST({ request }) {
+export async function POST({ request, cookies }) {
 	try {
 		assertConfigured();
+
+		const sid = getSession(cookies);
+		if (!sid) return json({ success: false, error: 'Not authenticated' }, { status: 401 });
+
 		const { action, data } = await request.json();
+		const MODEL = getModel();
 
 		switch (action) {
 			case 'create':
-				return json({ success: true, id: await execute(MODEL, 'create', [data]) });
+				return json({ success: true, id: await sessionCallKw(sid, MODEL, 'create', [data]) });
 
 			case 'search': {
 				const { domain = [], fields = [] } = data;
-				return json({ success: true, results: await execute(MODEL, 'search_read', [domain], { fields }) });
+				return json({
+					success: true,
+					results: await sessionCallKw(sid, MODEL, 'search_read', [domain], { fields })
+				});
 			}
 
 			case 'update': {
 				const { id, values } = data;
-				return json({ success: true, result: await execute(MODEL, 'write', [[id], values]) });
+				return json({
+					success: true,
+					result: await sessionCallKw(sid, MODEL, 'write', [[id], values])
+				});
 			}
 
 			case 'delete': {
 				const { id } = data;
-				return json({ success: true, result: await execute(MODEL, 'unlink', [[id]]) });
+				return json({ success: true, result: await sessionCallKw(sid, MODEL, 'unlink', [[id]]) });
 			}
 
 			default:
 				return json({ success: false, error: 'Invalid action' }, { status: 400 });
 		}
 	} catch (error) {
+		const status = error?.status || 500;
+		if (status === 401) clearSessionCookie(cookies); // expired session -> force re-login
 		console.error('Odoo API Error:', error);
 		return json(
 			{ success: false, error: error instanceof Error ? error.message : 'Unknown error' },
-			{ status: 500 }
+			{ status }
 		);
 	}
 }

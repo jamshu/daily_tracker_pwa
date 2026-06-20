@@ -5,20 +5,24 @@ Track your five daily prayers — Jamāʻah and Sunnah for each — plus exercis
 reading, and Qurʻan reading toward daily targets, with a live progress ring and a
 seven-day overview.
 
-Built on the **svelte-odoo-pwa** pattern. Habit data, notes, and a journal are
-stored in an Odoo Studio model (`x_dailytracker`) over JSON-RPC, through a
-server-side proxy so credentials never reach the browser. The offline-write sync
-queue from the skill is intentionally omitted — it isn't needed here.
+Built on the **svelte-odoo-pwa** pattern. It's a multi-tenant SaaS: users sign
+up and log in, each signup provisions its own Odoo **company + user**, and every
+user's habit data, notes, and journal live in an Odoo Studio model
+(`x_dailytracker`) isolated by Odoo's multi-company record rules. All Odoo
+traffic goes through a server-side proxy, and the login session lives in a
+secure httpOnly cookie — credentials never reach the browser.
 
 ## Setup
 
-1. Copy `.env.example` to `.env` and fill in your Odoo details:
+1. Copy `.env.example` to `.env`. **`ODOO_USERNAME` / `ODOO_API_KEY` must be an
+   Odoo administrator** — they're used at signup to create the company + user
+   (and nothing else; data access uses each user's own session):
 
    ```env
    ODOO_URL=https://your-instance.odoo.com
    ODOO_DB=your-database-name
-   ODOO_USERNAME=your-username
-   ODOO_API_KEY=your-api-key          # My Profile → Account Security → New API Key
+   ODOO_USERNAME=admin-username
+   ODOO_API_KEY=admin-api-key          # My Profile → Account Security → New API Key
    ODOO_MODEL=x_dailytracker
    ```
 
@@ -48,6 +52,41 @@ One record per day. Expected fields:
 
 On load the app reads the last 35 days; edits debounce-save (create the record
 the first time a day is touched, update it thereafter).
+
+## Accounts & multi-tenant isolation (required Odoo setup)
+
+Signup creates a real Odoo company + user; login uses that user's web session.
+For this to work and to keep each tenant's data private, configure Odoo:
+
+1. **Enable multi-company.** Settings → Users & Companies must allow multiple
+   companies. The `ODOO_USERNAME` API user needs administrator rights (it must be
+   able to create `res.company` and `res.users`). Each signup consumes an Odoo
+   user seat — on Odoo Online that is a billable internal user.
+2. **Add `company_id` to `x_dailytracker`.** In Studio, make the model
+   company-specific (adds a `company_id` Many2one to `res.company`). New records
+   default to the creating user's company.
+3. **Add a record rule** on `x_dailytracker`:
+   `['company_id', 'in', company_ids]` (global, or for the Internal User group).
+   Without this rule, users could read each other's rows.
+4. **Grant access rights.** Give the *Internal User* group read/write/create/
+   delete access (ir.model.access) on `x_dailytracker`, so new users can use it.
+5. **Auth endpoints** (`/api/auth/signup|login|logout|me`) use Odoo's web session
+   API (`/web/session/authenticate`, `/web/dataset/call_kw`). The session id is
+   stored in an httpOnly cookie (`app_session`), valid 30 days.
+
+> Security: open signup creates Odoo users with the admin key. Before going
+> public, gate `/api/auth/signup` with a CAPTCHA, invite code, or rate limit to
+> prevent abuse and runaway seat usage. Odoo password policy applies to new
+> users (min length is enforced both client- and Odoo-side).
+
+## Routes
+
+```
+/             dashboard (requires login; redirects to /login otherwise)
+/login        sign in / sign up (toggle)
+/api/auth/*   signup · login · logout · me   (session cookie)
+/api/odoo     data proxy — runs as the logged-in user
+```
 
 Production build:
 

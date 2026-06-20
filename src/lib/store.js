@@ -12,8 +12,16 @@ import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
 import { emptyDay, dayProgress } from './config.js';
 import { odooClient } from './odoo.js';
+import { user } from './auth.js';
 
-const FIELDS = ['id', 'x_studio_date', 'x_studio_json', 'x_studio_notes', 'x_studio_journal'];
+const FIELDS = [
+	'id',
+	'x_studio_date',
+	'x_studio_json',
+	'x_studio_notes',
+	'x_studio_journal',
+	'create_uid'
+];
 const RANGE_DAYS = 35; // how many recent days to load for the week strip + history
 
 /* ----------------------------- date helpers ----------------------------- */
@@ -93,9 +101,17 @@ export async function load() {
 			FIELDS
 		);
 		const map = {};
+		const myUid = get(user)?.uid;
 		for (const row of rows) {
 			const k = row.x_studio_date;
 			if (!k) continue;
+			// Secondary client-side guard: keep only records I created. The Odoo
+			// record rule (['create_uid','=',user.id]) is the real enforcement —
+			// this just avoids ever showing someone else's row if a rule is missing.
+			if (myUid != null && row.create_uid) {
+				const owner = Array.isArray(row.create_uid) ? row.create_uid[0] : row.create_uid;
+				if (owner !== myUid) continue;
+			}
 			map[k] = {
 				id: row.id,
 				data: parseData(row.x_studio_json),

@@ -49,12 +49,37 @@ One record per day. Expected fields:
 On load the app reads the last 35 days; edits debounce-save (create the record
 the first time a day is touched, update it thereafter).
 
-Build a static bundle (deployable to any static host):
+Production build:
 
 ```bash
-npm run build    # outputs to build/
+npm run build    # builds via @sveltejs/adapter-vercel
 npm run preview  # serve the production build locally
 ```
+
+## Deploying to Vercel
+
+The app uses **`@sveltejs/adapter-vercel`** because the `/api/odoo` route must run
+server-side (a static adapter can't deploy it — that's what caused the failed
+build). Vercel serves the prerendered page shell statically and runs the proxy
+as a serverless function.
+
+1. Import the repo into Vercel (it auto-detects SvelteKit — no `vercel.json`
+   needed).
+2. **Set the Odoo credentials as Environment Variables** in the Vercel project
+   (Settings → Environment Variables). These are *not* committed (`.env` is
+   gitignored), so the deploy needs them or the API returns "not configured":
+
+   | Name | Example |
+   |---|---|
+   | `ODOO_URL` | `https://your-instance.odoo.com` |
+   | `ODOO_DB` | `your-database-name` |
+   | `ODOO_USERNAME` | `your-username` |
+   | `ODOO_API_KEY` | `your-api-key` |
+   | `ODOO_MODEL` | `x_dailytracker` |
+
+   Add them to Production (and Preview if you use preview deploys), then redeploy.
+3. Make sure your Odoo instance allows requests from the Vercel domain if you
+   have IP/origin restrictions.
 
 ## What's tracked
 

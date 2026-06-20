@@ -35,6 +35,34 @@
 		}
 	}
 
+	let copied = false;
+	let copyTimer;
+
+	async function copy() {
+		if (!quote) return;
+		const text = `"${quote}" — ${author}`;
+		try {
+			await navigator.clipboard.writeText(text);
+		} catch {
+			// fallback for browsers / non-secure contexts without the Clipboard API
+			const ta = document.createElement('textarea');
+			ta.value = text;
+			ta.style.position = 'fixed';
+			ta.style.opacity = '0';
+			document.body.appendChild(ta);
+			ta.select();
+			try {
+				document.execCommand('copy');
+			} catch {
+				/* ignore */
+			}
+			document.body.removeChild(ta);
+		}
+		copied = true;
+		clearTimeout(copyTimer);
+		copyTimer = setTimeout(() => (copied = false), 1500);
+	}
+
 	onMount(load);
 </script>
 
@@ -54,12 +82,33 @@
 		{/if}
 	</div>
 
-	<button class="refresh" on:click={load} disabled={loading} aria-label="new quote" title="New quote">
-		<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class:spin={loading}>
-			<path d="M21 12a9 9 0 1 1-2.64-6.36" />
-			<path d="M21 3v6h-6" />
-		</svg>
-	</button>
+	<div class="actions">
+		<button
+			class="iconbtn"
+			class:done={copied}
+			on:click={copy}
+			disabled={loading || !quote}
+			aria-label="copy quote"
+			title={copied ? 'Copied!' : 'Copy quote'}
+		>
+			{#if copied}
+				<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M20 6 9 17l-5-5" />
+				</svg>
+			{:else}
+				<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<rect x="9" y="9" width="11" height="11" rx="2" />
+					<path d="M5 15V5a2 2 0 0 1 2-2h10" />
+				</svg>
+			{/if}
+		</button>
+		<button class="iconbtn" on:click={load} disabled={loading} aria-label="new quote" title="New quote">
+			<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class:spin={loading}>
+				<path d="M21 12a9 9 0 1 1-2.64-6.36" />
+				<path d="M21 3v6h-6" />
+			</svg>
+		</button>
+	</div>
 </section>
 
 <style>
@@ -94,8 +143,13 @@
 		font-weight: 600;
 		color: var(--teal);
 	}
-	.refresh {
+	.actions {
 		flex-shrink: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+	.iconbtn {
 		width: 38px;
 		height: 38px;
 		border-radius: 11px;
@@ -106,13 +160,17 @@
 		border: 1px solid var(--border);
 		transition: all 0.15s ease;
 	}
-	.refresh:hover:not(:disabled) {
+	.iconbtn:hover:not(:disabled) {
 		color: var(--text);
 		background: var(--surface-2);
 	}
-	.refresh:disabled {
+	.iconbtn:disabled {
 		opacity: 0.6;
 		cursor: default;
+	}
+	.iconbtn.done {
+		color: var(--green);
+		border-color: var(--green);
 	}
 	.swap {
 		animation: fade 0.4s ease both;

@@ -12,6 +12,9 @@ import { json } from '@sveltejs/kit';
 // instead of a build-time crash.
 import { env } from '$env/dynamic/private';
 
+// Must run as a serverless function, never prerendered (it's a POST proxy).
+export const prerender = false;
+
 const ODOO_URL = env.ODOO_URL;
 const ODOO_DB = env.ODOO_DB;
 const ODOO_USERNAME = env.ODOO_USERNAME;

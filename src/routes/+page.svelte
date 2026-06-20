@@ -221,7 +221,7 @@
 	<h2 class="section-title">Notes &amp; Journal</h2>
 	<NotesCard date={$selectedDate} notes={$currentNotes} journal={$currentJournal} />
 
-	<p class="foot">Synced to Odoo · {$selectedDate}</p>
+	<p class="foot">Synced to Backend · {$selectedDate}</p>
 </div>
 
 <CelebrationToast />

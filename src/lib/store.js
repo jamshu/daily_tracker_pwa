@@ -13,6 +13,7 @@ import { browser } from '$app/environment';
 import { emptyDay, dayProgress } from './config.js';
 import { odooClient } from './odoo.js';
 import { user } from './auth.js';
+import { settings } from './settings.js';
 
 const FIELDS = [
 	'id',
@@ -86,7 +87,9 @@ export const allDays = derived(records, ($r) => {
 
 const currentRecord = derived([records, selectedDate], ([$r, $d]) => $r[$d] || blankRecord());
 export const currentDay = derived(currentRecord, ($r) => $r.data);
-export const currentProgress = derived(currentDay, ($d) => dayProgress($d));
+export const currentProgress = derived([currentDay, settings], ([$d, $s]) =>
+	dayProgress($d, $s.activities)
+);
 export const currentNotes = derived(currentRecord, ($r) => $r.notes);
 export const currentJournal = derived(currentRecord, ($r) => $r.journal);
 

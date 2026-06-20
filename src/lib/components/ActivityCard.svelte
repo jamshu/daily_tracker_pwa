@@ -2,11 +2,13 @@
 	import { createEventDispatcher } from 'svelte';
 	export let activity; // { id, name, unit, target, step }
 	export let value = 0;
+	export let target = null; // per-user override; falls back to activity.target
 	const dispatch = createEventDispatcher();
 
-	$: frac = Math.min(value / activity.target, 1);
+	$: tgt = target ?? activity.target;
+	$: frac = Math.min(value / tgt, 1);
 	$: pct = Math.round(frac * 100);
-	$: met = value >= activity.target;
+	$: met = value >= tgt;
 
 	function set(v) {
 		dispatch('set', { value: Math.max(0, v) });
@@ -17,7 +19,7 @@
 	<div class="top">
 		<div class="head">
 			<span class="name">{activity.name}</span>
-			<span class="goal" class:met>{value} / {activity.target} {activity.unit}</span>
+			<span class="goal" class:met>{value} / {tgt} {activity.unit}</span>
 		</div>
 		<div class="stepper">
 			<button on:click={() => set(value - activity.step)} aria-label="decrease">−</button>

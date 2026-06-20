@@ -2,6 +2,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import { allDays, shiftKey, dateKey } from '../store.js';
 	import { dayProgress } from '../config.js';
+	import { settings } from '../settings.js';
 	export let todayK;
 	export let selectedK;
 	const dispatch = createEventDispatcher();
@@ -22,7 +23,7 @@
 
 <div class="strip card">
 	{#each days as key (key)}
-		{@const prog = dayProgress($allDays[key])}
+		{@const prog = dayProgress($allDays[key], $settings.activities)}
 		<button
 			class="day"
 			class:sel={key === selectedK}

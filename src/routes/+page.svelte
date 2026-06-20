@@ -25,14 +25,20 @@
 	import DateNav from '$lib/components/DateNav.svelte';
 	import WeekStrip from '$lib/components/WeekStrip.svelte';
 	import CelebrationToast from '$lib/components/CelebrationToast.svelte';
+	import AdhkarModal from '$lib/components/AdhkarModal.svelte';
 	import { celebrate } from '$lib/toast.js';
+	import { openAdhkar } from '$lib/adhkar.js';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { user, logout } from '$lib/auth.js';
+	import { settings, loadSettings } from '$lib/settings.js';
 
 	const todayK = dateKey();
 
-	onMount(load);
+	onMount(() => {
+		load();
+		loadSettings();
+	});
 
 	async function doLogout() {
 		await logout();
@@ -62,7 +68,7 @@
 		return n + (r.jamath ? 1 : 0) + (p.hasSunnah && r.sunnah ? 1 : 0) + (r.dhikr ? 1 : 0);
 	}, 0);
 	$: activitiesMet = ACTIVITIES.filter(
-		(a) => ($currentDay.activities[a.id] || 0) >= a.target
+		(a) => ($currentDay.activities[a.id] || 0) >= ($settings.activities[a.id] ?? a.target)
 	).length;
 	$: deedsDone = DEEDS.filter((d) => $currentDay.deeds?.[d.id]).length;
 
@@ -111,9 +117,10 @@
 
 	// Set an activity value; celebrate the moment it reaches its target.
 	function onActivitySet(activity, value) {
+		const target = $settings.activities[activity.id] ?? activity.target;
 		const prev = $currentDay.activities[activity.id] || 0;
 		setActivity($selectedDate, activity.id, value);
-		if (prev < activity.target && value >= activity.target) celebrate(activity.id);
+		if (prev < target && value >= target) celebrate(activity.id);
 	}
 </script>
 
@@ -137,6 +144,12 @@
 				{#if SYNC_LABEL[$syncState]}
 					<span class="sync {$syncState}">{SYNC_LABEL[$syncState]}</span>
 				{/if}
+				<button class="gear" on:click={() => goto(`${base}/settings`)} title="Settings" aria-label="settings">
+					<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="3" />
+						<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+					</svg>
+				</button>
 				<button class="logout" on:click={doLogout} title="Sign out" aria-label="sign out">
 					<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -174,6 +187,21 @@
 
 	<QuoteCard />
 
+	<button class="dhikr-link" on:click={() => openAdhkar('afterSalah')}>
+		<span class="dl-icon">
+			<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 1 0 9.8 9.8z" />
+			</svg>
+		</span>
+		<span class="dl-text">
+			<strong>Dhikr after Salah</strong>
+			<small>The remembrance to recite after every fard prayer</small>
+		</span>
+		<svg class="dl-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="M9 18l6-6-6-6" />
+		</svg>
+	</button>
+
 	<h2 class="section-title">Prayers · Jamāʻah, Sunnah &amp; Dhikr</h2>
 	<div class="card">
 		{#each PRAYERS as p (p.id)}
@@ -202,6 +230,7 @@
 			<ActivityCard
 				activity={a}
 				value={$currentDay.activities[a.id] || 0}
+				target={$settings.activities[a.id]}
 				on:set={(e) => onActivitySet(a, e.detail.value)}
 			/>
 		{/each}
@@ -214,6 +243,7 @@
 				deed={d}
 				done={$currentDay.deeds?.[d.id] || false}
 				on:toggle={() => onDeedToggle(d)}
+				on:info={() => openAdhkar(d.guide)}
 			/>
 		{/each}
 	</div>
@@ -225,6 +255,7 @@
 </div>
 
 <CelebrationToast />
+<AdhkarModal />
 
 <style>
 	header {
@@ -276,6 +307,21 @@
 	.logout:hover {
 		color: var(--red);
 		border-color: var(--red);
+	}
+	.gear {
+		width: 34px;
+		height: 34px;
+		border-radius: 10px;
+		display: grid;
+		place-items: center;
+		color: var(--text-dim);
+		background: var(--surface);
+		border: 1px solid var(--border);
+		transition: all 0.15s ease;
+	}
+	.gear:hover {
+		color: var(--text);
+		border-color: var(--teal);
 	}
 	.sync {
 		font-size: 0.72rem;
@@ -346,6 +392,55 @@
 		text-align: center;
 		margin-top: 28px;
 		font-size: 0.76rem;
+		color: var(--text-faint);
+	}
+	.dhikr-link {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-top: 26px;
+		padding: 13px 14px;
+		border-radius: var(--radius);
+		text-align: left;
+		color: var(--text);
+		background: linear-gradient(135deg, rgba(20, 184, 166, 0.16), rgba(214, 166, 74, 0.12));
+		border: 1px solid var(--border);
+		transition: all 0.15s ease;
+	}
+	.dhikr-link:hover {
+		border-color: var(--teal);
+	}
+	.dhikr-link:active {
+		transform: scale(0.99);
+	}
+	.dl-icon {
+		flex-shrink: 0;
+		width: 38px;
+		height: 38px;
+		border-radius: 11px;
+		display: grid;
+		place-items: center;
+		color: #042f2a;
+		background: linear-gradient(135deg, var(--teal), var(--gold));
+	}
+	.dl-text {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		min-width: 0;
+	}
+	.dl-text strong {
+		font-size: 0.98rem;
+		font-weight: 700;
+	}
+	.dl-text small {
+		font-size: 0.76rem;
+		color: var(--text-dim);
+	}
+	.dl-chev {
+		flex-shrink: 0;
 		color: var(--text-faint);
 	}
 	@media (max-width: 520px) {

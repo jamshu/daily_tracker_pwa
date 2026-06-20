@@ -25,8 +25,8 @@ export const ACTIVITIES = [
 
 /** Simple done / not-done daily deeds (one mark each). */
 export const DEEDS = [
-	{ id: 'adhkar_morning', name: 'Morning Adhkār', hint: 'After Fajr' },
-	{ id: 'adhkar_evening', name: 'Evening Adhkār', hint: 'After Asr / Maghrib' },
+	{ id: 'adhkar_morning', name: 'Morning Adhkār', hint: 'After Fajr', guide: 'morning' },
+	{ id: 'adhkar_evening', name: 'Evening Adhkār', hint: 'After Asr / Maghrib', guide: 'evening' },
 	{ id: 'sadaqah', name: 'Sadaqah', hint: 'Charity given' }
 ];
 
@@ -56,8 +56,11 @@ export function emptyDay() {
 	return { prayers, activities, deeds, nawafil };
 }
 
-/** Score a single day in [0, 1]. */
-export function dayProgress(day) {
+/**
+ * Score a single day in [0, 1]. `targets` optionally overrides per-activity
+ * goals (per-user settings); falls back to each activity's default target.
+ */
+export function dayProgress(day, targets) {
 	if (!day) return 0;
 	let score = 0;
 	for (const p of PRAYERS) {
@@ -67,8 +70,9 @@ export function dayProgress(day) {
 		if (rec?.dhikr) score += 1;
 	}
 	for (const a of ACTIVITIES) {
+		const target = (targets && targets[a.id]) || a.target;
 		const v = Number(day.activities?.[a.id] || 0);
-		score += Math.min(v / a.target, 1);
+		score += Math.min(v / target, 1);
 	}
 	for (const d of DEEDS) {
 		if (day.deeds?.[d.id]) score += 1;

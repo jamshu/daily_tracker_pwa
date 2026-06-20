@@ -170,11 +170,9 @@ export async function sessionInfo(sessionId) {
 export function buildSessionContext(info) {
 	const base = info?.user_context && typeof info.user_context === 'object' ? info.user_context : {};
 	const ctx = { ...base };
-	console.log('buildSessionContext', { info, ctx });
 	const current = info?.user_companies?.current_company ?? info?.company_id ?? null;
 	if (current) ctx.allowed_company_ids = [current];
 	if (info?.uid != null && ctx.uid == null) ctx.uid = info.uid;
-	console.log('buildSessionContext returning', { info, ctx });
 	return ctx;
 }
 

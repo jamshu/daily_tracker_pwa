@@ -2,7 +2,7 @@
 // (not the admin key), so Odoo's multi-company record rules isolate each
 // tenant's x_dailytracker records. Returns 401 when there is no valid session.
 import { json } from '@sveltejs/kit';
-import { assertConfigured, sessionCallKw, getModel } from '$lib/server/odoo.js';
+import { assertConfigured, sessionCallKw, sessionInfo, getModel } from '$lib/server/odoo.js';
 import { getSession, clearSessionCookie } from '$lib/server/session.js';
 
 // Must run as a serverless function, never prerendered (it's a POST proxy).
@@ -24,9 +24,19 @@ export async function POST({ request, cookies }) {
 
 			case 'search': {
 				const { domain = [], fields = [] } = data;
+				// Hard-scope every search to the logged-in user's own tenant, server-
+				// side, so a loose/misconfigured Odoo record rule can never leak
+				// another company's rows into the app. Prefer the company filter;
+				// fall back to create_uid if the session has no company.
+				const info = await sessionInfo(sid);
+				const companyId = info?.user_companies?.current_company ?? info?.company_id ?? null;
+				const scope = companyId
+					? ['x_studio_company_id', '=', companyId]
+					: ['create_uid', '=', info.uid];
+				const scopedDomain = [scope, ...domain];
 				return json({
 					success: true,
-					results: await sessionCallKw(sid, MODEL, 'search_read', [domain], { fields })
+					results: await sessionCallKw(sid, MODEL, 'search_read', [scopedDomain], { fields })
 				});
 			}
 

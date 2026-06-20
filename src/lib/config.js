@@ -1,14 +1,20 @@
 // Habit definitions. Edit targets here — the dashboard and progress math read
 // straight from these arrays, so adding/removing an item needs no other change.
 
-/** The five daily prayers. Each is tracked for Jamath (congregation) + Sunnah. */
+/**
+ * The five daily prayers. Each tracks Jamāʻah (congregation) + Dhikr after
+ * salah; most also track a Sunnah — Asr has no Sunnah, so hasSunnah is false.
+ */
 export const PRAYERS = [
-	{ id: 'fajr', name: 'Fajr', sunnah: '2 rakʻah before' },
-	{ id: 'dhuhr', name: 'Dhuhr', sunnah: '4 before · 2 after' },
-	{ id: 'asr', name: 'Asr', sunnah: '4 before' },
-	{ id: 'maghrib', name: 'Maghrib', sunnah: '2 after' },
-	{ id: 'isha', name: 'Isha', sunnah: '2 after · Witr' }
+	{ id: 'fajr', name: 'Fajr', hasSunnah: true, sunnah: '2 rakʻah before' },
+	{ id: 'dhuhr', name: 'Dhuhr', hasSunnah: true, sunnah: '4 before · 2 after' },
+	{ id: 'asr', name: 'Asr', hasSunnah: false, sunnah: '' },
+	{ id: 'maghrib', name: 'Maghrib', hasSunnah: true, sunnah: '2 after' },
+	{ id: 'isha', name: 'Isha', hasSunnah: true, sunnah: '2 after · Witr' }
 ];
+
+/** Marks available across all prayers: Jamāʻah + Dhikr each, + Sunnah where it applies. */
+export const PRAYER_MARKS = PRAYERS.reduce((n, p) => n + 2 + (p.hasSunnah ? 1 : 0), 0);
 
 /** Target-based activities. value counts toward `target` in `unit`. */
 export const ACTIVITIES = [
@@ -26,15 +32,15 @@ export const DEEDS = [
 
 /**
  * Total weight of a perfect day, used to scale the progress bar.
- * Prayers: 2 booleans each (Jamath + Sunnah). Activities: 1 each (fraction of
- * target). Deeds: 1 boolean each.
+ * Prayers: Jamāʻah + Dhikr each, plus Sunnah where it applies (PRAYER_MARKS).
+ * Activities: 1 each (fraction of target). Deeds: 1 boolean each.
  */
-export const MAX_SCORE = PRAYERS.length * 2 + ACTIVITIES.length + DEEDS.length;
+export const MAX_SCORE = PRAYER_MARKS + ACTIVITIES.length + DEEDS.length;
 
 /** A fresh, empty record for one day. */
 export function emptyDay() {
 	const prayers = {};
-	for (const p of PRAYERS) prayers[p.id] = { jamath: false, sunnah: false };
+	for (const p of PRAYERS) prayers[p.id] = { jamath: false, sunnah: false, dhikr: false };
 	const activities = {};
 	for (const a of ACTIVITIES) activities[a.id] = 0;
 	const deeds = {};
@@ -49,7 +55,8 @@ export function dayProgress(day) {
 	for (const p of PRAYERS) {
 		const rec = day.prayers?.[p.id];
 		if (rec?.jamath) score += 1;
-		if (rec?.sunnah) score += 1;
+		if (p.hasSunnah && rec?.sunnah) score += 1;
+		if (rec?.dhikr) score += 1;
 	}
 	for (const a of ACTIVITIES) {
 		const v = Number(day.activities?.[a.id] || 0);

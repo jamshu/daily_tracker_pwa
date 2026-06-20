@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import { PRAYERS, ACTIVITIES, DEEDS } from '$lib/config.js';
+	import { PRAYERS, ACTIVITIES, DEEDS, PRAYER_MARKS } from '$lib/config.js';
 	import {
 		currentDay,
 		currentProgress,
@@ -56,7 +56,7 @@
 	// summary stats for the selected day (prayers, activities, deeds)
 	$: prayerUnits = PRAYERS.reduce((n, p) => {
 		const r = $currentDay.prayers[p.id] || {};
-		return n + (r.jamath ? 1 : 0) + (r.sunnah ? 1 : 0);
+		return n + (r.jamath ? 1 : 0) + (p.hasSunnah && r.sunnah ? 1 : 0) + (r.dhikr ? 1 : 0);
 	}, 0);
 	$: activitiesMet = ACTIVITIES.filter(
 		(a) => ($currentDay.activities[a.id] || 0) >= a.target
@@ -126,7 +126,7 @@
 			<p class="msg">{message}</p>
 			<div class="stats">
 				<div class="stat">
-					<span class="big">{prayerUnits}<small>/10</small></span>
+					<span class="big">{prayerUnits}<small>/{PRAYER_MARKS}</small></span>
 					<span class="lbl">prayer marks</span>
 				</div>
 				<div class="stat">
@@ -143,7 +143,7 @@
 
 	<QuoteCard />
 
-	<h2 class="section-title">Prayers · Jamāʻah &amp; Sunnah</h2>
+	<h2 class="section-title">Prayers · Jamāʻah, Sunnah &amp; Dhikr</h2>
 	<div class="card">
 		{#each PRAYERS as p (p.id)}
 			<PrayerCard

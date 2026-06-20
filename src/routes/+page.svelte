@@ -23,6 +23,8 @@
 	import NotesCard from '$lib/components/NotesCard.svelte';
 	import DateNav from '$lib/components/DateNav.svelte';
 	import WeekStrip from '$lib/components/WeekStrip.svelte';
+	import CelebrationToast from '$lib/components/CelebrationToast.svelte';
+	import { celebrate } from '$lib/toast.js';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { user, logout } from '$lib/auth.js';
@@ -83,6 +85,27 @@
 	}
 	function pick(e) {
 		selectedDate.set(e.detail.key);
+	}
+
+	// Toggle a prayer act; celebrate only when it's switched ON.
+	function onPrayerToggle(prayer, field) {
+		const wasOn = $currentDay.prayers[prayer.id]?.[field];
+		togglePrayer($selectedDate, prayer.id, field);
+		if (!wasOn) celebrate(field);
+	}
+
+	// Toggle a daily deed; celebrate when marked done.
+	function onDeedToggle(deed) {
+		const wasOn = $currentDay.deeds?.[deed.id];
+		toggleDeed($selectedDate, deed.id);
+		if (!wasOn) celebrate(deed.id);
+	}
+
+	// Set an activity value; celebrate the moment it reaches its target.
+	function onActivitySet(activity, value) {
+		const prev = $currentDay.activities[activity.id] || 0;
+		setActivity($selectedDate, activity.id, value);
+		if (prev < activity.target && value >= activity.target) celebrate(activity.id);
 	}
 </script>
 
@@ -149,7 +172,7 @@
 			<PrayerCard
 				prayer={p}
 				record={$currentDay.prayers[p.id]}
-				on:toggle={(e) => togglePrayer($selectedDate, p.id, e.detail.field)}
+				on:toggle={(e) => onPrayerToggle(p, e.detail.field)}
 			/>
 		{/each}
 	</div>
@@ -160,7 +183,7 @@
 			<ActivityCard
 				activity={a}
 				value={$currentDay.activities[a.id] || 0}
-				on:set={(e) => setActivity($selectedDate, a.id, e.detail.value)}
+				on:set={(e) => onActivitySet(a, e.detail.value)}
 			/>
 		{/each}
 	</div>
@@ -171,7 +194,7 @@
 			<DeedToggle
 				deed={d}
 				done={$currentDay.deeds?.[d.id] || false}
-				on:toggle={() => toggleDeed($selectedDate, d.id)}
+				on:toggle={() => onDeedToggle(d)}
 			/>
 		{/each}
 	</div>
@@ -181,6 +204,8 @@
 
 	<p class="foot">Synced to Odoo · {$selectedDate}</p>
 </div>
+
+<CelebrationToast />
 
 <style>
 	header {

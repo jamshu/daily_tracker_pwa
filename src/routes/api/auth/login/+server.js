@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
-import { assertConfigured, authenticateUser } from '$lib/server/odoo.js';
-import { setSessionCookie } from '$lib/server/session.js';
+import { assertConfigured, authenticateUser, buildSessionContext } from '$lib/server/odoo.js';
+import { setSessionCookie, setContextCookie } from '$lib/server/session.js';
 
 export const prerender = false;
 
@@ -14,6 +14,7 @@ export async function POST({ request, cookies }) {
 
 		const { sessionId, info } = await authenticateUser(email, password);
 		setSessionCookie(cookies, sessionId);
+		setContextCookie(cookies, buildSessionContext(info)); // { lang, tz, uid, allowed_company_ids }
 
 		return json({
 			ok: true,

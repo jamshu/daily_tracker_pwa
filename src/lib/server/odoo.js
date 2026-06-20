@@ -161,6 +161,23 @@ export async function sessionInfo(sessionId) {
 	return result;
 }
 
+/**
+ * Build the Odoo call context from an authenticate / get_session_info result:
+ * { lang, tz, uid } from user_context, plus allowed_company_ids scoped to the
+ * user's current company so multi-company record rules filter to this tenant.
+ * Shape: { lang, tz, uid, allowed_company_ids: [companyId] }.
+ */
+export function buildSessionContext(info) {
+	const base = info?.user_context && typeof info.user_context === 'object' ? info.user_context : {};
+	const ctx = { ...base };
+	console.log('buildSessionContext', { info, ctx });
+	const current = info?.user_companies?.current_company ?? info?.company_id ?? null;
+	if (current) ctx.allowed_company_ids = [current];
+	if (info?.uid != null && ctx.uid == null) ctx.uid = info.uid;
+	console.log('buildSessionContext returning', { info, ctx });
+	return ctx;
+}
+
 export async function sessionCallKw(sessionId, model, method, args = [], kwargs = {}) {
 	const { result } = await rpc(
 		'/web/dataset/call_kw',

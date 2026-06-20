@@ -5,7 +5,7 @@
 
 	$: radius = (size - stroke) / 2;
 	$: circ = 2 * Math.PI * radius;
-	$: pct = Math.round(value * 100);
+	$: score = Math.round(value * 100);
 	$: offset = circ * (1 - value);
 	$: tone = value >= 1 ? 'var(--green)' : value >= 0.5 ? 'var(--teal)' : 'var(--gold)';
 </script>
@@ -34,8 +34,8 @@
 		/>
 	</svg>
 	<div class="label">
-		<span class="pct">{pct}<small>%</small></span>
-		<span class="sub">complete</span>
+		<span class="pct">{score}<small>/100</small></span>
+		<span class="sub">score</span>
 	</div>
 </div>
 
@@ -64,10 +64,10 @@
 		letter-spacing: -0.03em;
 	}
 	.pct small {
-		font-size: 1rem;
+		font-size: 0.85rem;
 		font-weight: 700;
 		color: var(--text-dim);
-		margin-left: 2px;
+		margin-left: 1px;
 	}
 	.sub {
 		font-size: 0.72rem;

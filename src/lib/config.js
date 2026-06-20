@@ -30,12 +30,18 @@ export const DEEDS = [
 	{ id: 'sadaqah', name: 'Sadaqah', hint: 'Charity given' }
 ];
 
+/** Voluntary (nafl) prayers — simple done / not-done (one mark each). */
+export const NAWAFIL = [
+	{ id: 'tahajjud', name: 'Tahajjud', hint: 'Night prayer' },
+	{ id: 'duha', name: 'Duha', hint: 'Forenoon prayer' }
+];
+
 /**
  * Total weight of a perfect day, used to scale the progress bar.
  * Prayers: Jamāʻah + Dhikr each, plus Sunnah where it applies (PRAYER_MARKS).
- * Activities: 1 each (fraction of target). Deeds: 1 boolean each.
+ * Activities: 1 each (fraction of target). Deeds + Nawafil: 1 boolean each.
  */
-export const MAX_SCORE = PRAYER_MARKS + ACTIVITIES.length + DEEDS.length;
+export const MAX_SCORE = PRAYER_MARKS + ACTIVITIES.length + DEEDS.length + NAWAFIL.length;
 
 /** A fresh, empty record for one day. */
 export function emptyDay() {
@@ -45,7 +51,9 @@ export function emptyDay() {
 	for (const a of ACTIVITIES) activities[a.id] = 0;
 	const deeds = {};
 	for (const d of DEEDS) deeds[d.id] = false;
-	return { prayers, activities, deeds };
+	const nawafil = {};
+	for (const n of NAWAFIL) nawafil[n.id] = false;
+	return { prayers, activities, deeds, nawafil };
 }
 
 /** Score a single day in [0, 1]. */
@@ -64,6 +72,9 @@ export function dayProgress(day) {
 	}
 	for (const d of DEEDS) {
 		if (day.deeds?.[d.id]) score += 1;
+	}
+	for (const n of NAWAFIL) {
+		if (day.nawafil?.[n.id]) score += 1;
 	}
 	return Math.max(0, Math.min(score / MAX_SCORE, 1));
 }

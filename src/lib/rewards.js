@@ -154,5 +154,34 @@ export const REWARDS = {
 			quote: 'Give charity without delay, for it stands in the way of calamity.',
 			source: 'Tirmidhi'
 		}
+	],
+	tahajjud: [
+		{
+			title: 'Maa shaa Allah — you rose for Tahajjud',
+			quote: 'The best prayer after the obligatory prayers is the night prayer.',
+			source: 'Muslim'
+		},
+		{
+			title: 'When your Lord descends',
+			quote: 'Our Lord descends to the lowest heaven in the last third of the night and says: Who will call upon Me, that I may answer him?',
+			source: 'Bukhari & Muslim'
+		},
+		{
+			title: 'The way of the righteous',
+			quote: 'Hold fast to night prayer, for it was the way of the righteous before you and a means of nearness to your Lord.',
+			source: 'Tirmidhi'
+		}
+	],
+	duha: [
+		{
+			title: 'Maa shaa Allah — Duha prayed',
+			quote: 'Charity is due upon every joint each morning, and two rakʻah of Duha suffice for all of that.',
+			source: 'Muslim'
+		},
+		{
+			title: 'Forgiveness like the sea foam',
+			quote: 'Whoever observes the Duha prayer, his sins are forgiven even if they are like the foam of the sea.',
+			source: 'Tirmidhi'
+		}
 	]
 };

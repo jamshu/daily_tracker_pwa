@@ -53,11 +53,16 @@ function parseData(jsonStr) {
 		if (o.prayers)
 			for (const id in base.prayers)
 				if (o.prayers[id])
-					base.prayers[id] = { jamath: !!o.prayers[id].jamath, sunnah: !!o.prayers[id].sunnah };
+					base.prayers[id] = {
+							jamath: !!o.prayers[id].jamath,
+							sunnah: !!o.prayers[id].sunnah,
+							dhikr: !!o.prayers[id].dhikr
+						};
 		if (o.activities)
 			for (const id in base.activities)
 				if (o.activities[id] != null) base.activities[id] = Number(o.activities[id]) || 0;
 		if (o.deeds) for (const id in base.deeds) base.deeds[id] = !!o.deeds[id];
+			if (o.nawafil) for (const id in base.nawafil) base.nawafil[id] = !!o.nawafil[id];
 	} catch {
 		/* malformed JSON — fall back to an empty day */
 	}
@@ -199,6 +204,14 @@ export function toggleDeed(date, deedId) {
 	mutate(date, (r) => {
 		if (!r.data.deeds) r.data.deeds = {};
 		r.data.deeds[deedId] = !r.data.deeds[deedId];
+	});
+}
+
+/** Toggle a voluntary prayer (Tahajjud, Duha) for a date. */
+export function toggleNafl(date, naflId) {
+	mutate(date, (r) => {
+		if (!r.data.nawafil) r.data.nawafil = {};
+		r.data.nawafil[naflId] = !r.data.nawafil[naflId];
 	});
 }
 

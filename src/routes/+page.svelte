@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import { PRAYERS, ACTIVITIES, DEEDS, PRAYER_MARKS } from '$lib/config.js';
+	import { PRAYERS, ACTIVITIES, DEEDS, NAWAFIL, PRAYER_MARKS } from '$lib/config.js';
 	import {
 		currentDay,
 		currentProgress,
@@ -13,6 +13,7 @@
 		togglePrayer,
 		setActivity,
 		toggleDeed,
+		toggleNafl,
 		load
 	} from '$lib/store.js';
 	import ProgressRing from '$lib/components/ProgressRing.svelte';
@@ -101,6 +102,13 @@
 		if (!wasOn) celebrate(deed.id);
 	}
 
+	// Toggle a voluntary prayer (Tahajjud / Duha); celebrate when marked done.
+	function onNaflToggle(nafl) {
+		const wasOn = $currentDay.nawafil?.[nafl.id];
+		toggleNafl($selectedDate, nafl.id);
+		if (!wasOn) celebrate(nafl.id);
+	}
+
 	// Set an activity value; celebrate the moment it reaches its target.
 	function onActivitySet(activity, value) {
 		const prev = $currentDay.activities[activity.id] || 0;
@@ -173,6 +181,17 @@
 				prayer={p}
 				record={$currentDay.prayers[p.id]}
 				on:toggle={(e) => onPrayerToggle(p, e.detail.field)}
+			/>
+		{/each}
+	</div>
+
+	<h2 class="section-title">Voluntary Prayers</h2>
+	<div class="card">
+		{#each NAWAFIL as n (n.id)}
+			<DeedToggle
+				deed={n}
+				done={$currentDay.nawafil?.[n.id] || false}
+				on:toggle={() => onNaflToggle(n)}
 			/>
 		{/each}
 	</div>

@@ -82,7 +82,9 @@
 		display: flex;
 		justify-content: center;
 		align-items: flex-start;
-		padding: 18px 16px;
+		/* keep the toast clear of the iOS notch / status bar */
+		padding: calc(18px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-right, 0px))
+			18px calc(16px + env(safe-area-inset-left, 0px));
 	}
 	.field {
 		position: absolute;

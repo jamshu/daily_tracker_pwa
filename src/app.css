@@ -62,7 +62,10 @@ h3 {
 .app {
 	max-width: var(--maxw);
 	margin: 0 auto;
-	padding: 20px 16px 64px;
+	/* Respect iOS safe areas (notch / status bar / home indicator) so the
+	   top-right controls aren't hidden under the status bar and stay tappable. */
+	padding: calc(20px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-right, 0px))
+		calc(64px + env(safe-area-inset-bottom, 0px)) calc(16px + env(safe-area-inset-left, 0px));
 }
 
 .section-title {

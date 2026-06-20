@@ -99,8 +99,10 @@ export async function adminExecute(model, method, args = [], kwargs = {}) {
 export async function createTenantUser({ name, email, password }) {
 	const displayName = name || email;
 
-	// 1) new company for this tenant
-	const companyId = await adminExecute('res.company', 'create', [{ name: displayName }]);
+	// 1) new company for this tenant. The company name embeds the (unique) email
+	// so two users with the same display name don't collide on company name.
+	const companyName = `${displayName} (${email})`;
+	const companyId = await adminExecute('res.company', 'create', [{ name: companyName }]);
 
 	// 2) internal-user group (best-effort; ACLs still configured in Odoo)
 	const vals = {

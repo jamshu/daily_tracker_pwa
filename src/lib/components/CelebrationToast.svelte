@@ -158,9 +158,10 @@
 		display: flex;
 		gap: 14px;
 		padding: 16px 18px;
-		border: 1px solid var(--border);
-		background: linear-gradient(160deg, var(--surface-2), var(--surface));
-		box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+		border: 1px solid #324a6b;
+		background: linear-gradient(160deg, #1d2f4f, #16243f);
+		box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+		backdrop-filter: blur(2px);
 		animation: pop 0.5s cubic-bezier(0.18, 1.3, 0.5, 1) both;
 	}
 	@keyframes pop {
@@ -212,16 +213,17 @@
 	}
 	.quote {
 		margin: 0;
-		font-size: 0.9rem;
+		font-size: 0.95rem;
 		font-style: italic;
-		line-height: 1.45;
-		color: var(--text-dim);
+		font-weight: 500;
+		line-height: 1.55;
+		color: #d4deec;
 	}
 	.source {
-		margin: 6px 0 0;
-		font-size: 0.78rem;
+		margin: 7px 0 0;
+		font-size: 0.8rem;
 		font-weight: 700;
-		color: var(--teal);
+		color: var(--green);
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.field {

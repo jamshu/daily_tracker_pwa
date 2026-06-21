@@ -16,17 +16,20 @@
 </script>
 
 <div class="activity card" class:met>
-	<div class="top">
-		<div class="head">
-			<span class="name">{activity.name}</span>
-			<span class="goal" class:met>{value} / {tgt} {activity.unit}</span>
-		</div>
-		<div class="stepper">
-			<button on:click={() => set(value - activity.step)} aria-label="decrease">−</button>
-			<span class="val">{value}</span>
-			<button on:click={() => set(value + activity.step)} aria-label="increase">+</button>
-		</div>
+	<div class="head">
+		<span class="name">{activity.name}</span>
+		<span class="goal" class:met>{value} / {tgt} {activity.unit}</span>
 	</div>
+	<input
+		class="slider"
+		type="range"
+		min="0"
+		max={tgt}
+		step={activity.step}
+		{value}
+		on:input={(e) => set(Number(e.currentTarget.value))}
+		aria-label={activity.name}
+	/>
 	<div class="bar">
 		<div class="fill" style="width:{pct}%" />
 	</div>
@@ -39,16 +42,11 @@
 		flex-direction: column;
 		gap: 12px;
 	}
-	.top {
+	.head {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 12px;
-	}
-	.head {
-		display: flex;
-		flex-direction: column;
-		gap: 3px;
 	}
 	.name {
 		font-weight: 700;
@@ -62,39 +60,60 @@
 		color: var(--green);
 		font-weight: 600;
 	}
-	.stepper {
-		display: flex;
-		align-items: center;
-		gap: 4px;
+	.slider {
+		width: 100%;
+		height: 28px;
+		background: transparent;
+		cursor: pointer;
+		-webkit-appearance: none;
+		appearance: none;
+	}
+	.slider::-webkit-slider-runnable-track {
+		height: 9px;
+		border-radius: 999px;
 		background: var(--bg-soft);
 		border: 1px solid var(--border);
+	}
+	.slider::-moz-range-track {
+		height: 9px;
 		border-radius: 999px;
-		padding: 4px;
+		background: var(--bg-soft);
+		border: 1px solid var(--border);
 	}
-	.stepper button {
-		width: 34px;
-		height: 34px;
+	.slider::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 28px;
+		height: 28px;
+		margin-top: -10px;
 		border-radius: 50%;
-		font-size: 1.3rem;
-		font-weight: 700;
-		color: var(--text);
-		background: var(--surface-2);
-		display: grid;
-		place-items: center;
-		line-height: 1;
-		transition: all 0.15s ease;
+		background: var(--teal);
+		border: 3px solid var(--surface-2);
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+		transition: transform 0.15s ease;
 	}
-	.stepper button:hover {
+	.slider::-moz-range-thumb {
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		background: var(--teal);
+		border: 3px solid var(--surface-2);
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+		transition: transform 0.15s ease;
+	}
+	.slider:active::-webkit-slider-thumb {
+		transform: scale(1.12);
 		background: var(--teal-deep);
 	}
-	.stepper button:active {
-		transform: scale(0.9);
+	.slider:active::-moz-range-thumb {
+		transform: scale(1.12);
+		background: var(--teal-deep);
 	}
-	.val {
-		min-width: 30px;
-		text-align: center;
-		font-weight: 700;
-		font-variant-numeric: tabular-nums;
+	.activity.met .slider::-webkit-slider-thumb {
+		background: var(--green);
+	}
+	.activity.met .slider::-moz-range-thumb {
+		background: var(--green);
 	}
 	.bar {
 		height: 9px;

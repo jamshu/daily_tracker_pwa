@@ -194,3 +194,49 @@ export async function destroySession(sessionId) {
 		/* ignore — cookie is cleared regardless */
 	}
 }
+
+/* ------------------------------ password reset ---------------------------- */
+// All reset operations run through the admin key (no logged-in session exists
+// during a reset). The 6-digit code is stashed in the user's own JSON settings
+// field, then verified and consumed when the new password is set.
+
+// Keep in sync with src/routes/api/settings/+server.js.
+const SETTINGS_FIELD = 'x_studio_settings';
+
+/** Look up an internal user by login (email). Returns {id,name,login,email}|null. */
+export async function findUserByLogin(login) {
+	const rows = await adminExecute('res.users', 'search_read', [[['login', '=', login]]], {
+		fields: ['id', 'name', 'login', 'email'],
+		limit: 1
+	});
+	return rows?.[0] || null;
+}
+
+/** Read the raw JSON settings string for a user id ('' if unset). */
+export async function readUserSettings(uid) {
+	const rows = await adminExecute('res.users', 'read', [[uid]], { fields: [SETTINGS_FIELD] });
+	return rows?.[0]?.[SETTINGS_FIELD] || '';
+}
+
+/** Overwrite the JSON settings string for a user id. */
+export async function writeUserSettings(uid, jsonStr) {
+	return adminExecute('res.users', 'write', [[uid], { [SETTINGS_FIELD]: jsonStr }]);
+}
+
+/** Set a new password for a user id (admin privilege). */
+export async function setUserPassword(uid, password) {
+	return adminExecute('res.users', 'write', [[uid], { password: String(password) }]);
+}
+
+/**
+ * Send an Odoo email template to a user, exposing the reset code to the
+ * template via the render context. Reference it inside the template as:
+ *   subject (inline_template):  {{ ctx.get('reset_code') }}
+ *   body_html (qweb):           <t t-out="ctx.get('reset_code')"/>
+ */
+export async function sendResetCodeEmail(templateId, uid, code) {
+	return adminExecute('mail.template', 'send_mail', [Number(templateId), uid], {
+		force_send: true,
+		context: { reset_code: String(code) }
+	});
+}

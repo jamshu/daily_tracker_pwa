@@ -49,6 +49,31 @@ export async function signup(name, email, password) {
 	return d.user;
 }
 
+// Step 1: ask the server to email a 6-digit reset code. Always resolves on a
+// 2xx so the UI can't be used to probe which emails have accounts.
+export async function requestReset(email) {
+	const res = await fetch(url('/api/auth/forgot'), {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ email })
+	});
+	const d = await res.json().catch(() => ({}));
+	if (!res.ok || !d.ok) throw new Error(d.error || 'Could not send reset code');
+	return true;
+}
+
+// Step 2: submit the code plus the new/confirm password to set it.
+export async function resetPassword(email, code, password, confirm) {
+	const res = await fetch(url('/api/auth/reset'), {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ email, code, password, confirm })
+	});
+	const d = await res.json().catch(() => ({}));
+	if (!res.ok || !d.ok) throw new Error(d.error || 'Could not reset password');
+	return true;
+}
+
 export async function logout() {
 	try {
 		await fetch(url('/api/auth/logout'), { method: 'POST' });

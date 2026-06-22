@@ -10,10 +10,12 @@
 // proxy (src/lib/odoo.js) — credentials never reach the browser.
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
-import { emptyDay, dayProgress } from './config.js';
+import { emptyDay, dayProgress, parseDay } from './config.js';
 import { odooClient } from './odoo.js';
 import { user } from './auth.js';
 import { settings, resetSettings } from './settings.js';
+import { resetGroups } from './groups.js';
+import { resetLeaderboard } from './leaderboard.js';
 
 const FIELDS = [
 	'id',
@@ -46,29 +48,8 @@ function blankRecord() {
 	return { id: null, data: emptyDay(), notes: '', journal: '' };
 }
 
-function parseData(jsonStr) {
-	const base = emptyDay();
-	if (!jsonStr) return base;
-	try {
-		const o = JSON.parse(jsonStr);
-		if (o.prayers)
-			for (const id in base.prayers)
-				if (o.prayers[id])
-					base.prayers[id] = {
-							jamath: !!o.prayers[id].jamath,
-							sunnah: !!o.prayers[id].sunnah,
-							dhikr: !!o.prayers[id].dhikr
-						};
-		if (o.activities)
-			for (const id in base.activities)
-				if (o.activities[id] != null) base.activities[id] = Number(o.activities[id]) || 0;
-		if (o.deeds) for (const id in base.deeds) base.deeds[id] = !!o.deeds[id];
-			if (o.nawafil) for (const id in base.nawafil) base.nawafil[id] = !!o.nawafil[id];
-	} catch {
-		/* malformed JSON — fall back to an empty day */
-	}
-	return base;
-}
+// Day-JSON parsing lives in config.js (shared with the leaderboard scorer).
+const parseData = parseDay;
 
 /** dateKey -> record */
 export const records = writable({});
@@ -261,6 +242,8 @@ if (browser) {
 		if (prev && $u === null) {
 			resetData();
 			resetSettings();
+			resetGroups();
+			resetLeaderboard();
 		}
 		prev = $u;
 	});

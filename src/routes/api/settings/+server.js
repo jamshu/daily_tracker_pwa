@@ -66,7 +66,8 @@ export async function POST({ request, cookies }) {
 			if (Number.isFinite(n) && n > 0) activities[id] = Math.round(n);
 		}
 		const theme = coerceTheme(body?.theme);
-		const settings = { activities, theme };
+		const shareGlobal = body?.shareGlobal === true;
+		const settings = { activities, theme, shareGlobal };
 
 		await adminExecute('res.users', 'write', [[uid], { [SETTINGS_FIELD]: JSON.stringify(settings) }]);
 		return json({ ok: true, settings });

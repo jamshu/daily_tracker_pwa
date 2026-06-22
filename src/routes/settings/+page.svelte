@@ -9,6 +9,7 @@
 	// form state: activity id -> target value
 	let form = Object.fromEntries(ACTIVITIES.map((a) => [a.id, a.target]));
 	let theme = DEFAULT_THEME;
+	let shareGlobal = false;
 	let busy = false;
 	let status = ''; // '' | 'saved' | 'error'
 	let error = '';
@@ -17,6 +18,7 @@
 		await loadSettings();
 		form = { ...form, ...$settings.activities };
 		theme = $settings.theme;
+		shareGlobal = $settings.shareGlobal === true;
 	});
 
 	function pickTheme(id) {
@@ -29,7 +31,7 @@
 		status = '';
 		error = '';
 		try {
-			await saveSettings({ activities: form, theme });
+			await saveSettings({ activities: form, theme, shareGlobal });
 			status = 'saved';
 			setTimeout(() => (status = ''), 2200);
 		} catch (e) {
@@ -111,6 +113,23 @@
 				{/if}
 			</button>
 		{/each}
+	</div>
+
+	<h2 class="section-title">Privacy &amp; sharing</h2>
+	<div class="card">
+		<button
+			type="button"
+			class="toggle-row"
+			role="switch"
+			aria-checked={shareGlobal}
+			on:click={() => (shareGlobal = !shareGlobal)}
+		>
+			<span class="meta">
+				<span class="name">Share my score on the global leaderboard</span>
+				<span class="unit">Off by default. When on, your name and 30-day score are visible to everyone.</span>
+			</span>
+			<span class="switch" class:on={shareGlobal} aria-hidden="true"><span class="knob" /></span>
+		</button>
 	</div>
 
 	<div class="actions">
@@ -269,6 +288,48 @@
 	.check {
 		flex: 0 0 auto;
 		color: var(--teal);
+	}
+	.toggle-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 14px;
+		width: 100%;
+		padding: 14px;
+		text-align: left;
+		color: var(--text);
+		background: transparent;
+	}
+	.toggle-row .meta {
+		flex: 1;
+	}
+	.switch {
+		flex: 0 0 auto;
+		width: 46px;
+		height: 28px;
+		border-radius: 999px;
+		background: var(--surface-2);
+		border: 1px solid var(--border);
+		position: relative;
+		transition: background 0.18s ease;
+	}
+	.switch.on {
+		background: var(--teal);
+		border-color: var(--teal);
+	}
+	.switch .knob {
+		position: absolute;
+		top: 2px;
+		left: 2px;
+		width: 22px;
+		height: 22px;
+		border-radius: 50%;
+		background: #fff;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+		transition: transform 0.18s ease;
+	}
+	.switch.on .knob {
+		transform: translateX(18px);
 	}
 	.actions {
 		display: flex;

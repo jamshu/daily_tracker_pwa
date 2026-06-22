@@ -32,12 +32,14 @@
 	import { base } from '$app/paths';
 	import { user, logout } from '$lib/auth.js';
 	import { settings, loadSettings } from '$lib/settings.js';
+	import { pendingInviteCount, loadGroups } from '$lib/groups.js';
 
 	const todayK = dateKey();
 
 	onMount(() => {
 		load();
 		loadSettings();
+		loadGroups(); // for the leaderboard invite badge
 	});
 
 	async function doLogout() {
@@ -144,6 +146,13 @@
 				{#if SYNC_LABEL[$syncState]}
 					<span class="sync {$syncState}">{SYNC_LABEL[$syncState]}</span>
 				{/if}
+				<button class="gear trophy" on:click={() => goto(`${base}/leaderboard`)} title="Leaderboard" aria-label="leaderboard">
+					<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z" />
+						<path d="M5 4H3v2a3 3 0 0 0 3 3M19 4h2v2a3 3 0 0 1-3 3" />
+					</svg>
+					{#if $pendingInviteCount}<span class="badge">{$pendingInviteCount}</span>{/if}
+				</button>
 				<button class="gear" on:click={() => goto(`${base}/settings`)} title="Settings" aria-label="settings">
 					<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<circle cx="12" cy="12" r="3" />
@@ -322,6 +331,25 @@
 	.gear:hover {
 		color: var(--text);
 		border-color: var(--teal);
+	}
+	.trophy {
+		position: relative;
+	}
+	.trophy .badge {
+		position: absolute;
+		top: -6px;
+		right: -6px;
+		min-width: 16px;
+		height: 16px;
+		padding: 0 4px;
+		border-radius: 999px;
+		background: var(--red);
+		color: #fff;
+		font-size: 0.66rem;
+		font-weight: 700;
+		display: grid;
+		place-items: center;
+		line-height: 1;
 	}
 	.sync {
 		font-size: 0.72rem;

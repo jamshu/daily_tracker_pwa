@@ -57,6 +57,35 @@ export function emptyDay() {
 }
 
 /**
+ * Parse a stored x_studio_json string into a full day object (missing keys
+ * filled from emptyDay()). Shared by the client store and the server-side
+ * leaderboard scorer so both interpret records identically.
+ */
+export function parseDay(jsonStr) {
+	const base = emptyDay();
+	if (!jsonStr) return base;
+	try {
+		const o = JSON.parse(jsonStr);
+		if (o.prayers)
+			for (const id in base.prayers)
+				if (o.prayers[id])
+					base.prayers[id] = {
+						jamath: !!o.prayers[id].jamath,
+						sunnah: !!o.prayers[id].sunnah,
+						dhikr: !!o.prayers[id].dhikr
+					};
+		if (o.activities)
+			for (const id in base.activities)
+				if (o.activities[id] != null) base.activities[id] = Number(o.activities[id]) || 0;
+		if (o.deeds) for (const id in base.deeds) base.deeds[id] = !!o.deeds[id];
+		if (o.nawafil) for (const id in base.nawafil) base.nawafil[id] = !!o.nawafil[id];
+	} catch {
+		/* malformed JSON — fall back to an empty day */
+	}
+	return base;
+}
+
+/**
  * Score a single day in [0, 1]. `targets` optionally overrides per-activity
  * goals (per-user settings); falls back to each activity's default target.
  */
@@ -81,4 +110,12 @@ export function dayProgress(day, targets) {
 		if (day.nawafil?.[n.id]) score += 1;
 	}
 	return Math.max(0, Math.min(score / MAX_SCORE, 1));
+}
+
+/**
+ * Leaderboard points for a stored day JSON string, scored against the DEFAULT
+ * targets (so lowering personal targets can't inflate rank). Range [0, MAX_SCORE].
+ */
+export function dayPoints(jsonStr) {
+	return dayProgress(parseDay(jsonStr), null) * MAX_SCORE;
 }

@@ -26,8 +26,12 @@ function initialTheme() {
 	return DEFAULT_THEME;
 }
 
-// { activities: { exercise, books, quran }, theme } — effective settings used everywhere.
-export const settings = writable({ activities: defaultTargets(), theme: initialTheme() });
+// { activities: { exercise, books, quran }, theme, shareGlobal } — effective settings.
+export const settings = writable({
+	activities: defaultTargets(),
+	theme: initialTheme(),
+	shareGlobal: false
+});
 
 // Apply a theme to <html> immediately and cache it for pre-paint (app.html).
 export function applyTheme(id) {
@@ -54,7 +58,7 @@ function coerce(obj) {
 // the previous user's targets before loadSettings() returns. Theme stays on the
 // cached value to avoid a flash; loadSettings() applies the new user's theme.
 export function resetSettings() {
-	settings.set({ activities: defaultTargets(), theme: initialTheme() });
+	settings.set({ activities: defaultTargets(), theme: initialTheme(), shareGlobal: false });
 }
 
 export async function loadSettings() {
@@ -64,22 +68,30 @@ export async function loadSettings() {
 		if (!res.ok) return;
 		const d = await res.json();
 		const theme = coerceTheme(d?.settings?.theme);
-		settings.set({ activities: coerce(d?.settings?.activities), theme });
+		settings.set({
+			activities: coerce(d?.settings?.activities),
+			theme,
+			shareGlobal: d?.settings?.shareGlobal === true
+		});
 		applyTheme(theme);
 	} catch {
 		/* keep defaults */
 	}
 }
 
-export async function saveSettings({ activities, theme }) {
+export async function saveSettings({ activities, theme, shareGlobal }) {
 	const res = await fetch(`${base}/api/settings`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ activities, theme })
+		body: JSON.stringify({ activities, theme, shareGlobal: shareGlobal === true })
 	});
 	const d = await res.json().catch(() => ({}));
 	if (!res.ok || !d.ok) throw new Error(d.error || 'Could not save settings');
 	const savedTheme = coerceTheme(d?.settings?.theme ?? theme);
-	settings.set({ activities: coerce(d?.settings?.activities ?? activities), theme: savedTheme });
+	settings.set({
+		activities: coerce(d?.settings?.activities ?? activities),
+		theme: savedTheme,
+		shareGlobal: d?.settings?.shareGlobal === true
+	});
 	applyTheme(savedTheme);
 }

@@ -158,9 +158,9 @@
 		display: flex;
 		gap: 14px;
 		padding: 16px 18px;
-		border: 1px solid #324a6b;
-		background: linear-gradient(160deg, #1d2f4f, #16243f);
-		box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+		border: 1px solid var(--border);
+		background: linear-gradient(160deg, var(--surface-2), var(--surface));
+		box-shadow: var(--shadow);
 		backdrop-filter: blur(2px);
 		animation: pop 0.5s cubic-bezier(0.18, 1.3, 0.5, 1) both;
 	}
@@ -217,7 +217,7 @@
 		font-style: italic;
 		font-weight: 500;
 		line-height: 1.55;
-		color: #d4deec;
+		color: var(--text-dim);
 	}
 	.source {
 		margin: 7px 0 0;

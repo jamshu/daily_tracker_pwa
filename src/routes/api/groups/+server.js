@@ -135,8 +135,12 @@ export async function POST({ request, cookies }) {
 				]
 			);
 			if (existing) return json({ ok: false, error: 'Already invited or a member' }, { status: 409 });
+			// x_name is required on x_lb_member — derive it from the group name.
+			const grp = await adminExecute(GROUP_MODEL, 'read', [[gid]], { fields: ['x_name'] });
+			const gName = grp?.[0]?.x_name || 'Group';
 			await adminExecute(MEMBER_MODEL, 'create', [
 				{
+					x_name: `${gName} / invite`,
 					x_studio_group_id: gid,
 					x_studio_user_id: userId,
 					x_studio_invited_by_id: me,

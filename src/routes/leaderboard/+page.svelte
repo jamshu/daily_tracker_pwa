@@ -97,7 +97,7 @@
 		{:else if $global}
 			<p class="note">
 				{#if $global.myRank}Your rank: <strong>#{$global.myRank}</strong> · {/if}Average daily score over the last 30 days (out of 100).
-			</p>{/if}
+			</p>
 			{#if $global.rows.length}
 				<div class="card list">
 					{#each $global.rows as r (r.rank)}

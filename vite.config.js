@@ -28,6 +28,11 @@ export default defineConfig({
 				icons: [
 					{ src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
 					{ src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+				],
+				// Android long-press-icon quick actions (ignored on iOS).
+				shortcuts: [
+					{ name: 'Today', short_name: 'Today', url: '/' },
+					{ name: 'Leaderboard', short_name: 'Leaderboard', url: '/leaderboard' }
 				]
 			}
 		})

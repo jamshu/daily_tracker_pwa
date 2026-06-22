@@ -50,6 +50,13 @@ function coerce(obj) {
 	return out;
 }
 
+// Reset to defaults when the user logs out, so the next user never briefly sees
+// the previous user's targets before loadSettings() returns. Theme stays on the
+// cached value to avoid a flash; loadSettings() applies the new user's theme.
+export function resetSettings() {
+	settings.set({ activities: defaultTargets(), theme: initialTheme() });
+}
+
 export async function loadSettings() {
 	if (!browser) return;
 	try {

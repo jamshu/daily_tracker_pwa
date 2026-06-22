@@ -13,7 +13,7 @@ import { browser } from '$app/environment';
 import { emptyDay, dayProgress } from './config.js';
 import { odooClient } from './odoo.js';
 import { user } from './auth.js';
-import { settings } from './settings.js';
+import { settings, resetSettings } from './settings.js';
 
 const FIELDS = [
 	'id',
@@ -234,4 +234,34 @@ export function setJournal(date, text) {
 		return { ...m, [date]: cur };
 	});
 	scheduleSave(date);
+}
+
+/* -------------------------------- reset ---------------------------------- */
+
+// Wipe all in-memory user data. Without this, logging out then in as a different
+// user on the same browser would show the previous user's cached records until a
+// full page refresh (the stores are module singletons that survive SPA nav, and
+// load() merges new data UNDER any stale records).
+export function resetData() {
+	for (const k in timers) clearTimeout(timers[k]);
+	for (const k in timers) delete timers[k];
+	for (const k in chains) delete chains[k];
+	records.set({});
+	selectedDate.set(dateKey());
+	syncState.set('idle');
+	syncError.set('');
+}
+
+// Clear everything the moment the session goes to "logged out" (covers both the
+// logout button and an expired-session redirect). Only on a real transition, so
+// the initial undefined -> null on first load doesn't fire.
+if (browser) {
+	let prev;
+	user.subscribe(($u) => {
+		if (prev && $u === null) {
+			resetData();
+			resetSettings();
+		}
+		prev = $u;
+	});
 }

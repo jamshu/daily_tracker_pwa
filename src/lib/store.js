@@ -2,7 +2,6 @@
 //   x_studio_date    -> the day (YYYY-MM-DD), our key
 //   x_studio_json    -> JSON of { prayers, activities, deeds }
 //   x_studio_notes   -> HTML notes
-//   x_studio_journal -> HTML journal
 //   x_name           -> display name
 //
 // The UI edits an in-memory copy immediately (optimistic) and we debounce a
@@ -22,7 +21,6 @@ const FIELDS = [
 	'x_studio_date',
 	'x_studio_json',
 	'x_studio_notes',
-	'x_studio_journal',
 	'create_uid'
 ];
 const RANGE_DAYS = 35; // how many recent days to load for the week strip + history
@@ -38,14 +36,14 @@ export function shiftKey(key, n) {
 	return dateKey(new Date(y, m - 1, d + n));
 }
 
-// Notes & Journal are rich text (HTML) from the editor and are stored verbatim
-// in the Odoo HTML fields — no plain-text conversion.
+// Notes are rich text (HTML) from the editor and are stored verbatim in the
+// Odoo HTML field — no plain-text conversion.
 
 /* -------------------------------- records -------------------------------- */
-// record shape: { id: number|null, data: {prayers,activities,deeds}, notes, journal }
+// record shape: { id: number|null, data: {prayers,activities,deeds}, notes }
 
 function blankRecord() {
-	return { id: null, data: emptyDay(), notes: '', journal: '' };
+	return { id: null, data: emptyDay(), notes: '' };
 }
 
 // Day-JSON parsing lives in config.js (shared with the leaderboard scorer).
@@ -72,7 +70,6 @@ export const currentProgress = derived([currentDay, settings], ([$d, $s]) =>
 	dayProgress($d, $s.activities)
 );
 export const currentNotes = derived(currentRecord, ($r) => $r.notes);
-export const currentJournal = derived(currentRecord, ($r) => $r.journal);
 
 /* --------------------------------- load ---------------------------------- */
 
@@ -104,8 +101,7 @@ export async function load() {
 			map[k] = {
 				id: row.id,
 				data: parseData(row.x_studio_json),
-				notes: row.x_studio_notes || '',
-				journal: row.x_studio_journal || ''
+				notes: row.x_studio_notes || ''
 			};
 		}
 		// merge so any unsaved local edits made before load finished survive
@@ -138,8 +134,7 @@ async function doSave(date) {
 		x_name: `Daily Tracker ${date}`,
 		x_studio_date: date,
 		x_studio_json: JSON.stringify(rec.data),
-		x_studio_notes: rec.notes || '',
-		x_studio_journal: rec.journal || ''
+		x_studio_notes: rec.notes || ''
 	};
 	try {
 		if (rec.id) {
@@ -203,15 +198,6 @@ export function setNotes(date, text) {
 	records.update((m) => {
 		const cur = m[date] ? { ...m[date] } : blankRecord();
 		cur.notes = text;
-		return { ...m, [date]: cur };
-	});
-	scheduleSave(date);
-}
-
-export function setJournal(date, text) {
-	records.update((m) => {
-		const cur = m[date] ? { ...m[date] } : blankRecord();
-		cur.journal = text;
 		return { ...m, [date]: cur };
 	});
 	scheduleSave(date);

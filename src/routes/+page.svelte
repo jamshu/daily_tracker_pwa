@@ -5,7 +5,6 @@
 		currentDay,
 		currentProgress,
 		currentNotes,
-		currentJournal,
 		selectedDate,
 		syncState,
 		dateKey,
@@ -257,8 +256,8 @@
 		{/each}
 	</div>
 
-	<h2 class="section-title">Notes &amp; Journal</h2>
-	<NotesCard date={$selectedDate} notes={$currentNotes} journal={$currentJournal} />
+	<h2 class="section-title">Notes</h2>
+	<NotesCard date={$selectedDate} notes={$currentNotes} />
 
 	<p class="foot">Synced to Backend · {$selectedDate}</p>
 </div>

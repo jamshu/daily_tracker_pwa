@@ -1,32 +1,21 @@
 <script>
-	import { setNotes, setJournal } from '$lib/store.js';
+	import { setNotes } from '$lib/store.js';
 	import RichEditor from './RichEditor.svelte';
 
 	export let date; // YYYY-MM-DD
 	export let notes = '';
-	export let journal = '';
 </script>
 
-<!-- Re-key on date so the editors reset to the selected day's content. -->
+<!-- Re-key on date so the editor resets to the selected day's content. -->
 {#key date}
 	<div class="notes-grid">
 		<div class="editor card">
 			<label>Notes</label>
 			<RichEditor
 				html={notes}
-				minHeight="100px"
-				placeholder="Quick notes, reminders, du‘ā lists…"
-				on:change={(e) => setNotes(date, e.detail)}
-			/>
-		</div>
-
-		<div class="editor card">
-			<label>Journal</label>
-			<RichEditor
-				html={journal}
 				minHeight="150px"
-				placeholder="How did the day go? Reflections, gratitude, lessons…"
-				on:change={(e) => setJournal(date, e.detail)}
+				placeholder="Quick notes, reflections, du‘ā lists…"
+				on:change={(e) => setNotes(date, e.detail)}
 			/>
 		</div>
 	</div>

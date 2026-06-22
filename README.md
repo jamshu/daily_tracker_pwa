@@ -48,7 +48,6 @@ One record per day. Expected fields:
 | `x_studio_date` | Date | The day — the lookup key |
 | `x_studio_json` | Text (multiline) | `{ prayers, activities, deeds }` as JSON |
 | `x_studio_notes` | Html | Notes editor content |
-| `x_studio_journal` | Html | Journal editor content |
 
 On load the app reads the last 35 days; edits debounce-save (create the record
 the first time a day is touched, update it thereafter).

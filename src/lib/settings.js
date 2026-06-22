@@ -13,8 +13,21 @@ function defaultTargets() {
 	return t;
 }
 
+// Start from the cached theme (same value the app.html pre-paint script used)
+// so hydration doesn't flash back to the default before loadSettings returns.
+function initialTheme() {
+	if (browser) {
+		try {
+			return coerceTheme(localStorage.getItem('theme'));
+		} catch {
+			/* ignore */
+		}
+	}
+	return DEFAULT_THEME;
+}
+
 // { activities: { exercise, books, quran }, theme } — effective settings used everywhere.
-export const settings = writable({ activities: defaultTargets(), theme: DEFAULT_THEME });
+export const settings = writable({ activities: defaultTargets(), theme: initialTheme() });
 
 // Apply a theme to <html> immediately and cache it for pre-paint (app.html).
 export function applyTheme(id) {

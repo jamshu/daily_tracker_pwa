@@ -126,7 +126,7 @@
 		>
 			<span class="meta">
 				<span class="name">Share my score on the global leaderboard</span>
-				<span class="unit">Off by default. When on, your name and 30-day score are visible to everyone.</span>
+				<span class="unit">Off by default. When on, your name and today's score are visible to everyone.</span>
 			</span>
 			<span class="switch" class:on={shareGlobal} aria-hidden="true"><span class="knob" /></span>
 		</button>

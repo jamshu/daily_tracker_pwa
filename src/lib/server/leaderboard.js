@@ -3,7 +3,7 @@
 // record rules — a user session can never read another user's rows. Callers are
 // responsible for authorization (only expose scores the requester may see).
 import { adminExecute, getModel } from './odoo.js';
-import { dayPoints } from '$lib/config.js';
+import { dayProgress, parseDay } from '$lib/config.js';
 
 // Custom Odoo models (created once in Studio).
 export const GROUP_MODEL = 'x_lb_group';
@@ -27,8 +27,10 @@ export function m2oName(v) {
 }
 
 /**
- * Sum rolling-30-day points per user. `uids` optionally restricts the scan.
- * Returns Map<uid, points>. Scored against DEFAULT targets via dayPoints().
+ * Average daily score (0–100) over the last 30 days, per user — the SAME 0–100
+ * scale shown on the dashboard ring, averaged across the days that have entries.
+ * Scored against DEFAULT targets (anti-gaming). `uids` optionally restricts the
+ * scan. Returns Map<uid, score 0–100>.
  */
 export async function scoreByUser(uids) {
 	const domain = [['x_studio_date', '>=', windowStart()]];
@@ -36,12 +38,18 @@ export async function scoreByUser(uids) {
 	const rows = await adminExecute(getModel(), 'search_read', [domain], {
 		fields: ['create_uid', 'x_studio_json']
 	});
-	const map = new Map();
+	const agg = new Map(); // uid -> { sum, days }
 	for (const r of rows) {
 		const owner = m2oId(r.create_uid);
 		if (!owner) continue;
-		map.set(owner, (map.get(owner) || 0) + dayPoints(r.x_studio_json));
+		const pct = dayProgress(parseDay(r.x_studio_json), null) * 100;
+		const a = agg.get(owner) || { sum: 0, days: 0 };
+		a.sum += pct;
+		a.days += 1;
+		agg.set(owner, a);
 	}
+	const map = new Map();
+	for (const [uid, a] of agg) map.set(uid, a.days ? a.sum / a.days : 0);
 	return map;
 }
 

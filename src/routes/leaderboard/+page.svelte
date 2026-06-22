@@ -95,7 +95,9 @@
 				<button class="primary" on:click={() => goto(`${base}/settings`)}>Enable in Settings</button>
 			</div>
 		{:else if $global}
-			{#if $global.myRank}<p class="note">Your rank: <strong>#{$global.myRank}</strong></p>{/if}
+			<p class="note">
+				{#if $global.myRank}Your rank: <strong>#{$global.myRank}</strong> · {/if}Average daily score over the last 30 days (out of 100).
+			</p>{/if}
 			{#if $global.rows.length}
 				<div class="card list">
 					{#each $global.rows as r (r.rank)}

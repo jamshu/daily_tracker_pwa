@@ -10,12 +10,10 @@ export const GROUP_MODEL = 'x_lb_group';
 export const MEMBER_MODEL = 'x_lb_member';
 export const SETTINGS_FIELD = 'x_studio_settings';
 
-const WINDOW_DAYS = 30;
-
-function windowStart() {
+function today() {
 	const d = new Date();
-	d.setDate(d.getDate() - (WINDOW_DAYS - 1));
-	return d.toISOString().slice(0, 10);
+	const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+	return local.toISOString().slice(0, 10);
 }
 
 /** m2o fields read back as [id, display_name] — pull the id (or a plain int). */
@@ -27,29 +25,22 @@ export function m2oName(v) {
 }
 
 /**
- * Average daily score (0–100) over the last 30 days, per user — the SAME 0–100
- * scale shown on the dashboard ring, averaged across the days that have entries.
- * Scored against DEFAULT targets (anti-gaming). `uids` optionally restricts the
- * scan. Returns Map<uid, score 0–100>.
+ * Today's score (0–100) per user — the SAME 0–100 scale shown on the dashboard
+ * ring, for the current day only. Scored against DEFAULT targets (anti-gaming).
+ * `uids` optionally restricts the scan. Returns Map<uid, score 0–100>.
  */
 export async function scoreByUser(uids) {
-	const domain = [['x_studio_date', '>=', windowStart()]];
+	const domain = [['x_studio_date', '=', today()]];
 	if (Array.isArray(uids) && uids.length) domain.push(['create_uid', 'in', uids]);
 	const rows = await adminExecute(getModel(), 'search_read', [domain], {
 		fields: ['create_uid', 'x_studio_json']
 	});
-	const agg = new Map(); // uid -> { sum, days }
+	const map = new Map();
 	for (const r of rows) {
 		const owner = m2oId(r.create_uid);
 		if (!owner) continue;
-		const pct = dayProgress(parseDay(r.x_studio_json), null) * 100;
-		const a = agg.get(owner) || { sum: 0, days: 0 };
-		a.sum += pct;
-		a.days += 1;
-		agg.set(owner, a);
+		map.set(owner, dayProgress(parseDay(r.x_studio_json), null) * 100);
 	}
-	const map = new Map();
-	for (const [uid, a] of agg) map.set(uid, a.days ? a.sum / a.days : 0);
 	return map;
 }
 

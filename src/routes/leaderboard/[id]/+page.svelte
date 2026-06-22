@@ -106,7 +106,7 @@
 	{:else if state === 'error'}
 		<div class="card empty">Couldn't load this group.</div>
 	{:else if board}
-		<p class="cap">Average daily score over the last 30 days (out of 100).</p>
+		<p class="cap">Today's score (out of 100).</p>
 		<div class="card list">
 			{#each board.rows as r (r.rank)}
 				<div class="row" class:me={r.isMe}>

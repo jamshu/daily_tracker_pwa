@@ -12,7 +12,7 @@
 		leaveGroup
 	} from '$lib/groups.js';
 
-	let tab = 'global'; // 'global' | 'groups'
+	let tab = 'groups'; // 'groups' | 'global'
 	let newName = '';
 	let creating = false;
 	let busyId = null; // memberId being responded to
@@ -77,11 +77,11 @@
 	</header>
 
 	<div class="tabs">
-		<button class:active={tab === 'global'} on:click={() => (tab = 'global')}>Global</button>
 		<button class:active={tab === 'groups'} on:click={() => (tab = 'groups')}>
 			Groups
 			{#if $invites.length}<span class="dot">{$invites.length}</span>{/if}
 		</button>
+		<button class:active={tab === 'global'} on:click={() => (tab = 'global')}>Global</button>
 	</div>
 
 	{#if err}<p class="err">{err}</p>{/if}

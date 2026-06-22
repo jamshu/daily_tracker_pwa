@@ -9,16 +9,19 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<title>Daily Tracker</title>
 		<script>
-			// Apply cached theme before first paint to avoid a flash of the default.
+			// Apply cached theme before first paint to avoid a flash. New users
+			// (no cached theme) get the default 'claude' palette; keep this id in
+			// sync with DEFAULT_THEME in src/lib/themes.js.
 			try {
 				var t = localStorage.getItem('theme');
-				if (t && /^[a-z-]+$/.test(t)) document.documentElement.dataset.theme = t;
-			} catch (e) {}
+				document.documentElement.dataset.theme = t && /^[a-z-]+$/.test(t) ? t : 'claude';
+			} catch (e) {
+				document.documentElement.dataset.theme = 'claude';
+			}
 		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
 	</body>
-	
 </html>

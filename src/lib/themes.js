@@ -2,9 +2,10 @@
 // (no browser-only deps). The chosen theme id is persisted per-user in
 // x_studio_settings and applied via a data-theme attribute on <html>.
 // Each theme's palette lives in app.css under :root[data-theme='<id>'].
-// `midnight` is the base :root palette (the original default).
+// `midnight` is the base :root palette; `claude` is the default applied for
+// new users (and as the pre-paint fallback in app.html).
 
-export const DEFAULT_THEME = 'midnight';
+export const DEFAULT_THEME = 'claude';
 
 // swatch = [accent, surface, bg] — three colors shown in the picker preview.
 export const THEMES = [

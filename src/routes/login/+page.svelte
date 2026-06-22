@@ -320,13 +320,29 @@
 	.switch {
 		text-align: center;
 		margin: 18px 0 0;
-		font-size: 0.88rem;
+		font-size: 0.92rem;
 		color: var(--text-dim);
 	}
 	.switch button {
 		color: var(--teal);
-		font-weight: 700;
-		padding: 0 2px;
+		font-weight: 800;
+		font-size: 0.96rem;
+		padding: 3px 8px;
+		margin-left: 2px;
+		border-radius: var(--radius-sm);
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		transition:
+			background 0.15s ease,
+			color 0.15s ease;
+	}
+	.switch button:hover {
+		color: var(--teal-deep);
+		background: var(--bg-soft);
+	}
+	.switch button:focus-visible {
+		outline: 2px solid var(--teal);
+		outline-offset: 2px;
 	}
 	.spinner {
 		width: 18px;

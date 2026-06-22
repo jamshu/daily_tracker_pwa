@@ -108,6 +108,11 @@
 	{:else if board}
 		<p class="cap">Today's score (out of 100).</p>
 		<div class="card list">
+			<div class="row head">
+				<span class="rank">#</span>
+				<span class="name">Name</span>
+				<span class="score">Score</span>
+			</div>
 			{#each board.rows as r (r.rank)}
 				<div class="row" class:me={r.isMe}>
 					<span class="rank">{medal(r.rank) || `#${r.rank}`}</span>
@@ -188,12 +193,13 @@
 		display: flex;
 		flex-direction: column;
 		padding: 0;
+		overflow: hidden;
 	}
 	.row {
 		display: flex;
 		align-items: center;
-		gap: 12px;
-		padding: 13px 14px;
+		gap: 14px;
+		padding: 15px 18px;
 		border-bottom: 1px solid var(--border);
 	}
 	.row:last-child {
@@ -202,10 +208,27 @@
 	.row.me {
 		background: color-mix(in srgb, var(--teal) 14%, transparent);
 	}
+	/* Column header */
+	.row.head {
+		padding: 11px 18px;
+		background: var(--bg-soft);
+	}
+	.row.head .rank,
+	.row.head .name,
+	.row.head .score {
+		font-size: 0.7rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.07em;
+		color: var(--text-faint);
+		background: none;
+		padding: 0;
+	}
 	.rank {
 		flex: 0 0 auto;
 		min-width: 34px;
 		font-weight: 800;
+		font-size: 0.98rem;
 		font-variant-numeric: tabular-nums;
 		color: var(--text-dim);
 	}
@@ -216,6 +239,7 @@
 		flex-direction: column;
 		gap: 2px;
 		text-align: left;
+		min-width: 0;
 	}
 	.you {
 		color: var(--teal);
@@ -229,8 +253,12 @@
 	.score {
 		flex: 0 0 auto;
 		font-weight: 800;
+		font-size: 0.95rem;
 		font-variant-numeric: tabular-nums;
 		color: var(--teal);
+		padding: 4px 11px;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--teal) 12%, transparent);
 	}
 	.search {
 		width: 100%;

@@ -5,7 +5,7 @@
 // their own res.users record (SELF_WRITEABLE_FIELDS), hence the admin path.
 import { json } from '@sveltejs/kit';
 import { assertConfigured, sessionInfo, adminExecute } from '$lib/server/odoo.js';
-import { getSession, getContext, clearSessionCookie } from '$lib/server/session.js';
+import { getSession, getContext, clearSessionCookie, refreshSessionCookie } from '$lib/server/session.js';
 import { ACTIVITIES } from '$lib/config.js';
 import { coerceTheme } from '$lib/themes.js';
 
@@ -20,7 +20,8 @@ async function uidFromSession(cookies) {
 	if (ctx?.uid) return ctx.uid;
 	const sid = getSession(cookies);
 	if (!sid) return null;
-	const info = await sessionInfo(sid);
+	const { result: info, sessionId } = await sessionInfo(sid);
+	refreshSessionCookie(cookies, sessionId, sid);
 	return info?.uid ?? null;
 }
 

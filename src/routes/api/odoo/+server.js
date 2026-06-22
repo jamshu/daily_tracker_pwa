@@ -5,7 +5,7 @@
 // suspenders. Returns 401 when there is no session.
 import { json } from '@sveltejs/kit';
 import { assertConfigured, sessionCallKw, sessionInfo, buildSessionContext, getModel } from '$lib/server/odoo.js';
-import { getSession, getContext, clearSessionCookie } from '$lib/server/session.js';
+import { getSession, getContext, clearSessionCookie, refreshSessionCookie } from '$lib/server/session.js';
 
 // Must run as a serverless function, never prerendered (it's a POST proxy).
 export const prerender = false;
@@ -20,10 +20,22 @@ export async function POST({ request, cookies }) {
 		const { action, data } = await request.json();
 		const MODEL = getModel();
 
+		// Run a session call and keep the browser cookie in sync with any rotated
+		// Odoo session id (also slides the 30-day expiry forward on activity).
+		const call = async (model, method, args, kwargs) => {
+			const { result, sessionId } = await sessionCallKw(sid, model, method, args, kwargs);
+			refreshSessionCookie(cookies, sessionId, sid);
+			return result;
+		};
+
 		// Prefer the context captured at login; fall back to a live lookup if the
 		// cookie is absent (e.g. a session restored before this was added).
 		let ctx = getContext(cookies);
-		if (!ctx) ctx = buildSessionContext(await sessionInfo(sid));
+		if (!ctx) {
+			const { result, sessionId } = await sessionInfo(sid);
+			refreshSessionCookie(cookies, sessionId, sid);
+			ctx = buildSessionContext(result);
+		}
 		const companyId = ctx.allowed_company_ids?.[0] ?? null;
 		const uid = ctx.uid ?? null;
 
@@ -31,7 +43,7 @@ export async function POST({ request, cookies }) {
 			case 'create':
 				return json({
 					success: true,
-					id: await sessionCallKw(sid, MODEL, 'create', [data], { context: ctx })
+					id: await call(MODEL, 'create', [data], { context: ctx })
 				});
 
 			case 'search': {
@@ -44,7 +56,7 @@ export async function POST({ request, cookies }) {
 				const scopedDomain = [scope, ...domain];
 				return json({
 					success: true,
-					results: await sessionCallKw(sid, MODEL, 'search_read', [scopedDomain], {
+					results: await call(MODEL, 'search_read', [scopedDomain], {
 						fields,
 						context: ctx
 					})
@@ -55,7 +67,7 @@ export async function POST({ request, cookies }) {
 				const { id, values } = data;
 				return json({
 					success: true,
-					result: await sessionCallKw(sid, MODEL, 'write', [[id], values], { context: ctx })
+					result: await call(MODEL, 'write', [[id], values], { context: ctx })
 				});
 			}
 
@@ -63,7 +75,7 @@ export async function POST({ request, cookies }) {
 				const { id } = data;
 				return json({
 					success: true,
-					result: await sessionCallKw(sid, MODEL, 'unlink', [[id]], { context: ctx })
+					result: await call(MODEL, 'unlink', [[id]], { context: ctx })
 				});
 			}
 

@@ -17,6 +17,14 @@ export function clearSessionCookie(cookies) {
 	cookies.delete(SESSION_COOKIE, { path: '/' });
 }
 
+// Keep the browser cookie in lockstep with Odoo. If Odoo rotated the session id
+// (newId differs), store the new one; otherwise re-set the current id to slide the
+// 30-day expiry forward on activity. No-op when there's no session.
+export function refreshSessionCookie(cookies, newId, currentId) {
+	const id = newId || currentId;
+	if (id) setSessionCookie(cookies, id);
+}
+
 export function getSession(cookies) {
 	return cookies.get(SESSION_COOKIE) || null;
 }

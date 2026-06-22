@@ -1,6 +1,6 @@
 <script>
 	import '../app.css';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { base } from '$app/paths';
@@ -10,9 +10,27 @@
 
 	let ready = false;
 
+	// Keepalive: while logged in, re-sync the session every 10 min and whenever the
+	// tab becomes visible. Each /api/auth/me call refreshes the rotated session id
+	// and slides the cookie's 30-day expiry, so an idle tab never drifts into logout.
+	const KEEPALIVE_MS = 10 * 60 * 1000;
+	let keepaliveTimer = null;
+
+	function pingIfVisible() {
+		if ($user && document.visibilityState === 'visible') checkSession();
+	}
+
 	onMount(async () => {
 		await checkSession();
 		ready = true;
+		document.addEventListener('visibilitychange', pingIfVisible);
+		keepaliveTimer = setInterval(pingIfVisible, KEEPALIVE_MS);
+	});
+
+	onDestroy(() => {
+		if (!browser) return;
+		if (keepaliveTimer) clearInterval(keepaliveTimer);
+		document.removeEventListener('visibilitychange', pingIfVisible);
 	});
 
 	// Keep <html data-theme> in sync once settings load / change.

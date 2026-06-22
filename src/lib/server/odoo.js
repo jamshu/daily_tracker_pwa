@@ -154,13 +154,18 @@ export async function authenticateUser(login, password) {
 }
 
 export async function sessionInfo(sessionId) {
-	const { result } = await rpc('/web/session/get_session_info', {}, `session_id=${sessionId}`);
+	const { result, setCookie } = await rpc(
+		'/web/session/get_session_info',
+		{},
+		`session_id=${sessionId}`
+	);
 	if (!result || !result.uid) {
 		const e = new Error('Session expired');
 		e.status = 401;
 		throw e;
 	}
-	return result;
+	// Odoo may rotate the session id; surface it so callers can re-sync the cookie.
+	return { result, sessionId: parseSessionId(setCookie) };
 }
 
 /**
@@ -179,12 +184,13 @@ export function buildSessionContext(info) {
 }
 
 export async function sessionCallKw(sessionId, model, method, args = [], kwargs = {}) {
-	const { result } = await rpc(
+	const { result, setCookie } = await rpc(
 		'/web/dataset/call_kw',
 		{ model, method, args, kwargs },
 		`session_id=${sessionId}`
 	);
-	return result;
+	// Odoo may rotate the session id; surface it so callers can re-sync the cookie.
+	return { result, sessionId: parseSessionId(setCookie) };
 }
 
 export async function destroySession(sessionId) {

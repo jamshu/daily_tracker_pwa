@@ -3,10 +3,12 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { ACTIVITIES } from '$lib/config.js';
-	import { settings, loadSettings, saveSettings } from '$lib/settings.js';
+	import { settings, loadSettings, saveSettings, applyTheme } from '$lib/settings.js';
+	import { THEMES, DEFAULT_THEME } from '$lib/themes.js';
 
 	// form state: activity id -> target value
 	let form = Object.fromEntries(ACTIVITIES.map((a) => [a.id, a.target]));
+	let theme = DEFAULT_THEME;
 	let busy = false;
 	let status = ''; // '' | 'saved' | 'error'
 	let error = '';
@@ -14,14 +16,20 @@
 	onMount(async () => {
 		await loadSettings();
 		form = { ...form, ...$settings.activities };
+		theme = $settings.theme;
 	});
+
+	function pickTheme(id) {
+		theme = id;
+		applyTheme(id); // live preview
+	}
 
 	async function save() {
 		busy = true;
 		status = '';
 		error = '';
 		try {
-			await saveSettings(form);
+			await saveSettings({ activities: form, theme });
 			status = 'saved';
 			setTimeout(() => (status = ''), 2200);
 		} catch (e) {
@@ -34,6 +42,8 @@
 
 	function resetDefaults() {
 		form = Object.fromEntries(ACTIVITIES.map((a) => [a.id, a.target]));
+		theme = DEFAULT_THEME;
+		applyTheme(DEFAULT_THEME);
 	}
 </script>
 
@@ -77,6 +87,29 @@
 					>
 				</div>
 			</div>
+		{/each}
+	</div>
+
+	<h2 class="section-title">Theme</h2>
+	<div class="card themes">
+		{#each THEMES as t (t.id)}
+			<button
+				type="button"
+				class="theme"
+				class:selected={theme === t.id}
+				aria-pressed={theme === t.id}
+				on:click={() => pickTheme(t.id)}
+			>
+				<span class="swatch" aria-hidden="true">
+					{#each t.swatch as c}
+						<span style="background:{c}"></span>
+					{/each}
+				</span>
+				<span class="tname">{t.name}</span>
+				{#if theme === t.id}
+					<svg class="check" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+				{/if}
+			</button>
 		{/each}
 	</div>
 
@@ -192,6 +225,50 @@
 	}
 	.stepper input:focus {
 		outline: none;
+	}
+	.themes {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+		padding: 10px;
+	}
+	.theme {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 10px 12px;
+		border-radius: var(--radius-sm);
+		background: var(--bg-soft);
+		border: 1px solid var(--border);
+		color: var(--text);
+		text-align: left;
+	}
+	.theme:hover {
+		background: var(--surface-2);
+	}
+	.theme.selected {
+		border-color: var(--teal);
+		box-shadow: 0 0 0 1px var(--teal);
+	}
+	.swatch {
+		display: inline-flex;
+		flex: 0 0 auto;
+		border-radius: 999px;
+		overflow: hidden;
+		border: 1px solid var(--border);
+	}
+	.swatch span {
+		width: 14px;
+		height: 24px;
+	}
+	.tname {
+		font-weight: 600;
+		font-size: 0.9rem;
+		flex: 1;
+	}
+	.check {
+		flex: 0 0 auto;
+		color: var(--teal);
 	}
 	.actions {
 		display: flex;

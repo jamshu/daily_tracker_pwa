@@ -7,6 +7,7 @@ import { json } from '@sveltejs/kit';
 import { assertConfigured, sessionInfo, adminExecute } from '$lib/server/odoo.js';
 import { getSession, getContext, clearSessionCookie } from '$lib/server/session.js';
 import { ACTIVITIES } from '$lib/config.js';
+import { coerceTheme } from '$lib/themes.js';
 
 export const prerender = false;
 
@@ -63,7 +64,8 @@ export async function POST({ request, cookies }) {
 			const n = Number(body?.activities?.[id]);
 			if (Number.isFinite(n) && n > 0) activities[id] = Math.round(n);
 		}
-		const settings = { activities };
+		const theme = coerceTheme(body?.theme);
+		const settings = { activities, theme };
 
 		await adminExecute('res.users', 'write', [[uid], { [SETTINGS_FIELD]: JSON.stringify(settings) }]);
 		return json({ ok: true, settings });

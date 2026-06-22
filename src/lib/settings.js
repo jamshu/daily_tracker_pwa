@@ -5,6 +5,7 @@ import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import { base } from '$app/paths';
 import { ACTIVITIES } from './config.js';
+import { coerceTheme, DEFAULT_THEME } from './themes.js';
 
 function defaultTargets() {
 	const t = {};
@@ -12,8 +13,20 @@ function defaultTargets() {
 	return t;
 }
 
-// { activities: { exercise, books, quran } } — effective targets used everywhere.
-export const settings = writable({ activities: defaultTargets() });
+// { activities: { exercise, books, quran }, theme } — effective settings used everywhere.
+export const settings = writable({ activities: defaultTargets(), theme: DEFAULT_THEME });
+
+// Apply a theme to <html> immediately and cache it for pre-paint (app.html).
+export function applyTheme(id) {
+	if (!browser) return;
+	const t = coerceTheme(id);
+	document.documentElement.dataset.theme = t;
+	try {
+		localStorage.setItem('theme', t);
+	} catch {
+		/* ignore */
+	}
+}
 
 function coerce(obj) {
 	const out = {};
@@ -30,19 +43,23 @@ export async function loadSettings() {
 		const res = await fetch(`${base}/api/settings`);
 		if (!res.ok) return;
 		const d = await res.json();
-		settings.set({ activities: coerce(d?.settings?.activities) });
+		const theme = coerceTheme(d?.settings?.theme);
+		settings.set({ activities: coerce(d?.settings?.activities), theme });
+		applyTheme(theme);
 	} catch {
 		/* keep defaults */
 	}
 }
 
-export async function saveSettings(activities) {
+export async function saveSettings({ activities, theme }) {
 	const res = await fetch(`${base}/api/settings`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ activities })
+		body: JSON.stringify({ activities, theme })
 	});
 	const d = await res.json().catch(() => ({}));
 	if (!res.ok || !d.ok) throw new Error(d.error || 'Could not save settings');
-	settings.set({ activities: coerce(d?.settings?.activities ?? activities) });
+	const savedTheme = coerceTheme(d?.settings?.theme ?? theme);
+	settings.set({ activities: coerce(d?.settings?.activities ?? activities), theme: savedTheme });
+	applyTheme(savedTheme);
 }

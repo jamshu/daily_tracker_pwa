@@ -4,7 +4,9 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { base } from '$app/paths';
+	import { browser } from '$app/environment';
 	import { user, checkSession } from '$lib/auth.js';
+	import { settings, applyTheme } from '$lib/settings.js';
 
 	let ready = false;
 
@@ -12,6 +14,9 @@
 		await checkSession();
 		ready = true;
 	});
+
+	// Keep <html data-theme> in sync once settings load / change.
+	$: if (browser) applyTheme($settings.theme);
 
 	$: path = $page.url.pathname.replace(base, '') || '/';
 	$: isLogin = path === '/login';

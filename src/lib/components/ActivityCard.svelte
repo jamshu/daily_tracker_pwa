@@ -6,8 +6,6 @@
 	const dispatch = createEventDispatcher();
 
 	$: tgt = target ?? activity.target;
-	$: frac = Math.min(value / tgt, 1);
-	$: pct = Math.round(frac * 100);
 	$: met = value >= tgt;
 
 	function set(v) {
@@ -30,9 +28,6 @@
 		on:input={(e) => set(Number(e.currentTarget.value))}
 		aria-label={activity.name}
 	/>
-	<div class="bar">
-		<div class="fill" style="width:{pct}%" />
-	</div>
 </div>
 
 <style>
@@ -114,20 +109,5 @@
 	}
 	.activity.met .slider::-moz-range-thumb {
 		background: var(--green);
-	}
-	.bar {
-		height: 9px;
-		border-radius: 999px;
-		background: var(--bg-soft);
-		overflow: hidden;
-	}
-	.fill {
-		height: 100%;
-		border-radius: 999px;
-		background: linear-gradient(90deg, var(--teal-deep), var(--teal));
-		transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-	}
-	.activity.met .fill {
-		background: linear-gradient(90deg, var(--teal), var(--green));
 	}
 </style>

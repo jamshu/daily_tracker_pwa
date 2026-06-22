@@ -130,6 +130,10 @@
 			</span>
 			<span class="switch" class:on={shareGlobal} aria-hidden="true"><span class="knob" /></span>
 		</button>
+		<p class="disclaimer">
+			Share only to encourage one another toward good. Keep your intention sincere — seek
+			acceptance from Allah, not the praise of people. “Actions are but by intentions.”
+		</p>
 	</div>
 
 	<div class="actions">
@@ -302,6 +306,14 @@
 	}
 	.toggle-row .meta {
 		flex: 1;
+	}
+	.disclaimer {
+		margin: 0;
+		padding: 0 14px 14px;
+		font-size: 0.78rem;
+		line-height: 1.5;
+		color: var(--text-faint);
+		font-style: italic;
 	}
 	.switch {
 		flex: 0 0 auto;

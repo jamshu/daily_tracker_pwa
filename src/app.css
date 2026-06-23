@@ -89,6 +89,46 @@
 	--bg-glow-b: rgba(210, 153, 34, 0.06);
 }
 
+/* Rosé Pine — muted dark, rose/iris accents. */
+:root[data-theme='rose-pine'] {
+	--bg: #191724;
+	--bg-soft: #1f1d2e;
+	--surface: #1f1d2e;
+	--surface-2: #26233a;
+	--border: #403d52;
+	--text: #e0def4;
+	--text-dim: #908caa;
+	--text-faint: #6e6a86;
+	--teal: #ebbcba;
+	--teal-deep: #d7827e;
+	--gold: #f6c177;
+	--green: #9ccfd8;
+	--red: #eb6f92;
+	--bg-glow-a: rgba(235, 188, 186, 0.08);
+	--bg-glow-b: rgba(196, 167, 231, 0.06);
+	--shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Nord — cool arctic dark, frost-blue accent. */
+:root[data-theme='nord'] {
+	--bg: #2e3440;
+	--bg-soft: #2e3440;
+	--surface: #3b4252;
+	--surface-2: #434c5e;
+	--border: #4c566a;
+	--text: #eceff4;
+	--text-dim: #d8dee9;
+	--text-faint: #8a93a5;
+	--teal: #88c0d0;
+	--teal-deep: #5e81ac;
+	--gold: #ebcb8b;
+	--green: #a3be8c;
+	--red: #bf616a;
+	--bg-glow-a: rgba(136, 192, 208, 0.1);
+	--bg-glow-b: rgba(180, 142, 173, 0.06);
+	--shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
 * {
 	box-sizing: border-box;
 }

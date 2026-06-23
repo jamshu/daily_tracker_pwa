@@ -7,6 +7,7 @@
 
 	$: tgt = target ?? activity.target;
 	$: met = value >= tgt;
+	$: fill = Math.min(100, tgt ? (value / tgt) * 100 : 0);
 
 	function set(v) {
 		dispatch('set', { value: Math.max(0, v) });
@@ -25,6 +26,7 @@
 		max={tgt}
 		step={activity.step}
 		{value}
+		style="--fill:{fill}%"
 		on:input={(e) => set(Number(e.currentTarget.value))}
 		aria-label={activity.name}
 	/>
@@ -44,12 +46,19 @@
 		gap: 12px;
 	}
 	.name {
-		font-weight: 700;
-		font-size: 1.02rem;
+		font-family: var(--font-display);
+		font-weight: 600;
+		font-optical-sizing: auto;
+		font-variation-settings: 'SOFT' 40;
+		font-size: 1.12rem;
+		letter-spacing: -0.01em;
 	}
 	.goal {
-		font-size: 0.8rem;
+		font-family: var(--font-display);
+		font-size: 0.92rem;
+		font-weight: 500;
 		color: var(--text-dim);
+		font-variant-numeric: tabular-nums;
 	}
 	.goal.met {
 		color: var(--green);
@@ -66,14 +75,30 @@
 	.slider::-webkit-slider-runnable-track {
 		height: 9px;
 		border-radius: 999px;
-		background: var(--bg-soft);
 		border: 1px solid var(--border);
+		background: linear-gradient(
+			90deg,
+			var(--teal-deep) 0,
+			var(--teal) var(--fill, 0%),
+			var(--bg-soft) var(--fill, 0%)
+		);
 	}
 	.slider::-moz-range-track {
 		height: 9px;
 		border-radius: 999px;
-		background: var(--bg-soft);
 		border: 1px solid var(--border);
+		background: linear-gradient(
+			90deg,
+			var(--teal-deep) 0,
+			var(--teal) var(--fill, 0%),
+			var(--bg-soft) var(--fill, 0%)
+		);
+	}
+	.activity.met .slider::-webkit-slider-runnable-track {
+		background: linear-gradient(90deg, var(--green) 0, var(--green) 100%, var(--bg-soft) 100%);
+	}
+	.activity.met .slider::-moz-range-track {
+		background: linear-gradient(90deg, var(--green) 0, var(--green) 100%, var(--bg-soft) 100%);
 	}
 	.slider::-webkit-slider-thumb {
 		-webkit-appearance: none;

@@ -56,30 +56,44 @@
 	}
 	.day.sel {
 		background: var(--surface-2);
+		box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text) 8%, transparent);
 	}
 	.dow {
-		font-size: 0.7rem;
+		font-size: 0.68rem;
 		font-weight: 700;
+		letter-spacing: 0.06em;
 		color: var(--text-faint);
 	}
 	.ball {
-		width: 34px;
-		height: 34px;
+		width: 36px;
+		height: 36px;
 		border-radius: 50%;
 		display: grid;
 		place-items: center;
-		/* conic ring shows that day's completion */
+		/* conic ring (gold→teal sweep) shows that day's completion */
 		background:
-			radial-gradient(circle at center, var(--surface) 56%, transparent 57%),
-			conic-gradient(var(--teal) calc(var(--p) * 360deg), var(--border) 0);
+			radial-gradient(circle at center, var(--surface) 58%, transparent 59%),
+			conic-gradient(
+				from -90deg,
+				var(--gold),
+				var(--teal) calc(var(--p) * 360deg),
+				var(--border) 0
+			);
 		position: relative;
+		transition: transform 0.15s ease;
+	}
+	.day:active .ball {
+		transform: scale(0.92);
 	}
 	.day.today .ball {
-		box-shadow: 0 0 0 2px var(--gold);
+		box-shadow:
+			0 0 0 2px var(--gold),
+			0 0 12px color-mix(in srgb, var(--gold) 55%, transparent);
 	}
 	.num {
-		font-size: 0.82rem;
-		font-weight: 700;
+		font-family: var(--font-display);
+		font-size: 0.86rem;
+		font-weight: 600;
 		font-variant-numeric: tabular-nums;
 	}
 </style>

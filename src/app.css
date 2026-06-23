@@ -21,8 +21,19 @@
 
 	--radius: 18px;
 	--radius-sm: 12px;
+	--radius-lg: 24px;
 	--shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+	--shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.25);
+	--shadow-lg: 0 24px 60px -18px rgba(0, 0, 0, 0.55);
 	--maxw: 760px;
+
+	/* Typography — Fraunces (serif display) for character, Inter for controls. */
+	--font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+	--font-body: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+		sans-serif;
+
+	/* Ceremonial accent for hairline rules / ornaments. */
+	--ornament: var(--gold);
 }
 
 /* ── Themes ─────────────────────────────────────────────────────────────
@@ -48,6 +59,8 @@
 	--bg-glow-a: rgba(193, 95, 60, 0.07);
 	--bg-glow-b: rgba(184, 134, 11, 0.05);
 	--shadow: 0 8px 24px rgba(20, 20, 19, 0.08);
+	--shadow-sm: 0 2px 8px rgba(20, 20, 19, 0.06);
+	--shadow-lg: 0 20px 50px -18px rgba(20, 20, 19, 0.16);
 }
 
 /* GitHub Light. */
@@ -68,6 +81,8 @@
 	--bg-glow-a: rgba(9, 105, 218, 0.05);
 	--bg-glow-b: rgba(154, 103, 0, 0.04);
 	--shadow: 0 8px 24px rgba(31, 35, 40, 0.12);
+	--shadow-sm: 0 2px 8px rgba(31, 35, 40, 0.08);
+	--shadow-lg: 0 20px 50px -18px rgba(31, 35, 40, 0.18);
 }
 
 /* GitHub Dark. */
@@ -145,10 +160,22 @@ body {
 		radial-gradient(900px 500px at -10% 0%, var(--bg-glow-b), transparent 55%),
 		var(--bg);
 	color: var(--text);
-	font-family:
-		'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+	font-family: var(--font-body);
 	-webkit-font-smoothing: antialiased;
 	min-height: 100dvh;
+}
+
+/* Fine grain overlay — adds tactile, paper-like depth over the gradient glows.
+   Fixed full-viewport, sits behind content, theme-agnostic (blends both ways). */
+body::before {
+	content: '';
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+	pointer-events: none;
+	opacity: 0.035;
+	mix-blend-mode: overlay;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 button {
@@ -163,8 +190,11 @@ h1,
 h2,
 h3 {
 	margin: 0;
-	font-weight: 700;
-	letter-spacing: -0.01em;
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-optical-sizing: auto;
+	font-variation-settings: 'SOFT' 30, 'WONK' 0;
+	letter-spacing: -0.012em;
 }
 
 .app {
@@ -176,33 +206,63 @@ h3 {
 		calc(64px + env(safe-area-inset-bottom, 0px)) calc(16px + env(safe-area-inset-left, 0px));
 }
 
+/* Editorial section divider — serif label with a hairline gold rule trailing off,
+   plus a small ornament tick before the rule. Reads like a printed almanac heading. */
 .section-title {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	font-size: 0.82rem;
+	gap: 12px;
+	font-family: var(--font-display);
+	font-size: 1.06rem;
 	font-weight: 600;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	color: var(--text-dim);
-	margin: 26px 4px 12px;
+	font-variation-settings: 'SOFT' 40, 'WONK' 0;
+	text-transform: none;
+	letter-spacing: -0.01em;
+	color: var(--text);
+	margin: 30px 4px 14px;
+}
+.section-title::after {
+	content: '';
+	flex: 1;
+	height: 1px;
+	background: linear-gradient(
+		90deg,
+		color-mix(in srgb, var(--ornament) 55%, transparent),
+		transparent
+	);
 }
 
 .card {
+	position: relative;
 	background: linear-gradient(180deg, var(--surface-2), var(--surface));
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
-	box-shadow: var(--shadow);
+	/* outer depth + a 1px inner top highlight for a lit, dimensional edge */
+	box-shadow:
+		inset 0 1px 0 color-mix(in srgb, var(--text) 7%, transparent),
+		var(--shadow-lg);
+}
+
+.card--interactive {
+	transition:
+		transform 0.18s ease,
+		box-shadow 0.18s ease,
+		border-color 0.18s ease;
+}
+.card--interactive:hover {
+	transform: translateY(-2px);
+	border-color: color-mix(in srgb, var(--teal) 50%, var(--border));
 }
 
 .fade-in {
-	animation: fade 0.4s ease both;
+	animation: fade 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+	animation-delay: var(--fade-delay, 0s);
 }
 
 @keyframes fade {
 	from {
 		opacity: 0;
-		transform: translateY(6px);
+		transform: translateY(10px);
 	}
 	to {
 		opacity: 1;

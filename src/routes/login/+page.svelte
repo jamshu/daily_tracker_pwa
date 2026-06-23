@@ -244,7 +244,8 @@
 	.auth {
 		width: 100%;
 		max-width: 380px;
-		padding: 28px 24px;
+		padding: 32px 26px;
+		border-radius: var(--radius-lg);
 	}
 	.brand {
 		display: flex;
@@ -263,13 +264,17 @@
 		background: linear-gradient(135deg, var(--teal), var(--gold));
 	}
 	h1 {
-		font-size: 1.25rem;
+		font-size: 1.5rem;
+		font-variation-settings: 'SOFT' 50;
+		letter-spacing: -0.02em;
 	}
 	.sub {
 		text-align: center;
+		font-family: var(--font-display);
+		font-style: italic;
 		color: var(--text-dim);
-		margin: 0 0 20px;
-		font-size: 0.92rem;
+		margin: 2px 0 22px;
+		font-size: 1rem;
 	}
 	form {
 		display: flex;

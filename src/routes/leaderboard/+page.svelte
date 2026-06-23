@@ -189,7 +189,9 @@
 		background: var(--surface-2);
 	}
 	h1 {
-		font-size: 1.35rem;
+		font-size: 1.6rem;
+		font-variation-settings: 'SOFT' 50;
+		letter-spacing: -0.02em;
 	}
 	.tabs {
 		display: flex;
@@ -265,8 +267,9 @@
 	.rank {
 		flex: 0 0 auto;
 		min-width: 34px;
-		font-weight: 800;
-		font-size: 0.98rem;
+		font-family: var(--font-display);
+		font-weight: 600;
+		font-size: 1.12rem;
 		font-variant-numeric: tabular-nums;
 		color: var(--text-dim);
 	}
@@ -294,8 +297,9 @@
 	}
 	.score {
 		flex: 0 0 auto;
-		font-weight: 800;
-		font-size: 0.95rem;
+		font-family: var(--font-display);
+		font-weight: 600;
+		font-size: 1.05rem;
 		font-variant-numeric: tabular-nums;
 		color: var(--teal);
 		padding: 4px 11px;

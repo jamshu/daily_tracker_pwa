@@ -210,7 +210,9 @@
 		background: var(--surface-2);
 	}
 	h1 {
-		font-size: 1.35rem;
+		font-size: 1.6rem;
+		font-variation-settings: 'SOFT' 50;
+		letter-spacing: -0.02em;
 	}
 	.sex-row {
 		display: flex;

@@ -172,7 +172,14 @@
 
 	<WeekStrip {todayK} selectedK={$selectedDate} on:pick={pick} />
 
-	<section class="hero card fade-in">
+	<section class="hero card fade-in" style="--fade-delay:0.05s">
+		<svg class="hero-motif" viewBox="0 0 100 100" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+			<g fill="none" stroke="currentColor" stroke-width="1">
+				<rect x="22" y="22" width="56" height="56" transform="rotate(45 50 50)" />
+				<rect x="22" y="22" width="56" height="56" />
+				<circle cx="50" cy="50" r="39" />
+			</g>
+		</svg>
 		<ProgressRing value={$currentProgress} />
 		<div class="hero-info">
 			<p class="msg">{message}</p>
@@ -193,9 +200,9 @@
 		</div>
 	</section>
 
-	<QuoteCard />
+	<div class="fade-in" style="--fade-delay:0.12s"><QuoteCard /></div>
 
-	<button class="dhikr-link" on:click={() => openAdhkar('afterSalah')}>
+	<button class="dhikr-link fade-in" style="--fade-delay:0.18s" on:click={() => openAdhkar('afterSalah')}>
 		<span class="dl-icon">
 			<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 				<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 1 0 9.8 9.8z" />
@@ -210,8 +217,8 @@
 		</svg>
 	</button>
 
-	<h2 class="section-title">Prayers · Jamāʻah, Sunnah &amp; Dhikr</h2>
-	<div class="card">
+	<h2 class="section-title fade-in" style="--fade-delay:0.24s">Prayers · Jamāʻah, Sunnah &amp; Dhikr</h2>
+	<div class="card fade-in" style="--fade-delay:0.28s">
 		{#each PRAYERS as p (p.id)}
 			<PrayerCard
 				prayer={p}
@@ -221,8 +228,8 @@
 		{/each}
 	</div>
 
-	<h2 class="section-title">Voluntary Prayers</h2>
-	<div class="card">
+	<h2 class="section-title fade-in" style="--fade-delay:0.32s">Voluntary Prayers</h2>
+	<div class="card fade-in" style="--fade-delay:0.34s">
 		{#each NAWAFIL as n (n.id)}
 			<DeedToggle
 				deed={n}
@@ -232,8 +239,8 @@
 		{/each}
 	</div>
 
-	<h2 class="section-title">Activities</h2>
-	<div class="activities">
+	<h2 class="section-title fade-in" style="--fade-delay:0.38s">Activities</h2>
+	<div class="activities fade-in" style="--fade-delay:0.4s">
 		{#each ACTIVITIES as a (a.id)}
 			<ActivityCard
 				activity={a}
@@ -244,8 +251,8 @@
 		{/each}
 	</div>
 
-	<h2 class="section-title">Daily Deeds</h2>
-	<div class="card">
+	<h2 class="section-title fade-in" style="--fade-delay:0.44s">Daily Deeds</h2>
+	<div class="card fade-in" style="--fade-delay:0.46s">
 		{#each DEEDS as d (d.id)}
 			<DeedToggle
 				deed={d}
@@ -256,8 +263,10 @@
 		{/each}
 	</div>
 
-	<h2 class="section-title">Notes</h2>
-	<NotesCard date={$selectedDate} notes={$currentNotes} />
+	<h2 class="section-title fade-in" style="--fade-delay:0.5s">Notes</h2>
+	<div class="fade-in" style="--fade-delay:0.52s">
+		<NotesCard date={$selectedDate} notes={$currentNotes} />
+	</div>
 
 	<p class="foot">Synced to Backend · {$selectedDate}</p>
 </div>
@@ -289,10 +298,14 @@
 		flex-direction: column;
 	}
 	h1 {
-		font-size: 1.35rem;
+		font-size: 1.5rem;
+		font-variation-settings: 'SOFT' 50, 'WONK' 0;
+		letter-spacing: -0.02em;
 	}
 	.greet {
-		font-size: 0.82rem;
+		font-family: var(--font-display);
+		font-style: italic;
+		font-size: 0.92rem;
 		color: var(--text-dim);
 	}
 	.head-right {
@@ -367,11 +380,32 @@
 		color: var(--red);
 	}
 	.hero {
+		position: relative;
+		overflow: hidden;
 		display: flex;
 		align-items: center;
-		gap: 20px;
-		padding: 20px;
+		gap: 22px;
+		padding: 26px 24px;
 		margin-top: 14px;
+		border-radius: var(--radius-lg);
+	}
+	/* faint geometric watermark behind the ring — theme-safe via currentColor */
+	.hero-motif {
+		position: absolute;
+		left: -28px;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 200px;
+		height: 200px;
+		color: var(--teal);
+		opacity: 0.06;
+		pointer-events: none;
+		z-index: 0;
+	}
+	.hero :global(.ring),
+	.hero-info {
+		position: relative;
+		z-index: 1;
 	}
 	.hero-info {
 		flex: 1;
@@ -396,12 +430,17 @@
 		gap: 2px;
 	}
 	.big {
-		font-size: 1.5rem;
-		font-weight: 800;
+		font-family: var(--font-display);
+		font-size: 1.7rem;
+		font-weight: 600;
+		font-optical-sizing: auto;
+		font-variation-settings: 'SOFT' 40;
 		letter-spacing: -0.02em;
+		font-variant-numeric: tabular-nums;
 	}
 	.big small {
-		font-size: 0.9rem;
+		font-family: var(--font-body);
+		font-size: 0.86rem;
 		color: var(--text-faint);
 		font-weight: 700;
 	}
@@ -431,12 +470,18 @@
 		border-radius: var(--radius);
 		text-align: left;
 		color: var(--text);
-		background: linear-gradient(135deg, rgba(20, 184, 166, 0.16), rgba(214, 166, 74, 0.12));
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--teal) 16%, transparent),
+			color-mix(in srgb, var(--gold) 12%, transparent)
+		);
 		border: 1px solid var(--border);
+		box-shadow: var(--shadow-sm);
 		transition: all 0.15s ease;
 	}
 	.dhikr-link:hover {
 		border-color: var(--teal);
+		transform: translateY(-1px);
 	}
 	.dhikr-link:active {
 		transform: scale(0.99);

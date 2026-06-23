@@ -64,14 +64,29 @@
 
 <style>
 	.prayer {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
-		padding: 13px 14px;
+		padding: 13px 14px 13px 16px;
 		border-bottom: 1px solid var(--border);
+		transition: background 0.25s ease;
 	}
 	.prayer:last-child {
 		border-bottom: none;
+	}
+	/* completed prayers get a soft green tint + left accent bar */
+	.prayer.done {
+		background: color-mix(in srgb, var(--green) 7%, transparent);
+	}
+	.prayer.done::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 3px;
+		background: var(--green);
 	}
 	.head {
 		display: flex;
@@ -80,8 +95,12 @@
 		flex-wrap: wrap;
 	}
 	.name {
-		font-weight: 700;
-		font-size: 1.05rem;
+		font-family: var(--font-display);
+		font-weight: 600;
+		font-optical-sizing: auto;
+		font-variation-settings: 'SOFT' 40;
+		font-size: 1.14rem;
+		letter-spacing: -0.01em;
 	}
 	.prayer.done .name {
 		color: var(--green);
@@ -120,21 +139,25 @@
 		color: #042f2a;
 		background: var(--teal);
 		border-color: var(--teal);
+		box-shadow: 0 3px 14px color-mix(in srgb, var(--teal) 45%, transparent);
 	}
 	.pill.home.on {
 		color: #fff;
 		background: var(--teal-deep);
 		border-color: var(--teal-deep);
+		box-shadow: 0 3px 14px color-mix(in srgb, var(--teal-deep) 45%, transparent);
 	}
 	.pill.sunnah.on {
 		color: #2a1e05;
 		background: var(--gold);
 		border-color: var(--gold);
+		box-shadow: 0 3px 14px color-mix(in srgb, var(--gold) 45%, transparent);
 	}
 	.pill.dhikr.on {
 		color: #04261c;
 		background: var(--green);
 		border-color: var(--green);
+		box-shadow: 0 3px 14px color-mix(in srgb, var(--green) 45%, transparent);
 	}
 	.pill.on .dot {
 		background: currentColor;

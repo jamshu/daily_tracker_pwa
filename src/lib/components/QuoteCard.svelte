@@ -131,16 +131,22 @@
 	}
 	.text {
 		margin: 0;
-		font-size: 1.02rem;
-		font-weight: 600;
-		line-height: 1.45;
+		font-family: var(--font-display);
+		font-size: 1.22rem;
+		font-weight: 500;
+		line-height: 1.42;
 		font-style: italic;
+		font-optical-sizing: auto;
+		font-variation-settings: 'SOFT' 50;
+		letter-spacing: -0.01em;
 		color: var(--text);
 	}
 	.author {
-		margin: 8px 0 0;
-		font-size: 0.82rem;
+		margin: 10px 0 0;
+		font-size: 0.78rem;
 		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
 		color: var(--teal);
 	}
 	.actions {

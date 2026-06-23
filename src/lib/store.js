@@ -67,7 +67,7 @@ export const allDays = derived(records, ($r) => {
 const currentRecord = derived([records, selectedDate], ([$r, $d]) => $r[$d] || blankRecord());
 export const currentDay = derived(currentRecord, ($r) => $r.data);
 export const currentProgress = derived([currentDay, settings], ([$d, $s]) =>
-	dayProgress($d, $s.activities)
+	dayProgress($d, $s.activities, $s.sex)
 );
 export const currentNotes = derived(currentRecord, ($r) => $r.notes);
 
@@ -168,8 +168,13 @@ function mutate(date, fn) {
 
 export function togglePrayer(date, prayerId, field) {
 	mutate(date, (r) => {
-		if (!r.data.prayers[prayerId]) r.data.prayers[prayerId] = { jamath: false, sunnah: false };
-		r.data.prayers[prayerId][field] = !r.data.prayers[prayerId][field];
+		if (!r.data.prayers[prayerId])
+			r.data.prayers[prayerId] = { jamath: false, home: false, sunnah: false, dhikr: false };
+		const rec = r.data.prayers[prayerId];
+		rec[field] = !rec[field];
+		// Jamāʻah and Home are mutually exclusive — a prayer is prayed in one place.
+		if (field === 'jamath' && rec.jamath) rec.home = false;
+		if (field === 'home' && rec.home) rec.jamath = false;
 	});
 }
 

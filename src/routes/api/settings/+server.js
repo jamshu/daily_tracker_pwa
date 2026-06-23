@@ -34,6 +34,10 @@ function parseSettings(raw) {
 	}
 }
 
+function coerceSex(v) {
+	return v === 'female' ? 'female' : 'male';
+}
+
 export async function GET({ cookies }) {
 	try {
 		assertConfigured();
@@ -67,7 +71,15 @@ export async function POST({ request, cookies }) {
 		}
 		const theme = coerceTheme(body?.theme);
 		const shareGlobal = body?.shareGlobal === true;
-		const settings = { activities, theme, shareGlobal };
+		// Sex: take a valid value from the body, else preserve what's already stored
+		// (never wipe the value set at signup).
+		const current = parseSettings(
+			(await adminExecute('res.users', 'read', [[uid]], { fields: [SETTINGS_FIELD] }))?.[0]?.[
+				SETTINGS_FIELD
+			]
+		);
+		const sex = coerceSex(body?.sex ?? current.sex);
+		const settings = { activities, theme, shareGlobal, sex };
 
 		await adminExecute('res.users', 'write', [[uid], { [SETTINGS_FIELD]: JSON.stringify(settings) }]);
 		return json({ ok: true, settings });

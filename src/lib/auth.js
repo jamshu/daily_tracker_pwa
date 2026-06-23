@@ -37,11 +37,11 @@ export async function login(email, password) {
 	return d.user;
 }
 
-export async function signup(name, email, password) {
+export async function signup(name, email, password, sex) {
 	const res = await fetch(url('/api/auth/signup'), {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ name, email, password })
+		body: JSON.stringify({ name, email, password, sex })
 	});
 	const d = await res.json().catch(() => ({}));
 	if (!res.ok || !d.ok) throw new Error(d.error || 'Sign up failed');

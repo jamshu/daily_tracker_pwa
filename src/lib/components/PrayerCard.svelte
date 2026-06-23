@@ -1,11 +1,12 @@
 <script>
 	import { createEventDispatcher } from 'svelte';
 	export let prayer; // { id, name, hasSunnah, sunnah }
-	export let record = { jamath: false, sunnah: false, dhikr: false };
+	export let record = { jamath: false, home: false, sunnah: false, dhikr: false };
 	const dispatch = createEventDispatcher();
 
-	// "done" = every applicable toggle is on
-	$: done = record.jamath && record.dhikr && (prayer.hasSunnah ? record.sunnah : true);
+	// "done" = attended (Jamāʻah or Home) + dhikr + sunnah where applicable
+	$: done =
+		(record.jamath || record.home) && record.dhikr && (prayer.hasSunnah ? record.sunnah : true);
 </script>
 
 <div class="prayer" class:done>
@@ -25,6 +26,16 @@
 		>
 			<span class="dot" />
 			Jamāʻah
+		</button>
+
+		<button
+			class="pill home"
+			class:on={record.home}
+			aria-pressed={record.home}
+			on:click={() => dispatch('toggle', { field: 'home' })}
+		>
+			<span class="dot" />
+			Home
 		</button>
 
 		{#if prayer.hasSunnah}
@@ -104,11 +115,16 @@
 		border: 2px solid var(--text-faint);
 		transition: all 0.18s ease;
 	}
-	/* on-states: Jamāʻah = teal, Sunnah = gold, Dhikr = green */
+	/* on-states: Jamāʻah = teal, Home = soft teal-deep, Sunnah = gold, Dhikr = green */
 	.pill.jamath.on {
 		color: #042f2a;
 		background: var(--teal);
 		border-color: var(--teal);
+	}
+	.pill.home.on {
+		color: #fff;
+		background: var(--teal-deep);
+		border-color: var(--teal-deep);
 	}
 	.pill.sunnah.on {
 		color: #2a1e05;

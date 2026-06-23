@@ -10,6 +10,7 @@
 	let form = Object.fromEntries(ACTIVITIES.map((a) => [a.id, a.target]));
 	let theme = DEFAULT_THEME;
 	let shareGlobal = false;
+	let sex = 'male';
 	let busy = false;
 	let status = ''; // '' | 'saved' | 'error'
 	let error = '';
@@ -19,6 +20,7 @@
 		form = { ...form, ...$settings.activities };
 		theme = $settings.theme;
 		shareGlobal = $settings.shareGlobal === true;
+		sex = $settings.sex === 'female' ? 'female' : 'male';
 	});
 
 	function pickTheme(id) {
@@ -31,7 +33,7 @@
 		status = '';
 		error = '';
 		try {
-			await saveSettings({ activities: form, theme, shareGlobal });
+			await saveSettings({ activities: form, theme, shareGlobal, sex });
 			status = 'saved';
 			setTimeout(() => (status = ''), 2200);
 		} catch (e) {
@@ -60,6 +62,38 @@
 		</button>
 		<h1>Settings</h1>
 	</header>
+
+	<h2 class="section-title">Profile</h2>
+	<div class="card">
+		<div class="sex-row">
+			<span class="meta">
+				<span class="name">Sex</span>
+				<span class="unit">Affects prayer scoring — a woman praying at home scores the same as in Jamāʻah.</span>
+			</span>
+			<div class="seg" role="radiogroup" aria-label="Sex">
+				<button
+					type="button"
+					class="seg-btn"
+					class:on={sex === 'male'}
+					role="radio"
+					aria-checked={sex === 'male'}
+					on:click={() => (sex = 'male')}
+				>
+					Male
+				</button>
+				<button
+					type="button"
+					class="seg-btn"
+					class:on={sex === 'female'}
+					role="radio"
+					aria-checked={sex === 'female'}
+					on:click={() => (sex = 'female')}
+				>
+					Female
+				</button>
+			</div>
+		</div>
+	</div>
 
 	<h2 class="section-title">Daily goals</h2>
 	<div class="card goals">
@@ -177,6 +211,38 @@
 	}
 	h1 {
 		font-size: 1.35rem;
+	}
+	.sex-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 14px;
+		padding: 14px;
+	}
+	.sex-row .meta {
+		flex: 1;
+	}
+	.seg {
+		flex: 0 0 auto;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 6px;
+		background: var(--bg-soft);
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		padding: 4px;
+	}
+	.seg-btn {
+		padding: 7px 16px;
+		border-radius: 999px;
+		font-weight: 600;
+		font-size: 0.9rem;
+		color: var(--text-dim);
+		background: transparent;
+	}
+	.seg-btn.on {
+		color: #042f2a;
+		background: var(--teal);
 	}
 	.goals {
 		display: flex;

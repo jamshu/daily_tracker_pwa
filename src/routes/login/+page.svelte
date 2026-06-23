@@ -6,6 +6,7 @@
 	let mode = 'login'; // 'login' | 'signup' | 'forgot' | 'reset'
 	let name = '';
 	let email = '';
+	let sex = ''; // 'male' | 'female' (signup only)
 	let password = '';
 	let confirm = '';
 	let code = '';
@@ -57,7 +58,8 @@
 		busy = true;
 		try {
 			if (isSignup) {
-				await signup(name.trim(), email.trim(), password);
+				if (sex !== 'male' && sex !== 'female') throw new Error('Please select Male or Female');
+				await signup(name.trim(), email.trim(), password, sex);
 				goto(`${base}/`);
 			} else if (isLogin) {
 				await login(email.trim(), password);
@@ -105,6 +107,32 @@
 					<span>Name</span>
 					<input type="text" bind:value={name} autocomplete="name" placeholder="Your name" required />
 				</label>
+
+				<div class="field">
+					<span class="field-label">Sex</span>
+					<div class="seg" role="radiogroup" aria-label="Sex">
+						<button
+							type="button"
+							class="seg-btn"
+							class:on={sex === 'male'}
+							role="radio"
+							aria-checked={sex === 'male'}
+							on:click={() => (sex = 'male')}
+						>
+							Male
+						</button>
+						<button
+							type="button"
+							class="seg-btn"
+							class:on={sex === 'female'}
+							role="radio"
+							aria-checked={sex === 'female'}
+							on:click={() => (sex = 'female')}
+						>
+							Female
+						</button>
+					</div>
+				</div>
 			{/if}
 
 			{#if isLogin || isSignup || isForgot || isReset}
@@ -272,6 +300,42 @@
 	}
 	input:focus {
 		outline: none;
+		border-color: var(--teal);
+	}
+	.field {
+		display: flex;
+		flex-direction: column;
+		gap: 5px;
+	}
+	.field-label {
+		font-size: 0.74rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.07em;
+		color: var(--text-dim);
+	}
+	.seg {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+	}
+	.seg-btn {
+		padding: 11px 12px;
+		border-radius: var(--radius-sm);
+		background: var(--bg-soft);
+		border: 1px solid var(--border);
+		color: var(--text-dim);
+		font-family: inherit;
+		font-size: 0.96rem;
+		font-weight: 600;
+		transition:
+			border-color 0.15s ease,
+			background 0.15s ease,
+			color 0.15s ease;
+	}
+	.seg-btn.on {
+		color: #042f2a;
+		background: var(--teal);
 		border-color: var(--teal);
 	}
 	.error {

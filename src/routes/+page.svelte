@@ -66,7 +66,7 @@
 	// summary stats for the selected day (prayers, activities, deeds)
 	$: prayerUnits = PRAYERS.reduce((n, p) => {
 		const r = $currentDay.prayers[p.id] || {};
-		return n + (r.jamath ? 1 : 0) + (p.hasSunnah && r.sunnah ? 1 : 0) + (r.dhikr ? 1 : 0);
+		return n + (r.jamath || r.home ? 1 : 0) + (p.hasSunnah && r.sunnah ? 1 : 0) + (r.dhikr ? 1 : 0);
 	}, 0);
 	$: activitiesMet = ACTIVITIES.filter(
 		(a) => ($currentDay.activities[a.id] || 0) >= ($settings.activities[a.id] ?? a.target)

@@ -13,6 +13,10 @@ function defaultTargets() {
 	return t;
 }
 
+export function coerceSex(v) {
+	return v === 'female' ? 'female' : 'male';
+}
+
 // Start from the cached theme (same value the app.html pre-paint script used)
 // so hydration doesn't flash back to the default before loadSettings returns.
 function initialTheme() {
@@ -26,11 +30,12 @@ function initialTheme() {
 	return DEFAULT_THEME;
 }
 
-// { activities: { exercise, books, quran }, theme, shareGlobal } — effective settings.
+// { activities: { exercise, books, quran }, theme, shareGlobal, sex } — effective settings.
 export const settings = writable({
 	activities: defaultTargets(),
 	theme: initialTheme(),
-	shareGlobal: false
+	shareGlobal: false,
+	sex: 'male'
 });
 
 // Apply a theme to <html> immediately and cache it for pre-paint (app.html).
@@ -58,7 +63,12 @@ function coerce(obj) {
 // the previous user's targets before loadSettings() returns. Theme stays on the
 // cached value to avoid a flash; loadSettings() applies the new user's theme.
 export function resetSettings() {
-	settings.set({ activities: defaultTargets(), theme: initialTheme(), shareGlobal: false });
+	settings.set({
+		activities: defaultTargets(),
+		theme: initialTheme(),
+		shareGlobal: false,
+		sex: 'male'
+	});
 }
 
 export async function loadSettings() {
@@ -71,7 +81,8 @@ export async function loadSettings() {
 		settings.set({
 			activities: coerce(d?.settings?.activities),
 			theme,
-			shareGlobal: d?.settings?.shareGlobal === true
+			shareGlobal: d?.settings?.shareGlobal === true,
+			sex: coerceSex(d?.settings?.sex)
 		});
 		applyTheme(theme);
 	} catch {
@@ -79,11 +90,11 @@ export async function loadSettings() {
 	}
 }
 
-export async function saveSettings({ activities, theme, shareGlobal }) {
+export async function saveSettings({ activities, theme, shareGlobal, sex }) {
 	const res = await fetch(`${base}/api/settings`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ activities, theme, shareGlobal: shareGlobal === true })
+		body: JSON.stringify({ activities, theme, shareGlobal: shareGlobal === true, sex: coerceSex(sex) })
 	});
 	const d = await res.json().catch(() => ({}));
 	if (!res.ok || !d.ok) throw new Error(d.error || 'Could not save settings');
@@ -91,7 +102,8 @@ export async function saveSettings({ activities, theme, shareGlobal }) {
 	settings.set({
 		activities: coerce(d?.settings?.activities ?? activities),
 		theme: savedTheme,
-		shareGlobal: d?.settings?.shareGlobal === true
+		shareGlobal: d?.settings?.shareGlobal === true,
+		sex: coerceSex(d?.settings?.sex ?? sex)
 	});
 	applyTheme(savedTheme);
 }

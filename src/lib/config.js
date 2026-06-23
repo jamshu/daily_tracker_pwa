@@ -46,7 +46,7 @@ export const MAX_SCORE = PRAYER_MARKS + ACTIVITIES.length + DEEDS.length + NAWAF
 /** A fresh, empty record for one day. */
 export function emptyDay() {
 	const prayers = {};
-	for (const p of PRAYERS) prayers[p.id] = { jamath: false, sunnah: false, dhikr: false };
+	for (const p of PRAYERS) prayers[p.id] = { jamath: false, home: false, sunnah: false, dhikr: false };
 	const activities = {};
 	for (const a of ACTIVITIES) activities[a.id] = 0;
 	const deeds = {};
@@ -71,6 +71,7 @@ export function parseDay(jsonStr) {
 				if (o.prayers[id])
 					base.prayers[id] = {
 						jamath: !!o.prayers[id].jamath,
+						home: !!o.prayers[id].home,
 						sunnah: !!o.prayers[id].sunnah,
 						dhikr: !!o.prayers[id].dhikr
 					};
@@ -88,13 +89,18 @@ export function parseDay(jsonStr) {
 /**
  * Score a single day in [0, 1]. `targets` optionally overrides per-activity
  * goals (per-user settings); falls back to each activity's default target.
+ * `sex` ('male' | 'female') scales the "prayed at home" attendance mark: a male
+ * praying at home earns 1/5 of the Jamāʻah mark, a female earns the full mark
+ * (praying at home is religiously equivalent for women). Defaults to male.
  */
-export function dayProgress(day, targets) {
+export function dayProgress(day, targets, sex) {
 	if (!day) return 0;
+	const homeMark = sex === 'female' ? 1 : 0.2;
 	let score = 0;
 	for (const p of PRAYERS) {
 		const rec = day.prayers?.[p.id];
 		if (rec?.jamath) score += 1;
+		else if (rec?.home) score += homeMark;
 		if (p.hasSunnah && rec?.sunnah) score += 1;
 		if (rec?.dhikr) score += 1;
 	}
@@ -116,6 +122,6 @@ export function dayProgress(day, targets) {
  * Leaderboard points for a stored day JSON string, scored against the DEFAULT
  * targets (so lowering personal targets can't inflate rank). Range [0, MAX_SCORE].
  */
-export function dayPoints(jsonStr) {
-	return dayProgress(parseDay(jsonStr), null) * MAX_SCORE;
+export function dayPoints(jsonStr, sex) {
+	return dayProgress(parseDay(jsonStr), null, sex) * MAX_SCORE;
 }

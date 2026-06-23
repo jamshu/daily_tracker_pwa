@@ -96,7 +96,7 @@ export async function adminExecute(model, method, args = [], kwargs = {}) {
  * Create a tenant: a fresh company + a user assigned to it. Data isolation then
  * comes from Odoo's multi-company record rules on x_dailytracker.
  */
-export async function createTenantUser({ name, email, password }) {
+export async function createTenantUser({ name, email, password, sex }) {
 	const displayName = name || email;
 
 	// 1) new company for this tenant. The company name embeds the (unique) email
@@ -111,7 +111,9 @@ export async function createTenantUser({ name, email, password }) {
 		email,
 		password,
 		company_id: companyId,
-		company_ids: [[6, 0, [companyId]]]
+		company_ids: [[6, 0, [companyId]]],
+		// Seed per-user settings JSON with sex (drives sex-based prayer scoring).
+		x_studio_settings: JSON.stringify({ sex: sex === 'female' ? 'female' : 'male' })
 	};
 	try {
 		const gid = await adminExecute('ir.model.data', 'xmlid_to_res_id', ['base.group_user', false]);

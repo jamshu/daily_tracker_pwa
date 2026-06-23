@@ -15,7 +15,7 @@ export const prerender = false;
 export async function POST({ request, cookies }) {
 	try {
 		assertConfigured();
-		const { name, email, password } = await request.json();
+		const { name, email, password, sex } = await request.json();
 
 		if (!name || !email || !password) {
 			return json({ ok: false, error: 'Name, email and password are required' }, { status: 400 });
@@ -26,8 +26,11 @@ export async function POST({ request, cookies }) {
 		if (String(password).length < 6) {
 			return json({ ok: false, error: 'Password must be at least 6 characters' }, { status: 400 });
 		}
+		if (sex !== 'male' && sex !== 'female') {
+			return json({ ok: false, error: 'Please select Male or Female' }, { status: 400 });
+		}
 
-		await createTenantUser({ name, email, password });
+		await createTenantUser({ name, email, password, sex });
 
 		// log the new user straight in
 		const { sessionId, info } = await authenticateUser(email, password);

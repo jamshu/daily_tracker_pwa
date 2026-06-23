@@ -35,11 +35,29 @@ export async function scoreByUser(uids) {
 	const rows = await adminExecute(getModel(), 'search_read', [domain], {
 		fields: ['create_uid', 'x_studio_json']
 	});
+	// Scoring of "prayed at home" depends on each user's sex, stored in their
+	// res.users settings JSON — load it for the distinct owners in this batch.
+	const owners = [...new Set(rows.map((r) => m2oId(r.create_uid)).filter(Boolean))];
+	const sexByUid = new Map();
+	if (owners.length) {
+		const userRows = await adminExecute('res.users', 'read', [owners], {
+			fields: ['id', SETTINGS_FIELD]
+		});
+		for (const u of userRows) {
+			let sex = 'male';
+			try {
+				sex = JSON.parse(u[SETTINGS_FIELD] || '{}')?.sex === 'female' ? 'female' : 'male';
+			} catch {
+				/* default male */
+			}
+			sexByUid.set(u.id, sex);
+		}
+	}
 	const map = new Map();
 	for (const r of rows) {
 		const owner = m2oId(r.create_uid);
 		if (!owner) continue;
-		map.set(owner, dayProgress(parseDay(r.x_studio_json), null) * 100);
+		map.set(owner, dayProgress(parseDay(r.x_studio_json), null, sexByUid.get(owner)) * 100);
 	}
 	return map;
 }

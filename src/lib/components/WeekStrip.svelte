@@ -23,7 +23,7 @@
 
 <div class="strip card">
 	{#each days as key (key)}
-		{@const prog = dayProgress($allDays[key], $settings.activities)}
+		{@const prog = dayProgress($allDays[key], $settings.activities, $settings.sex)}
 		<button
 			class="day"
 			class:sel={key === selectedK}

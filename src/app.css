@@ -191,10 +191,10 @@ h2,
 h3 {
 	margin: 0;
 	font-family: var(--font-display);
-	font-weight: 600;
+	font-weight: 700;
 	font-optical-sizing: auto;
 	font-variation-settings: 'SOFT' 30, 'WONK' 0;
-	letter-spacing: -0.012em;
+	letter-spacing: -0.015em;
 }
 
 .app {

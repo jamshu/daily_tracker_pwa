@@ -76,8 +76,12 @@
 		min-width: 0;
 	}
 	.name {
-		font-weight: 700;
-		font-size: 1.02rem;
+		font-family: var(--font-display);
+		font-weight: 600;
+		font-size: 1.1rem;
+		font-optical-sizing: auto;
+		font-variation-settings: 'SOFT' 40;
+		letter-spacing: -0.01em;
 	}
 	.deed.done .name {
 		color: var(--green);

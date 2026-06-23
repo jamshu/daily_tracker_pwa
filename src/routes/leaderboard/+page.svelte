@@ -282,6 +282,13 @@
 		text-align: left;
 		min-width: 0;
 	}
+	.name strong {
+		font-family: var(--font-display);
+		font-size: 1.08rem;
+		font-weight: 600;
+		font-variation-settings: 'SOFT' 40;
+		letter-spacing: -0.01em;
+	}
 	.name.link {
 		background: transparent;
 		color: var(--text);

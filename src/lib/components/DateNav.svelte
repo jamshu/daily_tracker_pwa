@@ -73,7 +73,11 @@
 		font-weight: 700;
 	}
 	.date {
-		font-size: 1.05rem;
-		font-weight: 700;
+		font-family: var(--font-display);
+		font-size: 1.15rem;
+		font-weight: 600;
+		font-optical-sizing: auto;
+		font-variation-settings: 'SOFT' 30, 'WONK' 0;
+		letter-spacing: -0.015em;
 	}
 </style>

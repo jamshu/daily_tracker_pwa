@@ -70,6 +70,10 @@ export function rankRows(users, scoreMap, myUid) {
 		isMe: u.id === myUid
 	}));
 	rows.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
-	rows.forEach((r, i) => (r.rank = i + 1));
+	// Standard competition ranking: equal scores share a rank, the next distinct
+	// score jumps to its absolute position (e.g. 1, 2, 2, 4).
+	rows.forEach((r, i) => {
+		r.rank = i > 0 && r.score === rows[i - 1].score ? rows[i - 1].rank : i + 1;
+	});
 	return rows;
 }

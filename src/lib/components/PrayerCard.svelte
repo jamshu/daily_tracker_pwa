@@ -35,7 +35,7 @@
 			on:click={() => dispatch('toggle', { field: 'home' })}
 		>
 			<span class="dot" />
-			Home
+			Alone
 		</button>
 
 		{#if prayer.hasSunnah}

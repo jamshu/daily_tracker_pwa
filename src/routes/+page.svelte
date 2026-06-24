@@ -32,6 +32,8 @@
 	import { user, logout } from '$lib/auth.js';
 	import { settings, loadSettings } from '$lib/settings.js';
 	import { pendingInviteCount, loadGroups } from '$lib/groups.js';
+	import FifaCard from '$lib/components/FifaCard.svelte';
+	import { loadFifa } from '$lib/fifa.js';
 
 	const todayK = dateKey();
 
@@ -39,6 +41,7 @@
 		load();
 		loadSettings();
 		loadGroups(); // for the leaderboard invite badge
+		loadFifa();
 	});
 
 	async function doLogout() {
@@ -200,9 +203,14 @@
 		</div>
 	</section>
 
-	<div class="fade-in" style="--fade-delay:0.12s"><QuoteCard /></div>
+	<h2 class="section-title fade-in" style="--fade-delay:0.10s">FIFA World Cup 2026</h2>
+	<div class="fade-in" style="--fade-delay:0.12s">
+		<FifaCard />
+	</div>
 
-	<button class="dhikr-link fade-in" style="--fade-delay:0.18s" on:click={() => openAdhkar('afterSalah')}>
+	<div class="fade-in" style="--fade-delay:0.18s"><QuoteCard /></div>
+
+	<button class="dhikr-link fade-in" style="--fade-delay:0.22s" on:click={() => openAdhkar('afterSalah')}>
 		<span class="dl-icon">
 			<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 				<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 1 0 9.8 9.8z" />
@@ -263,8 +271,8 @@
 		{/each}
 	</div>
 
-	<h2 class="section-title fade-in" style="--fade-delay:0.5s">Notes</h2>
-	<div class="fade-in" style="--fade-delay:0.52s">
+	<h2 class="section-title fade-in" style="--fade-delay:0.52s">Notes</h2>
+	<div class="fade-in" style="--fade-delay:0.54s">
 		<NotesCard date={$selectedDate} notes={$currentNotes} />
 	</div>
 

@@ -210,7 +210,7 @@
 								</span>
 							{/if}
 							<span class="name">{s.name}</span>
-							<span class="goals">{s.goals} ⚽</span>
+							<span class="goals">⚽ {s.goals}</span>
 						</li>
 					{/each}
 				</ol>

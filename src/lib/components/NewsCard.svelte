@@ -1,7 +1,8 @@
 <script>
 	import { news, relativeTime } from '$lib/news.js';
 
-	$: articles = $news.articles;
+	let tab = 'BBC'; // 'BBC' | 'AJ'
+	$: filtered = $news.articles.filter((a) => a.source === tab);
 </script>
 
 <div class="news card">
@@ -15,26 +16,24 @@
 		</span>
 		<div class="titles">
 			<strong>World News</strong>
-			<small>BBC World · live feed</small>
+			<small>Live feed</small>
 		</div>
-		<a
-			class="src"
-			href="https://www.bbc.co.uk/news/world"
-			target="_blank"
-			rel="noopener"
-			aria-label="Open BBC World News">↗</a
-		>
+	</div>
+
+	<div class="tabs" role="tablist">
+		<button type="button" role="tab" class:active={tab === 'BBC'} aria-selected={tab === 'BBC'} on:click={() => (tab = 'BBC')}>BBC</button>
+		<button type="button" role="tab" class:active={tab === 'AJ'}  aria-selected={tab === 'AJ'}  on:click={() => (tab = 'AJ')}>Al Jazeera</button>
 	</div>
 
 	{#if !$news.loaded}
 		<div class="state">Loading headlines…</div>
 	{:else if $news.error}
 		<div class="state err">{$news.error}</div>
-	{:else if !articles.length}
+	{:else if !filtered.length}
 		<div class="state">No headlines available</div>
 	{:else}
 		<ul class="list">
-			{#each articles as a, i}
+			{#each filtered as a, i}
 				<li class="item">
 					{#if a.thumb}
 						<img class="thumb" src={a.thumb} alt="" loading={i < 3 ? 'eager' : 'lazy'} />
@@ -186,9 +185,30 @@
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}
+	.tabs {
+		display: flex;
+		gap: 4px;
+		padding: 4px;
+		border-radius: 999px;
+		background: var(--bg-soft);
+		border: 1px solid var(--border);
+	}
+	.tabs button {
+		flex: 1;
+		padding: 6px 6px;
+		border-radius: 999px;
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: var(--text-dim);
+		transition: all 0.15s ease;
+	}
+	.tabs button.active {
+		color: #042f2a;
+		background: linear-gradient(135deg, var(--teal), var(--teal-deep, var(--teal)));
+	}
 	.time {
 		font-size: 0.7rem;
 		color: var(--text-faint);
-		margin-top: 1px;
+		margin-top: 2px;
 	}
 </style>

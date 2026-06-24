@@ -113,7 +113,7 @@
 				<span class="name">Name</span>
 				<span class="score">Score</span>
 			</div>
-			{#each board.rows as r (r.rank)}
+			{#each board.rows as r, i (i)}
 				<div class="row" class:me={r.isMe}>
 					<span class="rank">{medal(r.rank) || `#${r.rank}`}</span>
 					<span class="name">{r.name}{#if r.isMe}<span class="you"> (you)</span>{/if}</span>

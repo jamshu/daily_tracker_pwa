@@ -12,6 +12,7 @@ export const DEFAULT_CATEGORIES = [
 	{ id: 'medical',       label: 'Medical' },
 	{ id: 'entertainment', label: 'Entertainment' },
 	{ id: 'clothing',      label: 'Clothing' },
+	{ id: 'fines_rta',     label: 'Fines / RTA' },
 	{ id: 'other',         label: 'Other' }
 ];
 

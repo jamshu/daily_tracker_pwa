@@ -34,6 +34,8 @@
 	import { pendingInviteCount, loadGroups } from '$lib/groups.js';
 	import FifaCard from '$lib/components/FifaCard.svelte';
 	import { loadFifa } from '$lib/fifa.js';
+	import NewsCard from '$lib/components/NewsCard.svelte';
+	import { loadNews } from '$lib/news.js';
 
 	const todayK = dateKey();
 
@@ -42,6 +44,7 @@
 		loadSettings();
 		loadGroups(); // for the leaderboard invite badge
 		loadFifa();
+		loadNews();
 	});
 
 	async function doLogout() {
@@ -208,7 +211,12 @@
 		<FifaCard />
 	</div>
 
-	<div class="fade-in" style="--fade-delay:0.18s"><QuoteCard /></div>
+	<h2 class="section-title fade-in" style="--fade-delay:0.16s">World News</h2>
+	<div class="fade-in" style="--fade-delay:0.18s">
+		<NewsCard />
+	</div>
+
+	<div class="fade-in" style="--fade-delay:0.22s"><QuoteCard /></div>
 
 	<button class="dhikr-link fade-in" style="--fade-delay:0.22s" on:click={() => openAdhkar('afterSalah')}>
 		<span class="dl-icon">

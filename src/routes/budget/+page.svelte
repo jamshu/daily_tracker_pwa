@@ -21,10 +21,11 @@
 	let month = todayKey;
 	let rows = {};       // { catId: { budget, actual } } — local editable copy
 	let busy = false;
-	let status = '';     // '' | 'saved' | 'error'
+	let status = '';     // '' | 'saving' | 'saved' | 'error'
 	let error = '';
 	let addingCat = false;
 	let newCatName = '';
+	let saveTimer = null;
 
 	// Sync rows from store whenever month or store changes
 	$: rows = ensureMonth($budgetData, month);
@@ -63,30 +64,45 @@
 		return diff === 0 ? '0' : (diff > 0 ? '+' : '') + fmt(diff);
 	}
 
+	function scheduleAutoSave() {
+		clearTimeout(saveTimer);
+		status = 'saving';
+		saveTimer = setTimeout(save, 800);
+	}
+
+	function flushSave() {
+		if (saveTimer) {
+			clearTimeout(saveTimer);
+			saveTimer = null;
+			save();
+		}
+	}
+
 	function setVal(id, field, raw) {
 		const v = Math.max(0, parseFloat(raw) || 0);
 		rows = { ...rows, [id]: { ...rows[id], [field]: v } };
+		scheduleAutoSave();
 	}
 
 	function goPrev() {
+		flushSave();
 		const p = prevMonth(month);
-		// Clamp to 12 months back
 		const limit = prevMonth(prevMonth(prevMonth(prevMonth(prevMonth(prevMonth(prevMonth(prevMonth(prevMonth(prevMonth(prevMonth(prevMonth(todayKey))))))))))));
 		if (p >= limit) month = p;
 	}
 	function goNext() {
+		flushSave();
 		if (month < todayKey) month = nextMonth(month);
 	}
 
 	async function save() {
 		busy = true;
-		status = '';
+		status = 'saving';
 		error = '';
 		try {
-			// Persist local rows for this month
 			await saveBudget(month, rows);
 			status = 'saved';
-			setTimeout(() => (status = ''), 2200);
+			setTimeout(() => { if (status === 'saved') status = ''; }, 2200);
 		} catch (e) {
 			status = 'error';
 			error = e?.message || 'Could not save';
@@ -108,6 +124,7 @@
 		rows = { ...rows, [id]: { budget: 0, actual: 0 } };
 		addingCat = false;
 		newCatName = '';
+		scheduleAutoSave();
 	}
 
 	function copyFromPrev() {
@@ -120,11 +137,13 @@
 			}
 		}
 		rows = merged;
+		scheduleAutoSave();
 	}
 
 	function deleteCat(id) {
 		const { [id]: _, ...rest } = rows;
 		rows = rest;
+		scheduleAutoSave();
 	}
 
 	onMount(loadBudget);
@@ -147,6 +166,7 @@
 		<button class="mnav" on:click={goPrev} aria-label="previous month">‹</button>
 		<span class="mlabel">{monthLabel(month)}</span>
 		<button class="mnav" on:click={goNext} disabled={month >= todayKey} aria-label="next month">›</button>
+		<button class="copy-btn" on:click={copyFromPrev} disabled={!prevHasData} title="Copy budgets from previous month">↑ Copy prev</button>
 	</div>
 
 	<!-- Summary bar -->
@@ -262,17 +282,11 @@
 		{/if}
 	</div>
 
-	<div class="actions">
-		<button class="secondary" type="button" on:click={copyFromPrev} disabled={!prevHasData}>
-			Copy prev month
-		</button>
-		<button class="primary" type="button" on:click={save} disabled={busy}>
-			{#if busy}<span class="spinner" />{:else}Save{/if}
-		</button>
+	<div class="autosave-status">
+		{#if status === 'saving'}<span class="saving"><span class="spinner-sm" />Saving…</span>
+		{:else if status === 'saved'}<span class="ok">Saved</span>
+		{:else if status === 'error'}<span class="err">{error}</span>{/if}
 	</div>
-
-	{#if status === 'saved'}<p class="ok">Saved — budget updated.</p>{/if}
-	{#if status === 'error'}<p class="err">{error}</p>{/if}
 </div>
 
 <style>
@@ -516,56 +530,45 @@
 		border: 1px solid var(--border);
 	}
 
-	/* Actions */
-	.actions {
-		display: flex;
-		gap: 10px;
-		margin-top: 18px;
-	}
-	.secondary {
-		height: 46px;
-		padding: 0 18px;
-		border-radius: var(--radius-sm);
+	.copy-btn {
+		height: 32px;
+		padding: 0 12px;
+		border-radius: 8px;
+		font-size: 0.8rem;
 		font-weight: 600;
-		font-size: 0.9rem;
 		color: var(--text-dim);
 		background: var(--surface-2);
 		border: 1px solid var(--border);
 		white-space: nowrap;
+		transition: all 0.15s ease;
 	}
-	.secondary:hover:not(:disabled) { border-color: var(--teal); color: var(--teal); }
-	.secondary:disabled { opacity: 0.35; }
-	.primary {
-		flex: 1;
-		height: 46px;
-		border-radius: var(--radius-sm);
-		font-weight: 700;
-		font-size: 0.96rem;
-		display: grid;
-		place-items: center;
-		color: #042f2a;
-		background: linear-gradient(135deg, var(--teal), var(--green));
-	}
-	.primary:disabled { opacity: 0.7; }
+	.copy-btn:hover:not(:disabled) { border-color: var(--teal); color: var(--teal); }
+	.copy-btn:disabled { opacity: 0.35; }
 
-	.ok {
-		margin: 12px 0 0;
-		color: var(--green);
-		font-size: 0.9rem;
-		font-weight: 600;
+	.autosave-status {
+		min-height: 28px;
+		margin-top: 14px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 0.84rem;
 	}
-	.err {
-		margin: 12px 0 0;
-		color: var(--red);
-		font-size: 0.9rem;
+	.saving {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		color: var(--text-faint);
 	}
-	.spinner {
-		width: 18px;
-		height: 18px;
+	.ok { color: var(--green); font-weight: 600; }
+	.err { color: var(--red); }
+	.spinner-sm {
+		width: 13px;
+		height: 13px;
 		border-radius: 50%;
-		border: 2px solid rgba(4, 47, 42, 0.35);
-		border-top-color: #042f2a;
+		border: 2px solid color-mix(in srgb, var(--teal) 30%, transparent);
+		border-top-color: var(--teal);
 		animation: spin 0.7s linear infinite;
+		flex-shrink: 0;
 	}
 	@keyframes spin { to { transform: rotate(360deg); } }
 

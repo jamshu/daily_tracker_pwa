@@ -12,8 +12,10 @@
 	let shareGlobal = false;
 	let sex = 'male';
 	let busy = false;
-	let status = ''; // '' | 'saved' | 'error'
+	let status = ''; // '' | 'saving' | 'saved' | 'error'
 	let error = '';
+	let mounted = false;
+	let saveTimer = null;
 
 	// custom activities state
 	let customActivities = [];
@@ -30,21 +32,30 @@
 		shareGlobal = $settings.shareGlobal === true;
 		sex = $settings.sex === 'female' ? 'female' : 'male';
 		customActivities = [...($settings.customActivities ?? [])];
+		mounted = true;
 	});
+
+	function scheduleAutoSave() {
+		if (!mounted) return;
+		clearTimeout(saveTimer);
+		status = 'saving';
+		saveTimer = setTimeout(save, 800);
+	}
 
 	function pickTheme(id) {
 		theme = id;
-		applyTheme(id); // live preview
+		applyTheme(id);
+		scheduleAutoSave();
 	}
 
 	async function save() {
 		busy = true;
-		status = '';
+		status = 'saving';
 		error = '';
 		try {
 			await saveSettings({ activities: form, theme, shareGlobal, sex, customActivities });
 			status = 'saved';
-			setTimeout(() => (status = ''), 2200);
+			setTimeout(() => { if (status === 'saved') status = ''; }, 2200);
 		} catch (e) {
 			status = 'error';
 			error = e?.message || 'Could not save';
@@ -57,6 +68,7 @@
 		form = Object.fromEntries(ACTIVITIES.map((a) => [a.id, a.target]));
 		theme = DEFAULT_THEME;
 		applyTheme(DEFAULT_THEME);
+		scheduleAutoSave();
 	}
 
 	function confirmAddCustom() {
@@ -73,10 +85,12 @@
 		newCustomUnit = 'times';
 		newCustomStep = 1;
 		newCustomTarget = 1;
+		scheduleAutoSave();
 	}
 
 	function deleteCustom(id) {
 		customActivities = customActivities.filter((a) => a.id !== id);
+		scheduleAutoSave();
 	}
 </script>
 
@@ -106,7 +120,7 @@
 					class:on={sex === 'male'}
 					role="radio"
 					aria-checked={sex === 'male'}
-					on:click={() => (sex = 'male')}
+					on:click={() => { sex = 'male'; scheduleAutoSave(); }}
 				>
 					Male
 				</button>
@@ -116,7 +130,7 @@
 					class:on={sex === 'female'}
 					role="radio"
 					aria-checked={sex === 'female'}
-					on:click={() => (sex = 'female')}
+					on:click={() => { sex = 'female'; scheduleAutoSave(); }}
 				>
 					Female
 				</button>
@@ -135,7 +149,7 @@
 				<div class="stepper">
 					<button
 						type="button"
-						on:click={() => (form[a.id] = Math.max(1, (Number(form[a.id]) || 0) - a.step))}
+						on:click={() => { form[a.id] = Math.max(1, (Number(form[a.id]) || 0) - a.step); scheduleAutoSave(); }}
 						aria-label="decrease">−</button
 					>
 					<input
@@ -144,10 +158,11 @@
 						step={a.step}
 						bind:value={form[a.id]}
 						inputmode="numeric"
+						on:input={scheduleAutoSave}
 					/>
 					<button
 						type="button"
-						on:click={() => (form[a.id] = (Number(form[a.id]) || 0) + a.step)}
+						on:click={() => { form[a.id] = (Number(form[a.id]) || 0) + a.step; scheduleAutoSave(); }}
 						aria-label="increase">+</button
 					>
 				</div>
@@ -226,7 +241,7 @@
 			class="toggle-row"
 			role="switch"
 			aria-checked={shareGlobal}
-			on:click={() => (shareGlobal = !shareGlobal)}
+			on:click={() => { shareGlobal = !shareGlobal; scheduleAutoSave(); }}
 		>
 			<span class="meta">
 				<span class="name">Share my score on the global leaderboard</span>
@@ -240,17 +255,17 @@
 		</p>
 	</div>
 
-	<div class="actions">
+	<div class="reset-row">
 		<button class="ghost" type="button" on:click={resetDefaults} disabled={busy}>Reset to defaults</button>
-		<button class="primary" type="button" on:click={save} disabled={busy}>
-			{#if busy}<span class="spinner" />{:else}Save{/if}
-		</button>
 	</div>
 
-	{#if status === 'saved'}<p class="ok">Saved — your goals are updated.</p>{/if}
-	{#if status === 'error'}<p class="err">{error}</p>{/if}
+	<div class="autosave-status">
+		{#if status === 'saving'}<span class="saving"><span class="spinner-sm" />Saving…</span>
+		{:else if status === 'saved'}<span class="ok">Saved</span>
+		{:else if status === 'error'}<span class="err">{error}</span>{/if}
+	</div>
 
-	<p class="note">Goals are saved to your account and apply across your devices.</p>
+	<p class="note">Changes save automatically to your account.</p>
 </div>
 
 <style>
@@ -481,34 +496,46 @@
 	.switch.on .knob {
 		transform: translateX(18px);
 	}
-	.actions {
-		display: flex;
-		gap: 10px;
+	.reset-row {
 		margin-top: 18px;
+		display: flex;
+		justify-content: center;
 	}
-	.primary,
 	.ghost {
-		flex: 1;
-		height: 46px;
+		height: 40px;
 		border-radius: var(--radius-sm);
-		font-weight: 700;
-		font-size: 0.96rem;
+		font-weight: 600;
+		font-size: 0.88rem;
 		display: grid;
 		place-items: center;
-	}
-	.primary {
-		color: #042f2a;
-		background: linear-gradient(135deg, var(--teal), var(--green));
-	}
-	.primary:disabled {
-		opacity: 0.7;
-	}
-	.ghost {
 		color: var(--text-dim);
 		background: var(--surface);
 		border: 1px solid var(--border);
-		flex: 0 0 auto;
 		padding: 0 16px;
+	}
+	.ghost:hover:not(:disabled) { border-color: var(--teal); color: var(--teal); }
+	.autosave-status {
+		min-height: 28px;
+		margin-top: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 0.84rem;
+	}
+	.saving {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		color: var(--text-faint);
+	}
+	.spinner-sm {
+		width: 13px;
+		height: 13px;
+		border-radius: 50%;
+		border: 2px solid color-mix(in srgb, var(--teal) 30%, transparent);
+		border-top-color: var(--teal);
+		animation: spin 0.7s linear infinite;
+		flex-shrink: 0;
 	}
 	.ok {
 		margin: 12px 0 0;

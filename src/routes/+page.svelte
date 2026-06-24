@@ -262,26 +262,26 @@
 		{/each}
 	</div>
 
-	<h2 class="section-title fade-in" style="--fade-delay:0.38s">Activities</h2>
-	<div class="activities fade-in" style="--fade-delay:0.4s">
-		{#each ACTIVITIES as a (a.id)}
-			<ActivityCard
-				activity={a}
-				value={$currentDay.activities[a.id] || 0}
-				target={$settings.activities[a.id]}
-				on:set={(e) => onActivitySet(a, e.detail.value)}
-			/>
-		{/each}
-	</div>
-
-	<h2 class="section-title fade-in" style="--fade-delay:0.44s">Daily Deeds</h2>
-	<div class="card fade-in" style="--fade-delay:0.46s">
+	<h2 class="section-title fade-in" style="--fade-delay:0.38s">Daily Deeds</h2>
+	<div class="card fade-in" style="--fade-delay:0.40s">
 		{#each DEEDS as d (d.id)}
 			<DeedToggle
 				deed={d}
 				done={$currentDay.deeds?.[d.id] || false}
 				on:toggle={() => onDeedToggle(d)}
 				on:info={() => openAdhkar(d.guide)}
+			/>
+		{/each}
+	</div>
+
+	<h2 class="section-title fade-in" style="--fade-delay:0.44s">Activities</h2>
+	<div class="activities fade-in" style="--fade-delay:0.46s">
+		{#each ACTIVITIES as a (a.id)}
+			<ActivityCard
+				activity={a}
+				value={$currentDay.activities[a.id] || 0}
+				target={$settings.activities[a.id]}
+				on:set={(e) => onActivitySet(a, e.detail.value)}
 			/>
 		{/each}
 	</div>

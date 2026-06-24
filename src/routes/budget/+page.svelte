@@ -29,6 +29,8 @@
 	// Sync rows from store whenever month or store changes
 	$: rows = ensureMonth($budgetData, month);
 
+	$: prevHasData = Object.values(ensureMonth($budgetData, prevMonth(month))).some(v => v.budget > 0);
+
 	// Derived stats
 	$: catList = buildCatList(rows);
 	$: totalBudget = catList.reduce((s, r) => s + (r.budget || 0), 0);
@@ -106,6 +108,18 @@
 		rows = { ...rows, [id]: { budget: 0, actual: 0 } };
 		addingCat = false;
 		newCatName = '';
+	}
+
+	function copyFromPrev() {
+		const prevKey = prevMonth(month);
+		const prevRows = ensureMonth($budgetData, prevKey);
+		const merged = { ...rows };
+		for (const [id, val] of Object.entries(prevRows)) {
+			if (val.budget > 0) {
+				merged[id] = { actual: merged[id]?.actual ?? 0, budget: val.budget };
+			}
+		}
+		rows = merged;
 	}
 
 	function deleteCat(id) {
@@ -249,6 +263,9 @@
 	</div>
 
 	<div class="actions">
+		<button class="secondary" type="button" on:click={copyFromPrev} disabled={!prevHasData}>
+			Copy prev month
+		</button>
 		<button class="primary" type="button" on:click={save} disabled={busy}>
 			{#if busy}<span class="spinner" />{:else}Save{/if}
 		</button>
@@ -505,6 +522,19 @@
 		gap: 10px;
 		margin-top: 18px;
 	}
+	.secondary {
+		height: 46px;
+		padding: 0 18px;
+		border-radius: var(--radius-sm);
+		font-weight: 600;
+		font-size: 0.9rem;
+		color: var(--text-dim);
+		background: var(--surface-2);
+		border: 1px solid var(--border);
+		white-space: nowrap;
+	}
+	.secondary:hover:not(:disabled) { border-color: var(--teal); color: var(--teal); }
+	.secondary:disabled { opacity: 0.35; }
 	.primary {
 		flex: 1;
 		height: 46px;

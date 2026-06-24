@@ -19,17 +19,22 @@
 		<span class="name">{activity.name}</span>
 		<span class="goal" class:met>{value} / {tgt} {activity.unit}</span>
 	</div>
-	<input
-		class="slider"
-		type="range"
-		min="0"
-		max={tgt}
-		step={activity.step}
-		{value}
-		style="--fill:{fill}%"
-		on:input={(e) => set(Number(e.currentTarget.value))}
-		aria-label={activity.name}
-	/>
+	<div class="controls">
+		<div class="bar" style="--fill:{fill}%"><span class="fill"></span></div>
+		<div class="stepper">
+			<button
+				type="button"
+				on:click={() => set(value - activity.step)}
+				disabled={value <= 0}
+				aria-label={`decrease ${activity.name}`}>−</button
+			>
+			<button
+				type="button"
+				on:click={() => set(value + activity.step)}
+				aria-label={`increase ${activity.name}`}>+</button
+			>
+		</div>
+	</div>
 </div>
 
 <style>
@@ -64,75 +69,59 @@
 		color: var(--green);
 		font-weight: 600;
 	}
-	.slider {
-		width: 100%;
-		height: 28px;
-		background: transparent;
+	.controls {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+	.bar {
+		flex: 1;
+		height: 9px;
+		border-radius: 999px;
+		border: 1px solid var(--border);
+		background: var(--bg-soft);
+		overflow: hidden;
+	}
+	.fill {
+		display: block;
+		height: 100%;
+		width: var(--fill, 0%);
+		border-radius: 999px;
+		background: linear-gradient(90deg, var(--teal-deep), var(--teal));
+		transition: width 0.25s ease;
+	}
+	.activity.met .fill {
+		background: var(--green);
+	}
+	.stepper {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		flex: 0 0 auto;
+	}
+	.stepper button {
+		width: 30px;
+		height: 30px;
+		border-radius: 50%;
+		font-size: 1.2rem;
+		font-weight: 700;
+		color: var(--text);
+		background: var(--surface-2);
+		border: 1px solid var(--border);
+		display: grid;
+		place-items: center;
+		line-height: 1;
 		cursor: pointer;
-		-webkit-appearance: none;
-		appearance: none;
+		transition: background 0.15s ease;
 	}
-	.slider::-webkit-slider-runnable-track {
-		height: 9px;
-		border-radius: 999px;
-		border: 1px solid var(--border);
-		background: linear-gradient(
-			90deg,
-			var(--teal-deep) 0,
-			var(--teal) var(--fill, 0%),
-			var(--bg-soft) var(--fill, 0%)
-		);
-	}
-	.slider::-moz-range-track {
-		height: 9px;
-		border-radius: 999px;
-		border: 1px solid var(--border);
-		background: linear-gradient(
-			90deg,
-			var(--teal-deep) 0,
-			var(--teal) var(--fill, 0%),
-			var(--bg-soft) var(--fill, 0%)
-		);
-	}
-	.activity.met .slider::-webkit-slider-runnable-track {
-		background: linear-gradient(90deg, var(--green) 0, var(--green) 100%, var(--bg-soft) 100%);
-	}
-	.activity.met .slider::-moz-range-track {
-		background: linear-gradient(90deg, var(--green) 0, var(--green) 100%, var(--bg-soft) 100%);
-	}
-	.slider::-webkit-slider-thumb {
-		-webkit-appearance: none;
-		appearance: none;
-		width: 28px;
-		height: 28px;
-		margin-top: -10px;
-		border-radius: 50%;
-		background: var(--teal);
-		border: 3px solid var(--surface-2);
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
-		transition: transform 0.15s ease;
-	}
-	.slider::-moz-range-thumb {
-		width: 28px;
-		height: 28px;
-		border-radius: 50%;
-		background: var(--teal);
-		border: 3px solid var(--surface-2);
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
-		transition: transform 0.15s ease;
-	}
-	.slider:active::-webkit-slider-thumb {
-		transform: scale(1.12);
+	.stepper button:hover:not(:disabled) {
 		background: var(--teal-deep);
 	}
-	.slider:active::-moz-range-thumb {
-		transform: scale(1.12);
-		background: var(--teal-deep);
+	.stepper button:active:not(:disabled) {
+		transform: scale(0.97);
 	}
-	.activity.met .slider::-webkit-slider-thumb {
-		background: var(--green);
-	}
-	.activity.met .slider::-moz-range-thumb {
-		background: var(--green);
+	.stepper button:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
 	}
 </style>

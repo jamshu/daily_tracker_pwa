@@ -1,23 +1,22 @@
-// Per-user household budget stored as JSON on the user's own res.users record,
-// same pattern as /api/settings. Admin key used server-side; uid always taken
-// from the authenticated session, never from the request body.
 import { json } from '@sveltejs/kit';
-import { assertConfigured, sessionInfo, adminExecute } from '$lib/server/odoo.js';
+import { assertConfigured, sessionInfo, sessionCallKw } from '$lib/server/odoo.js';
 import { getSession, getContext, clearSessionCookie, refreshSessionCookie } from '$lib/server/session.js';
 
 export const prerender = false;
 
-const BUDGET_FIELD = 'x_studio_budget';
+const BUDGET_MODEL = 'x_budget';
 const MAX_CATEGORIES = 50;
 
-async function uidFromSession(cookies) {
-	const ctx = getContext(cookies);
-	if (ctx?.uid) return ctx.uid;
+async function getSessionData(cookies) {
 	const sid = getSession(cookies);
 	if (!sid) return null;
-	const { result: info, sessionId } = await sessionInfo(sid);
-	refreshSessionCookie(cookies, sessionId, sid);
-	return info?.uid ?? null;
+	const ctx = getContext(cookies);
+	if (ctx?.allowed_company_ids?.[0]) {
+		return { sid, companyId: ctx.allowed_company_ids[0] };
+	}
+	const { result: info, sessionId: newSid } = await sessionInfo(sid);
+	refreshSessionCookie(cookies, newSid, sid);
+	return { sid: newSid || sid, companyId: info?.company_id ?? false };
 }
 
 function parseBudget(raw) {
@@ -47,7 +46,6 @@ function sanitizeMonth(month) {
 function sanitizeData(body) {
 	if (typeof body !== 'object' || !body || Array.isArray(body)) return {};
 	const out = {};
-	// Only accept YYYY-MM keys
 	for (const [key, month] of Object.entries(body)) {
 		if (!/^\d{4}-\d{2}$/.test(key)) continue;
 		out[key] = sanitizeMonth(month);
@@ -58,12 +56,23 @@ function sanitizeData(body) {
 export async function GET({ cookies }) {
 	try {
 		assertConfigured();
-		if (!getSession(cookies)) return json({ ok: false }, { status: 401 });
-		const uid = await uidFromSession(cookies);
-		if (!uid) return json({ ok: false }, { status: 401 });
+		const session = await getSessionData(cookies);
+		if (!session) return json({ ok: false }, { status: 401 });
 
-		const rows = await adminExecute('res.users', 'read', [[uid]], { fields: [BUDGET_FIELD] });
-		return json({ ok: true, data: parseBudget(rows?.[0]?.[BUDGET_FIELD]) });
+		const { result: rows, sessionId: newSid } = await sessionCallKw(
+			session.sid, BUDGET_MODEL, 'search_read',
+			[[]],
+			{ fields: ['x_name', 'x_studio_budget'] }
+		);
+		if (newSid) refreshSessionCookie(cookies, newSid, session.sid);
+
+		const data = {};
+		for (const r of rows ?? []) {
+			if (/^\d{4}-\d{2}$/.test(r.x_name)) {
+				data[r.x_name] = parseBudget(r.x_studio_budget);
+			}
+		}
+		return json({ ok: true, data });
 	} catch (e) {
 		const status = e?.status || 500;
 		if (status === 401) clearSessionCookie(cookies);
@@ -74,14 +83,39 @@ export async function GET({ cookies }) {
 export async function POST({ request, cookies }) {
 	try {
 		assertConfigured();
-		if (!getSession(cookies)) return json({ ok: false }, { status: 401 });
-		const uid = await uidFromSession(cookies);
-		if (!uid) return json({ ok: false }, { status: 401 });
+		const session = await getSessionData(cookies);
+		if (!session) return json({ ok: false }, { status: 401 });
 
 		const body = await request.json();
 		const data = sanitizeData(body?.data);
+		let sid = session.sid;
 
-		await adminExecute('res.users', 'write', [[uid], { [BUDGET_FIELD]: JSON.stringify(data) }]);
+		for (const [key, monthData] of Object.entries(data)) {
+			const { result: existing, sessionId: s1 } = await sessionCallKw(
+				sid, BUDGET_MODEL, 'search_read',
+				[[['x_name', '=', key]]],
+				{ fields: ['id'], limit: 1 }
+			);
+			if (s1) { refreshSessionCookie(cookies, s1, sid); sid = s1; }
+
+			if (existing?.length) {
+				const { sessionId: s2 } = await sessionCallKw(
+					sid, BUDGET_MODEL, 'write',
+					[[existing[0].id], { x_studio_budget: JSON.stringify(monthData) }]
+				);
+				if (s2) { refreshSessionCookie(cookies, s2, sid); sid = s2; }
+			} else {
+				const { sessionId: s2 } = await sessionCallKw(
+					sid, BUDGET_MODEL, 'create',
+					[{
+						x_name: key,
+						x_studio_company_id: session.companyId,
+						x_studio_budget: JSON.stringify(monthData)
+					}]
+				);
+				if (s2) { refreshSessionCookie(cookies, s2, sid); sid = s2; }
+			}
+		}
 		return json({ ok: true, data });
 	} catch (e) {
 		const status = e?.status || 500;

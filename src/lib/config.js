@@ -55,7 +55,7 @@ export function emptyDay() {
 	for (const d of DEEDS) deeds[d.id] = false;
 	const nawafil = {};
 	for (const n of NAWAFIL) nawafil[n.id] = false;
-	return { prayers, activities, deeds, nawafil };
+	return { prayers, activities, deeds, nawafil, customActivities: {} };
 }
 
 /**
@@ -82,6 +82,11 @@ export function parseDay(jsonStr) {
 				if (o.activities[id] != null) base.activities[id] = Number(o.activities[id]) || 0;
 		if (o.deeds) for (const id in base.deeds) base.deeds[id] = !!o.deeds[id];
 		if (o.nawafil) for (const id in base.nawafil) base.nawafil[id] = !!o.nawafil[id];
+		if (o.customActivities && typeof o.customActivities === 'object' && !Array.isArray(o.customActivities)) {
+			for (const [id, v] of Object.entries(o.customActivities)) {
+				if (/^ca_[a-z0-9_]+$/.test(id)) base.customActivities[id] = Math.max(0, Number(v) || 0);
+			}
+		}
 	} catch {
 		/* malformed JSON — fall back to an empty day */
 	}

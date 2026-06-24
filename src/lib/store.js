@@ -184,6 +184,13 @@ export function setActivity(date, activityId, value) {
 	});
 }
 
+export function setCustomActivity(date, id, value) {
+	mutate(date, (r) => {
+		if (!r.data.customActivities) r.data.customActivities = {};
+		r.data.customActivities[id] = Math.max(0, Math.round(value));
+	});
+}
+
 export function toggleDeed(date, deedId) {
 	mutate(date, (r) => {
 		if (!r.data.deeds) r.data.deeds = {};

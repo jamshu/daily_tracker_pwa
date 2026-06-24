@@ -11,6 +11,7 @@
 		shiftKey,
 		togglePrayer,
 		setActivity,
+		setCustomActivity,
 		toggleDeed,
 		toggleNafl,
 		load
@@ -18,6 +19,7 @@
 	import ProgressRing from '$lib/components/ProgressRing.svelte';
 	import PrayerCard from '$lib/components/PrayerCard.svelte';
 	import ActivityCard from '$lib/components/ActivityCard.svelte';
+	import CustomActivityCard from '$lib/components/CustomActivityCard.svelte';
 	import DeedToggle from '$lib/components/DeedToggle.svelte';
 	import QuoteCard from '$lib/components/QuoteCard.svelte';
 	import NotesCard from '$lib/components/NotesCard.svelte';
@@ -285,6 +287,19 @@
 			/>
 		{/each}
 	</div>
+
+	{#if $settings.customActivities?.length}
+		<h2 class="section-title fade-in" style="--fade-delay:0.48s">Additional Activities</h2>
+		<div class="activities fade-in" style="--fade-delay:0.50s">
+			{#each $settings.customActivities as a (a.id)}
+				<CustomActivityCard
+					activity={a}
+					value={$currentDay.customActivities?.[a.id] ?? 0}
+					on:set={(e) => setCustomActivity($selectedDate, a.id, e.detail.value)}
+				/>
+			{/each}
+		</div>
+	{/if}
 
 	<h2 class="section-title fade-in" style="--fade-delay:0.52s">Notes</h2>
 	<div class="fade-in" style="--fade-delay:0.54s">

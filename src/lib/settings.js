@@ -30,12 +30,13 @@ function initialTheme() {
 	return DEFAULT_THEME;
 }
 
-// { activities: { exercise, books, quran }, theme, shareGlobal, sex } — effective settings.
+// { activities: { exercise, books, quran }, theme, shareGlobal, sex, customActivities } — effective settings.
 export const settings = writable({
 	activities: defaultTargets(),
 	theme: initialTheme(),
 	shareGlobal: false,
-	sex: 'male'
+	sex: 'male',
+	customActivities: []
 });
 
 // Apply a theme to <html> immediately and cache it for pre-paint (app.html).
@@ -67,7 +68,8 @@ export function resetSettings() {
 		activities: defaultTargets(),
 		theme: initialTheme(),
 		shareGlobal: false,
-		sex: 'male'
+		sex: 'male',
+		customActivities: []
 	});
 }
 
@@ -82,7 +84,8 @@ export async function loadSettings() {
 			activities: coerce(d?.settings?.activities),
 			theme,
 			shareGlobal: d?.settings?.shareGlobal === true,
-			sex: coerceSex(d?.settings?.sex)
+			sex: coerceSex(d?.settings?.sex),
+			customActivities: Array.isArray(d?.settings?.customActivities) ? d.settings.customActivities : []
 		});
 		applyTheme(theme);
 	} catch {
@@ -90,11 +93,11 @@ export async function loadSettings() {
 	}
 }
 
-export async function saveSettings({ activities, theme, shareGlobal, sex }) {
+export async function saveSettings({ activities, theme, shareGlobal, sex, customActivities }) {
 	const res = await fetch(`${base}/api/settings`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ activities, theme, shareGlobal: shareGlobal === true, sex: coerceSex(sex) })
+		body: JSON.stringify({ activities, theme, shareGlobal: shareGlobal === true, sex: coerceSex(sex), customActivities: customActivities ?? [] })
 	});
 	const d = await res.json().catch(() => ({}));
 	if (!res.ok || !d.ok) throw new Error(d.error || 'Could not save settings');
@@ -103,7 +106,8 @@ export async function saveSettings({ activities, theme, shareGlobal, sex }) {
 		activities: coerce(d?.settings?.activities ?? activities),
 		theme: savedTheme,
 		shareGlobal: d?.settings?.shareGlobal === true,
-		sex: coerceSex(d?.settings?.sex ?? sex)
+		sex: coerceSex(d?.settings?.sex ?? sex),
+		customActivities: Array.isArray(d?.settings?.customActivities) ? d.settings.customActivities : []
 	});
 	applyTheme(savedTheme);
 }

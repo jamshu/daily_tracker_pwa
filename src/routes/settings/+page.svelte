@@ -15,12 +15,21 @@
 	let status = ''; // '' | 'saved' | 'error'
 	let error = '';
 
+	// custom activities state
+	let customActivities = [];
+	let addingCustom = false;
+	let newCustomName = '';
+	let newCustomUnit = 'times';
+	let newCustomStep = 1;
+	let newCustomTarget = 1;
+
 	onMount(async () => {
 		await loadSettings();
 		form = { ...form, ...$settings.activities };
 		theme = $settings.theme;
 		shareGlobal = $settings.shareGlobal === true;
 		sex = $settings.sex === 'female' ? 'female' : 'male';
+		customActivities = [...($settings.customActivities ?? [])];
 	});
 
 	function pickTheme(id) {
@@ -33,7 +42,7 @@
 		status = '';
 		error = '';
 		try {
-			await saveSettings({ activities: form, theme, shareGlobal, sex });
+			await saveSettings({ activities: form, theme, shareGlobal, sex, customActivities });
 			status = 'saved';
 			setTimeout(() => (status = ''), 2200);
 		} catch (e) {
@@ -48,6 +57,26 @@
 		form = Object.fromEntries(ACTIVITIES.map((a) => [a.id, a.target]));
 		theme = DEFAULT_THEME;
 		applyTheme(DEFAULT_THEME);
+	}
+
+	function confirmAddCustom() {
+		const name = newCustomName.trim();
+		if (!name) { addingCustom = false; return; }
+		const slug = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').slice(0, 20);
+		const id = `ca_${slug}_${Date.now().toString(36)}`;
+		const unit = newCustomUnit.trim() || 'times';
+		const step = Math.max(1, Math.round(Number(newCustomStep) || 1));
+		const target = Math.max(1, Math.round(Number(newCustomTarget) || 1));
+		customActivities = [...customActivities, { id, name, unit, step, target }];
+		addingCustom = false;
+		newCustomName = '';
+		newCustomUnit = 'times';
+		newCustomStep = 1;
+		newCustomTarget = 1;
+	}
+
+	function deleteCustom(id) {
+		customActivities = customActivities.filter((a) => a.id !== id);
 	}
 </script>
 
@@ -124,6 +153,47 @@
 				</div>
 			</div>
 		{/each}
+	</div>
+
+	<h2 class="section-title">Additional activities</h2>
+	<div class="card custom-list">
+		{#each customActivities as a (a.id)}
+			<div class="custom-row">
+				<div class="meta">
+					<span class="name">{a.name}</span>
+					<span class="unit">Target: {a.target} {a.unit} · step {a.step}</span>
+				</div>
+				<button class="del-custom" type="button" on:click={() => deleteCustom(a.id)} aria-label="delete {a.name}">
+					<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M18 6L6 18M6 6l12 12" />
+					</svg>
+				</button>
+			</div>
+		{/each}
+		{#if addingCustom}
+			<div class="add-custom-form">
+				<input
+					class="cinput"
+					type="text"
+					placeholder="Activity name"
+					bind:value={newCustomName}
+					on:keydown={(e) => e.key === 'Enter' && confirmAddCustom()}
+					autofocus
+				/>
+				<input class="cinput cinput-sm" type="text" placeholder="Unit" bind:value={newCustomUnit} />
+				<input class="cinput cinput-xs" type="number" min="1" placeholder="Step" bind:value={newCustomStep} inputmode="numeric" />
+				<input class="cinput cinput-xs" type="number" min="1" placeholder="Target" bind:value={newCustomTarget} inputmode="numeric" />
+				<button class="confirm-btn" type="button" on:click={confirmAddCustom}>Add</button>
+				<button class="cancel-btn" type="button" on:click={() => (addingCustom = false)}>Cancel</button>
+			</div>
+		{:else}
+			<button class="add-custom" type="button" on:click={() => (addingCustom = true)}>
+				<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M12 5v14M5 12h14" />
+				</svg>
+				Add activity
+			</button>
+		{/if}
 	</div>
 
 	<h2 class="section-title">Theme</h2>
@@ -470,4 +540,86 @@
 			transform: rotate(360deg);
 		}
 	}
+
+	/* custom activities */
+	.custom-list {
+		display: flex;
+		flex-direction: column;
+	}
+	.custom-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		padding: 12px 14px;
+		border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+	}
+	.custom-row:last-of-type { border-bottom: none; }
+	.del-custom {
+		width: 28px;
+		height: 28px;
+		border-radius: 8px;
+		display: grid;
+		place-items: center;
+		color: var(--text-faint);
+		flex: 0 0 auto;
+		transition: all 0.15s ease;
+	}
+	.del-custom:hover { color: var(--red); background: color-mix(in srgb, var(--red) 12%, transparent); }
+	.add-custom-form {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 10px 14px;
+		border-top: 1px solid var(--border);
+		flex-wrap: wrap;
+	}
+	.cinput {
+		flex: 1;
+		min-width: 0;
+		padding: 8px 10px;
+		border-radius: 8px;
+		border: 1px solid var(--teal);
+		background: var(--bg-soft);
+		color: var(--text);
+		font-family: inherit;
+		font-size: 0.88rem;
+	}
+	.cinput-sm { flex: 0 0 72px; }
+	.cinput-xs { flex: 0 0 54px; -moz-appearance: textfield; }
+	.cinput-xs::-webkit-outer-spin-button,
+	.cinput-xs::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+	.cinput:focus { outline: none; }
+	.confirm-btn {
+		padding: 7px 14px;
+		border-radius: 8px;
+		font-weight: 700;
+		font-size: 0.84rem;
+		color: #042f2a;
+		background: var(--teal);
+		flex: 0 0 auto;
+	}
+	.cancel-btn {
+		padding: 7px 12px;
+		border-radius: 8px;
+		font-weight: 600;
+		font-size: 0.84rem;
+		color: var(--text-dim);
+		background: var(--surface-2);
+		border: 1px solid var(--border);
+		flex: 0 0 auto;
+	}
+	.add-custom {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		width: 100%;
+		padding: 12px 14px;
+		font-size: 0.84rem;
+		font-weight: 600;
+		color: var(--text-faint);
+		border-top: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+		transition: color 0.15s ease;
+	}
+	.add-custom:hover { color: var(--teal); }
 </style>

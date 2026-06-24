@@ -8,6 +8,7 @@ export const DEFAULT_CATEGORIES = [
 	{ id: 'water',         label: 'Water' },
 	{ id: 'internet',      label: 'Internet' },
 	{ id: 'grocery',       label: 'Grocery' },
+	{ id: 'Food',          label: 'Food' },
 	{ id: 'transport',     label: 'Transport / Fuel' },
 	{ id: 'medical',       label: 'Medical' },
 	{ id: 'entertainment', label: 'Entertainment' },

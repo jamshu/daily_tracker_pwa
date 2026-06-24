@@ -36,6 +36,31 @@
 			day: 'numeric'
 		});
 	}
+
+	// Player image cache: name → url string | null (null = no image found)
+	let playerImages = {};
+
+	async function fetchImage(name) {
+		if (name in playerImages) return;
+		playerImages[name] = undefined; // mark in-flight
+		try {
+			const slug = encodeURIComponent(name.replace(/ /g, '_'));
+			const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${slug}`);
+			const d = r.ok ? await r.json() : null;
+			playerImages = { ...playerImages, [name]: d?.thumbnail?.source ?? null };
+		} catch {
+			playerImages = { ...playerImages, [name]: null };
+		}
+	}
+
+	// Fetch images whenever scorers tab is active and list changes
+	$: if (tab === 'scorers' && scorers.length) {
+		scorers.forEach((s) => fetchImage(s.name));
+	}
+
+	function initials(name) {
+		return name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
+	}
 </script>
 
 <div class="fifa card">
@@ -78,7 +103,11 @@
 								<span class="d">{fmtDate(m.date)}</span>
 								{#if m.time}<span class="t">{m.time}</span>{/if}
 							</div>
-							<div class="teams">{m.team1} <span class="v">v</span> {m.team2}</div>
+							<div class="teams">
+							{#if m.flag1}<img class="flag" src={m.flag1} alt="" on:error={(e) => (e.target.style.display = 'none')} />{/if}{m.team1}
+							<span class="v">v</span>
+							{m.team2}{#if m.flag2}<img class="flag" src={m.flag2} alt="" on:error={(e) => (e.target.style.display = 'none')} />{/if}
+						</div>
 							<div class="meta">{m.group}{#if m.ground} · {m.ground}{/if}</div>
 						</li>
 					{/each}
@@ -92,9 +121,15 @@
 					{#each results as r}
 						<li class="result">
 							<div class="score-row">
-								<span class="tn">{r.team1}</span>
+								<span class="tn">
+									{#if r.flag1}<img class="flag" src={r.flag1} alt="" on:error={(e) => (e.target.style.display = 'none')} />{/if}
+									{r.team1}
+								</span>
 								<span class="score">{r.ft[0]}–{r.ft[1]}</span>
-								<span class="tn right">{r.team2}</span>
+								<span class="tn right">
+									{r.team2}
+									{#if r.flag2}<img class="flag" src={r.flag2} alt="" on:error={(e) => (e.target.style.display = 'none')} />{/if}
+								</span>
 							</div>
 							{#if r.scorers1.length || r.scorers2.length}
 								<div class="scorers">
@@ -154,8 +189,15 @@
 					{#each scorers as s, i}
 						<li>
 							<span class="rank">{i + 1}</span>
+							<span class="avatar">
+								{#if playerImages[s.name]}
+									<img src={playerImages[s.name]} alt={s.name} on:error={(e) => (e.target.style.display = 'none')} />
+								{:else}
+									<span class="initials">{initials(s.name)}</span>
+								{/if}
+							</span>
 							<span class="name">{s.name}</span>
-							<span class="goals">{s.goals}</span>
+							<span class="goals">{s.goals} ⚽</span>
 						</li>
 					{/each}
 				</ol>
@@ -276,10 +318,23 @@
 		color: var(--text-faint);
 		font-variant-numeric: tabular-nums;
 	}
+	.flag {
+		display: inline-block;
+		width: 20px;
+		height: auto;
+		border-radius: 3px;
+		vertical-align: middle;
+		margin: 0 3px;
+		flex-shrink: 0;
+	}
 	.teams {
 		grid-area: teams;
 		font-weight: 600;
 		font-size: 0.94rem;
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 2px;
 	}
 	.teams .v {
 		color: var(--text-faint);
@@ -414,8 +469,31 @@
 	.scorer-list li {
 		display: flex;
 		align-items: center;
-		gap: 12px;
+		gap: 10px;
 		padding: 7px 4px;
+	}
+	.avatar {
+		flex-shrink: 0;
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		overflow: hidden;
+		background: linear-gradient(135deg, var(--teal), var(--gold));
+		display: grid;
+		place-items: center;
+		border: 1px solid var(--border);
+	}
+	.avatar img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: top;
+	}
+	.initials {
+		font-size: 0.72rem;
+		font-weight: 700;
+		color: #042f2a;
+		letter-spacing: 0.02em;
 	}
 	.scorer-list li:not(:last-child) {
 		border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);

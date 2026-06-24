@@ -8,6 +8,27 @@ import { browser } from '$app/environment';
 import { base } from '$app/paths';
 import { dateKey, shiftKey } from './store.js';
 
+const FLAG_MAP = {
+	'Algeria': 'dz', 'Argentina': 'ar', 'Australia': 'au', 'Austria': 'at',
+	'Belgium': 'be', 'Bosnia & Herzegovina': 'ba', 'Brazil': 'br', 'Canada': 'ca',
+	'Cape Verde': 'cv', 'Colombia': 'co', 'Croatia': 'hr', 'Curaçao': 'cw',
+	'Czech Republic': 'cz', 'DR Congo': 'cd', 'Ecuador': 'ec', 'Egypt': 'eg',
+	'England': 'gb-eng', 'France': 'fr', 'Germany': 'de', 'Ghana': 'gh',
+	'Haiti': 'ht', 'Iran': 'ir', 'Iraq': 'iq', 'Ivory Coast': 'ci',
+	'Japan': 'jp', 'Jordan': 'jo', 'Mexico': 'mx', 'Morocco': 'ma',
+	'Netherlands': 'nl', 'New Zealand': 'nz', 'Norway': 'no', 'Panama': 'pa',
+	'Paraguay': 'py', 'Portugal': 'pt', 'Qatar': 'qa', 'Saudi Arabia': 'sa',
+	'Scotland': 'gb-sct', 'Senegal': 'sn', 'South Africa': 'za',
+	'South Korea': 'kr', 'Spain': 'es', 'Sweden': 'se', 'Switzerland': 'ch',
+	'Tunisia': 'tn', 'Turkey': 'tr', 'USA': 'us', 'Uruguay': 'uy',
+	'Uzbekistan': 'uz'
+};
+
+function flagUrl(name) {
+	const code = FLAG_MAP[name];
+	return code ? `https://flagcdn.com/w40/${code}.png` : null;
+}
+
 /** { matches, loaded, error } */
 export const fifa = writable({ matches: [], loaded: false, error: null });
 
@@ -88,6 +109,8 @@ export function upcomingMatches(matches, n = 5) {
 		})()),
 			team1: teamLabel(m.team1),
 			team2: teamLabel(m.team2),
+			flag1: flagUrl(teamLabel(m.team1)),
+			flag2: flagUrl(teamLabel(m.team2)),
 			group: m.group || m.round || '',
 			ground: m.ground || ''
 		}));
@@ -119,6 +142,8 @@ export function dayResults(matches, day = shiftKey(dateKey(), -1)) {
 			return {
 				team1: t1,
 				team2: t2,
+				flag1: flagUrl(t1),
+				flag2: flagUrl(t2),
 				ft: m.score.ft,
 				scorers1: scorerList(m.goals1),
 				scorers2: scorerList(m.goals2),

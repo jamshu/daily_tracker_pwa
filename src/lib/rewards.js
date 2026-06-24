@@ -114,6 +114,40 @@ export const REWARDS = {
 			source: 'Bukhari'
 		}
 	],
+	sleep: [
+		{
+			title: 'Maa shaa Allah — rest is a mercy',
+			quote: 'And We made your sleep [a means for] rest.',
+			source: 'Qurʼan 78:9'
+		},
+		{
+			title: 'Your eyes have a right over you',
+			quote: 'Your body has a right over you, and your eye has a right over you.',
+			source: 'Bukhari & Muslim'
+		},
+		{
+			title: 'Sleep early, rise for good',
+			quote: 'The Prophet ﷺ would sleep in the early night and rise in its later part to stand in prayer.',
+			source: 'based on Bukhari & Muslim'
+		}
+	],
+	hydration: [
+		{
+			title: 'Maa shaa Allah — from water, life',
+			quote: 'And We made from water every living thing.',
+			source: 'Qurʼan 21:30'
+		},
+		{
+			title: 'The Sunnah of drinking',
+			quote: 'The Prophet ﷺ would breathe three times while drinking, saying it is more satisfying and wholesome.',
+			source: 'Bukhari & Muslim'
+		},
+		{
+			title: 'The best of charity',
+			quote: 'Which charity is best? He said: Giving water to drink.',
+			source: 'Abu Dawud & Ibn Majah'
+		}
+	],
 	adhkar_morning: [
 		{
 			title: 'Maa shaa Allah — morning remembrance',

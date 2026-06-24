@@ -21,7 +21,8 @@ export const ACTIVITIES = [
 	{ id: 'exercise', name: 'Exercise', unit: 'min', target: 30, step: 5 },
 	{ id: 'books', name: 'Read Books', unit: 'min', target: 20, step: 5 },
 	{ id: 'quran', name: 'Read Qurʻan', unit: 'pages', target: 5, step: 1 },
-	{ id: 'sleep', name: 'Sleep', unit: 'hours', target: 6, step: 1 }
+	{ id: 'sleep', name: 'Sleep', unit: 'hours', target: 6, step: 1 },
+	{ id: 'hydration', name: 'Hydration', unit: 'glasses', target: 8, step: 1 }
 ];
 
 /** Simple done / not-done daily deeds (one mark each). */

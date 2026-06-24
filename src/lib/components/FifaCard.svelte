@@ -40,6 +40,7 @@
 	// Player image cache: name → url string | null (null = no image found)
 	let playerImages = {};
 
+	// Cache stores { img: url|null, page: url|null } per player name
 	async function fetchImage(name) {
 		if (name in playerImages) return;
 		playerImages[name] = undefined; // mark in-flight
@@ -47,9 +48,15 @@
 			const slug = encodeURIComponent(name.replace(/ /g, '_'));
 			const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${slug}`);
 			const d = r.ok ? await r.json() : null;
-			playerImages = { ...playerImages, [name]: d?.thumbnail?.source ?? null };
+			playerImages = {
+				...playerImages,
+				[name]: {
+					img: d?.thumbnail?.source ?? null,
+					page: d?.content_urls?.desktop?.page ?? null
+				}
+			};
 		} catch {
-			playerImages = { ...playerImages, [name]: null };
+			playerImages = { ...playerImages, [name]: { img: null, page: null } };
 		}
 	}
 
@@ -189,13 +196,19 @@
 					{#each scorers as s, i}
 						<li>
 							<span class="rank">{i + 1}</span>
-							<span class="avatar">
-								{#if playerImages[s.name]}
-									<img src={playerImages[s.name]} alt={s.name} on:error={(e) => (e.target.style.display = 'none')} />
-								{:else}
+								{#if playerImages[s.name]?.page}
+								<a class="avatar" href={playerImages[s.name].page} target="_blank" rel="noopener" aria-label="Wikipedia page for {s.name}">
+									{#if playerImages[s.name].img}
+										<img src={playerImages[s.name].img} alt={s.name} on:error={(e) => (e.target.style.display = 'none')} />
+									{:else}
+										<span class="initials">{initials(s.name)}</span>
+									{/if}
+								</a>
+							{:else}
+								<span class="avatar">
 									<span class="initials">{initials(s.name)}</span>
-								{/if}
-							</span>
+								</span>
+							{/if}
 							<span class="name">{s.name}</span>
 							<span class="goals">{s.goals} ⚽</span>
 						</li>

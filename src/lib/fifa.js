@@ -41,6 +41,29 @@ function hasResult(m) {
 	return Array.isArray(m?.score?.ft) && m.score.ft.length === 2;
 }
 
+// Parse source time string ("13:00 UTC-6") + source date ("YYYY-MM-DD") into
+// a JS Date (UTC-based). Returns null if the string doesn't match.
+function toLocalDatetime(date, timeStr) {
+	if (!date || !timeStr) return null;
+	const m = timeStr.match(/(\d{1,2}):(\d{2})\s*UTC([+-]\d+(?:\.\d+)?)?/i);
+	if (!m) return null;
+	const hh = Number(m[1]);
+	const mm = Number(m[2]);
+	const offsetHrs = Number(m[3] ?? 0);
+	const [y, mo, d] = date.split('-').map(Number);
+	// source local → UTC by subtracting the source offset
+	const utcMs = Date.UTC(y, mo - 1, d, hh, mm) - offsetHrs * 3600000;
+	return new Date(utcMs);
+}
+
+// Format a Date to "YYYY-MM-DD" in the browser's local timezone.
+function localDateKey(dt) {
+	const y = dt.getFullYear();
+	const mo = String(dt.getMonth() + 1).padStart(2, '0');
+	const d = String(dt.getDate()).padStart(2, '0');
+	return `${y}-${mo}-${d}`;
+}
+
 // Sort key from date + time. Time looks like "13:00 UTC-6"; the leading HH:MM is
 // enough to order same-day fixtures.
 function sortKey(m) {
@@ -57,7 +80,12 @@ export function upcomingMatches(matches, n = 5) {
 		.slice(0, n)
 		.map((m) => ({
 			date: m.date,
-			time: (m.time || '').replace(/\s*UTC.*/, ''),
+			...((() => {
+			const dt = toLocalDatetime(m.date, m.time);
+			return dt
+				? { date: localDateKey(dt), time: dt.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) }
+				: { date: m.date, time: (m.time || '').slice(0, 5) };
+		})()),
 			team1: teamLabel(m.team1),
 			team2: teamLabel(m.team2),
 			group: m.group || m.round || '',

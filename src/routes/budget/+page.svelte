@@ -47,7 +47,7 @@
 		}
 		for (const [id, val] of Object.entries(r)) {
 			if (isDefaultCategory(id)) continue;
-			all.push({ id, label: id, ...val });
+			all.push({ id, ...val, label: val.label || id });
 		}
 		return all;
 	}
@@ -121,7 +121,7 @@
 		if (!name) { addingCat = false; return; }
 		const id = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
 		if (!id || rows[id]) { addingCat = false; return; }
-		rows = { ...rows, [id]: { budget: 0, actual: 0 } };
+		rows = { ...rows, [id]: { budget: 0, actual: 0, label: name } };
 		addingCat = false;
 		newCatName = '';
 		scheduleAutoSave();
@@ -133,7 +133,7 @@
 		const merged = { ...rows };
 		for (const [id, val] of Object.entries(prevRows)) {
 			if (val.budget > 0) {
-				merged[id] = { actual: merged[id]?.actual ?? 0, budget: val.budget };
+				merged[id] = { actual: merged[id]?.actual ?? 0, budget: val.budget, label: merged[id]?.label || val.label };
 			}
 		}
 		rows = merged;

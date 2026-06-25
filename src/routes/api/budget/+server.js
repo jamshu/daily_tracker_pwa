@@ -37,7 +37,9 @@ function sanitizeMonth(month) {
 		if (typeof cat !== 'string' || !cat.trim()) continue;
 		const budget = Math.max(0, Number(val?.budget) || 0);
 		const actual = Math.max(0, Number(val?.actual) || 0);
-		out[cat.trim()] = { budget, actual };
+		const entry = { budget, actual };
+		if (typeof val?.label === 'string' && val.label.trim()) entry.label = val.label.trim();
+		out[cat.trim()] = entry;
 		count++;
 	}
 	return out;

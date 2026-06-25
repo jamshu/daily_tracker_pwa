@@ -159,6 +159,44 @@ export const ADHKAR = {
 			}
 		]
 	},
+	janaza: {
+		title: 'Janaza Prayer',
+		subtitle: 'Funeral prayer — 4 Takbeers, no rukūʻ or sujūd',
+		items: [
+			{
+				ar: `سُورَةُ الْفَاتِحَة`,
+				tr: `Sūrat al-Fātihah`,
+				en: `Recite Surah Al-Fatiha. Recite it silently after the first Takbeer.`,
+				count: `After 1st Takbeer`,
+				reward: `Recite silently. Opening surah is established sunnah in Janaza prayer.`,
+				source: `Ibn Abbas · Al-Shafi'i`
+			},
+			{
+				ar: `اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ، اللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ`,
+				tr: `Allāhumma salli ʻalā Muhammadin wa ʻalā āli Muhammadin kamā sallayta ʻalā Ibrāhīma wa ʻalā āli Ibrāhīma innaka Hamīdun Majīd. Allāhumma bārik ʻalā Muhammadin wa ʻalā āli Muhammadin kamā bārakta ʻalā Ibrāhīma wa ʻalā āli Ibrāhīma innaka Hamīdun Majīd.`,
+				en: `O Allah, send Your blessings upon Muhammad and upon the family of Muhammad, as You sent blessings upon Ibrahim and upon the family of Ibrahim. Indeed, You are the Most Praiseworthy, Most Glorious. O Allah, bless Muhammad and the family of Muhammad as You blessed Ibrahim and the family of Ibrahim. Indeed, You are the Most Praiseworthy, Most Glorious.`,
+				count: `After 2nd Takbeer`,
+				reward: `The Ibrahimiyyah salawat — same as recited in the tashahud.`,
+				source: `Bukhari · Muslim`
+			},
+			{
+				ar: `اللَّهُمَّ اغْفِرْ لَهُ وَارْحَمْهُ وَعَافِهِ وَاعْفُ عَنْهُ وَأَكْرِمْ نُزُلَهُ وَوَسِّعْ مُدْخَلَهُ وَاغْسِلْهُ بِالْمَاءِ وَالثَّلْجِ وَالْبَرَدِ وَنَقِّهِ مِنَ الْخَطَايَا كَمَا نَقَّيْتَ الثَّوْبَ الْأَبْيَضَ مِنَ الدَّنَسِ وَأَبْدِلْهُ دَارًا خَيْرًا مِنْ دَارِهِ وَأَهْلًا خَيْرًا مِنْ أَهْلِهِ وَزَوْجًا خَيْرًا مِنْ زَوْجِهِ وَأَدْخِلْهُ الْجَنَّةَ وَأَعِذْهُ مِنْ عَذَابِ الْقَبْرِ وَمِنْ عَذَابِ النَّارِ`,
+				tr: `Allāhummaghfir lahu warhamhu wa ʻāfihi wa'fu ʻanhu wa akrim nuzulahu wa wassiʻ madkhalahu waghsilhu bil-māʼi wath-thalji wal-barad, wa naqqihi minal-khatāyā kamā naqqayta ath-thawbal-abyada minad-danas, wa abdilhu dāran khayran min dārihi wa ahlan khayran min ahlihi wa zawjan khayran min zawjihi, wa adkhilhul-jannata wa aʻidhu min ʻadhābil-qabri wa min ʻadhābin-nār.`,
+				en: `O Allah, forgive him, have mercy on him, keep him safe and pardon him. Honour his reception, widen his entry, wash him with water, snow and hail, and cleanse him of sins as a white garment is cleansed of dirt. Give him a home better than his home, a family better than his family, a spouse better than his spouse. Admit him to Paradise and protect him from the punishment of the grave and from the punishment of the Fire.`,
+				count: `After 3rd Takbeer`,
+				reward: `The main dua for the deceased. Say "lahu" for male, "lahā" for female, "lahum" for a group.`,
+				source: `Muslim`
+			},
+			{
+				ar: `اللَّهُمَّ لَا تَحْرِمْنَا أَجْرَهُ وَلَا تَفْتِنَّا بَعْدَهُ وَاغْفِرْ لَنَا وَلَهُ`,
+				tr: `Allāhumma lā tahrimnā ajrahu wa lā taftinnā baʻdahu waghfir lanā wa lahu`,
+				en: `O Allah, do not deprive us of his reward and do not put us to trial after him, and forgive us and him.`,
+				count: `After 4th Takbeer`,
+				reward: `Then make one Tasleem to the right only: "As-salāmu ʻalaykum wa rahmatullāh".`,
+				source: `Al-Hakim · Ibn Majah`
+			}
+		]
+	},
 	afterSalah: {
 		title: 'Dhikr after Salah',
 		subtitle: 'After every obligatory prayer',

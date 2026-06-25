@@ -242,6 +242,21 @@
 		</svg>
 	</button>
 
+	<button class="dhikr-link fade-in" style="--fade-delay:0.23s" on:click={() => openAdhkar('janaza')}>
+		<span class="dl-icon">
+			<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M12 2L8 7H4l2 5-4 5h5l5 5 5-5h5l-4-5 2-5h-4L12 2z" />
+			</svg>
+		</span>
+		<span class="dl-text">
+			<strong>Janaza Prayer</strong>
+			<small>4 Takbeers — duas for the funeral prayer</small>
+		</span>
+		<svg class="dl-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="M9 18l6-6-6-6" />
+		</svg>
+	</button>
+
 	<h2 class="section-title fade-in" style="--fade-delay:0.24s">Prayers · Jamāʻah, Sunnah &amp; Dhikr</h2>
 	<div class="card fade-in" style="--fade-delay:0.28s">
 		{#each PRAYERS as p (p.id)}

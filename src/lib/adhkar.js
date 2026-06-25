@@ -150,6 +150,22 @@ export const ADHKAR = {
 				source: `Ahmad · Tirmidhi`
 			},
 			{
+				ar: `بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ`,
+				tr: `Bismillāhilladhī lā yadurru...`,
+				en: `In the name of Allah, with whose name nothing on earth or in the heaven can cause harm, and He is the All-Hearing, the All-Knowing.`,
+				count: `3×`,
+				reward: `Nothing will harm the one who says it.`,
+				source: `Abu Dawud · Tirmidhi`
+			},
+			{
+				ar: `حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ، عَلَيْهِ تَوَكَّلْتُ، وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ`,
+				tr: `Hasbiyallāhu lā ilāha illā huwa...`,
+				en: `Allah is sufficient for me; there is no god but Him. Upon Him I rely, and He is the Lord of the Mighty Throne.`,
+				count: `7×`,
+				reward: `Allah will suffice him in whatever worries him of this world and the next.`,
+				source: `Abu Dawud`
+			},
+			{
 				ar: `سُبْحَانَ اللَّهِ وَبِحَمْدِهِ`,
 				tr: `SubhānAllāhi wa bihamdih`,
 				en: `Glory and praise be to Allah.`,

@@ -39,6 +39,7 @@
 	$: totalDiff = totalActual - totalBudget;
 	$: totalOver = totalDiff > 0;
 
+
 	function buildCatList(r) {
 		// Default categories first, then custom
 		const all = [];
@@ -159,6 +160,7 @@
 			</svg>
 		</button>
 		<h1>Budget</h1>
+		<button class="report-btn" on:click={() => goto(`${base}/budget/report`)}>Report</button>
 	</header>
 
 	<!-- Month navigator -->
@@ -287,6 +289,7 @@
 		{:else if status === 'saved'}<span class="ok">Saved</span>
 		{:else if status === 'error'}<span class="err">{error}</span>{/if}
 	</div>
+
 </div>
 
 <style>
@@ -313,6 +316,18 @@
 		border: 1px solid var(--border);
 	}
 	.back:hover { background: var(--surface-2); }
+	.report-btn {
+		margin-left: auto;
+		padding: 7px 14px;
+		border-radius: 10px;
+		font-size: 0.82rem;
+		font-weight: 600;
+		color: var(--text-dim);
+		background: var(--surface-2);
+		border: 1px solid var(--border);
+		transition: all 0.15s ease;
+	}
+	.report-btn:hover { border-color: var(--teal); color: var(--teal); }
 	h1 {
 		font-size: 1.6rem;
 		font-variation-settings: 'SOFT' 50;
@@ -576,4 +591,5 @@
 		input[type='number'] { width: 64px; }
 		.mlabel { min-width: 130px; font-size: 0.96rem; }
 	}
+
 </style>

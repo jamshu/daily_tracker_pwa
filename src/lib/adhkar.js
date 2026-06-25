@@ -94,11 +94,11 @@ export const ADHKAR = {
 		subtitle: 'Recited after Asr until night',
 		items: [
 			{
-				ar: `اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ... وَلَا يَئُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ`,
+				ar: `اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ`,
 				tr: `Āyat al-Kursī (Qurʼan 2:255)`,
-				en: `Recite the full Verse of the Throne (as in the morning).`,
+				en: `Allah — there is no deity except Him, the Ever-Living, the Sustainer of all existence... His Throne extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.`,
 				count: `1×`,
-				reward: `Protection by Allah from the jinn until the morning.`,
+				reward: `Whoever recites it in the morning is protected by Allah from the jinn until evening.`,
 				source: `Al-Hakim · al-Nasaʼi`
 			},
 			{
@@ -134,11 +134,11 @@ export const ADHKAR = {
 				source: `Muslim`
 			},
 			{
-				ar: `اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ... فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ`,
+				ar: `اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ`,
 				tr: `Sayyid al-Istighfār`,
-				en: `The master supplication of seeking forgiveness (as in the morning).`,
+				en: `O Allah, You are my Lord, there is no god but You. You created me and I am Your servant... I acknowledge Your favour upon me and I confess my sin, so forgive me, for none forgives sins but You.`,
 				count: `1×`,
-				reward: `Whoever says it at night with firm faith and dies that night enters Paradise.`,
+				reward: `Whoever says it during the day with firm faith and dies that day enters Paradise.`,
 				source: `Bukhari`
 			},
 			{

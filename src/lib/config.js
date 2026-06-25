@@ -10,7 +10,7 @@ export const PRAYERS = [
 	{ id: 'dhuhr', name: 'Dhuhr', hasSunnah: true, sunnah: '4 before · 2 after' },
 	{ id: 'asr', name: 'Asr', hasSunnah: false, sunnah: '' },
 	{ id: 'maghrib', name: 'Maghrib', hasSunnah: true, sunnah: '2 after' },
-	{ id: 'isha', name: 'Isha', hasSunnah: true, sunnah: '2 after · Witr' }
+	{ id: 'isha', name: 'Isha', hasSunnah: true, sunnah: '2 after' }
 ];
 
 /** Marks available across all prayers: Jamāʻah + Dhikr each, + Sunnah where it applies. */
@@ -35,7 +35,8 @@ export const DEEDS = [
 /** Voluntary (nafl) prayers — simple done / not-done (one mark each). */
 export const NAWAFIL = [
 	{ id: 'tahajjud', name: 'Tahajjud', hint: 'Night prayer' },
-	{ id: 'duha', name: 'Duha', hint: 'Forenoon prayer' }
+	{ id: 'duha', name: 'Duha', hint: 'Forenoon prayer' },
+	{ id: 'witr', name: 'Witr', hint: 'After Isha' }
 ];
 
 /**

@@ -178,24 +178,52 @@ export const ADHKAR = {
 				count: `After 2nd Takbeer`,
 				reward: `The Ibrahimiyyah salawat — same as recited in the tashahud.`,
 				source: `Bukhari · Muslim`
-			},
-			{
-				ar: `اللَّهُمَّ اغْفِرْ لَهُ وَارْحَمْهُ وَعَافِهِ وَاعْفُ عَنْهُ وَأَكْرِمْ نُزُلَهُ وَوَسِّعْ مُدْخَلَهُ وَاغْسِلْهُ بِالْمَاءِ وَالثَّلْجِ وَالْبَرَدِ وَنَقِّهِ مِنَ الْخَطَايَا كَمَا نَقَّيْتَ الثَّوْبَ الْأَبْيَضَ مِنَ الدَّنَسِ وَأَبْدِلْهُ دَارًا خَيْرًا مِنْ دَارِهِ وَأَهْلًا خَيْرًا مِنْ أَهْلِهِ وَزَوْجًا خَيْرًا مِنْ زَوْجِهِ وَأَدْخِلْهُ الْجَنَّةَ وَأَعِذْهُ مِنْ عَذَابِ الْقَبْرِ وَمِنْ عَذَابِ النَّارِ`,
-				tr: `Allāhummaghfir lahu warhamhu wa ʻāfihi wa'fu ʻanhu wa akrim nuzulahu wa wassiʻ madkhalahu waghsilhu bil-māʼi wath-thalji wal-barad, wa naqqihi minal-khatāyā kamā naqqayta ath-thawbal-abyada minad-danas, wa abdilhu dāran khayran min dārihi wa ahlan khayran min ahlihi wa zawjan khayran min zawjihi, wa adkhilhul-jannata wa aʻidhu min ʻadhābil-qabri wa min ʻadhābin-nār.`,
-				en: `O Allah, forgive him, have mercy on him, keep him safe and pardon him. Honour his reception, widen his entry, wash him with water, snow and hail, and cleanse him of sins as a white garment is cleansed of dirt. Give him a home better than his home, a family better than his family, a spouse better than his spouse. Admit him to Paradise and protect him from the punishment of the grave and from the punishment of the Fire.`,
-				count: `After 3rd Takbeer`,
-				reward: `The main dua for the deceased. Say "lahu" for male, "lahā" for female, "lahum" for a group.`,
-				source: `Muslim`
-			},
-			{
-				ar: `اللَّهُمَّ لَا تَحْرِمْنَا أَجْرَهُ وَلَا تَفْتِنَّا بَعْدَهُ وَاغْفِرْ لَنَا وَلَهُ`,
-				tr: `Allāhumma lā tahrimnā ajrahu wa lā taftinnā baʻdahu waghfir lanā wa lahu`,
-				en: `O Allah, do not deprive us of his reward and do not put us to trial after him, and forgive us and him.`,
-				count: `After 4th Takbeer`,
-				reward: `Then make one Tasleem to the right only: "As-salāmu ʻalaykum wa rahmatullāh".`,
-				source: `Al-Hakim · Ibn Majah`
 			}
-		]
+		],
+		tabs: {
+			male: {
+				label: 'Male',
+				items: [
+					{
+						ar: `اللَّهُمَّ اغْفِرْ لَهُ وَارْحَمْهُ وَعَافِهِ وَاعْفُ عَنْهُ وَأَكْرِمْ نُزُلَهُ وَوَسِّعْ مُدْخَلَهُ وَاغْسِلْهُ بِالْمَاءِ وَالثَّلْجِ وَالْبَرَدِ وَنَقِّهِ مِنَ الْخَطَايَا كَمَا نَقَّيْتَ الثَّوْبَ الْأَبْيَضَ مِنَ الدَّنَسِ وَأَبْدِلْهُ دَارًا خَيْرًا مِنْ دَارِهِ وَأَهْلًا خَيْرًا مِنْ أَهْلِهِ وَزَوْجًا خَيْرًا مِنْ زَوْجِهِ وَأَدْخِلْهُ الْجَنَّةَ وَأَعِذْهُ مِنْ عَذَابِ الْقَبْرِ وَمِنْ عَذَابِ النَّارِ`,
+						tr: `Allāhummaghfir lahu warhamhu wa ʻāfihi wa'fu ʻanhu wa akrim nuzulahu wa wassiʻ madkhalahu waghsilhu bil-māʼi wath-thalji wal-barad, wa naqqihi minal-khatāyā kamā naqqayta ath-thawbal-abyada minad-danas, wa abdilhu dāran khayran min dārihi wa ahlan khayran min ahlihi wa zawjan khayran min zawjihi, wa adkhilhul-jannata wa aʻidhu min ʻadhābil-qabri wa min ʻadhābin-nār.`,
+						en: `O Allah, forgive him, have mercy on him, keep him safe and pardon him. Honour his reception, widen his entry, wash him with water, snow and hail, and cleanse him of sins as a white garment is cleansed of dirt. Give him a home better than his home, a family better than his family, a spouse better than his spouse. Admit him to Paradise and protect him from the punishment of the grave and from the punishment of the Fire.`,
+						count: `After 3rd Takbeer`,
+						reward: `Main dua for the deceased (male).`,
+						source: `Muslim`
+					},
+					{
+						ar: `اللَّهُمَّ لَا تَحْرِمْنَا أَجْرَهُ وَلَا تَفْتِنَّا بَعْدَهُ وَاغْفِرْ لَنَا وَلَهُ`,
+						tr: `Allāhumma lā tahrimnā ajrahu wa lā taftinnā baʻdahu waghfir lanā wa lahu`,
+						en: `O Allah, do not deprive us of his reward and do not put us to trial after him, and forgive us and him.`,
+						count: `After 4th Takbeer`,
+						reward: `Then make one Tasleem to the right: "As-salāmu ʻalaykum wa rahmatullāh".`,
+						source: `Al-Hakim · Ibn Majah`
+					}
+				]
+			},
+			female: {
+				label: 'Female',
+				items: [
+					{
+						ar: `اللَّهُمَّ اغْفِرْ لَهَا وَارْحَمْهَا وَعَافِهَا وَاعْفُ عَنْهَا وَأَكْرِمْ نُزُلَهَا وَوَسِّعْ مُدْخَلَهَا وَاغْسِلْهَا بِالْمَاءِ وَالثَّلْجِ وَالْبَرَدِ وَنَقِّهَا مِنَ الْخَطَايَا كَمَا نَقَّيْتَ الثَّوْبَ الْأَبْيَضَ مِنَ الدَّنَسِ وَأَبْدِلْهَا دَارًا خَيْرًا مِنْ دَارِهَا وَأَهْلًا خَيْرًا مِنْ أَهْلِهَا وَزَوْجًا خَيْرًا مِنْ زَوْجِهَا وَأَدْخِلْهَا الْجَنَّةَ وَأَعِذْهَا مِنْ عَذَابِ الْقَبْرِ وَمِنْ عَذَابِ النَّارِ`,
+						tr: `Allāhummaghfir lahā warhamhā wa ʻāfihā wa'fu ʻanhā wa akrim nuzulahā wa wassiʻ madkhalahā waghsilhā bil-māʼi wath-thalji wal-barad, wa naqqihā minal-khatāyā kamā naqqayta ath-thawbal-abyada minad-danas, wa abdilhā dāran khayran min dārihā wa ahlan khayran min ahlihā wa zawjan khayran min zawjihā, wa adkhilhal-jannata wa aʻidhā min ʻadhābil-qabri wa min ʻadhābin-nār.`,
+						en: `O Allah, forgive her, have mercy on her, keep her safe and pardon her. Honour her reception, widen her entry, wash her with water, snow and hail, and cleanse her of sins as a white garment is cleansed of dirt. Give her a home better than her home, a family better than her family, a spouse better than her spouse. Admit her to Paradise and protect her from the punishment of the grave and from the punishment of the Fire.`,
+						count: `After 3rd Takbeer`,
+						reward: `Main dua for the deceased (female).`,
+						source: `Muslim`
+					},
+					{
+						ar: `اللَّهُمَّ لَا تَحْرِمْنَا أَجْرَهَا وَلَا تَفْتِنَّا بَعْدَهَا وَاغْفِرْ لَنَا وَلَهَا`,
+						tr: `Allāhumma lā tahrimnā ajrahā wa lā taftinnā baʻdahā waghfir lanā wa lahā`,
+						en: `O Allah, do not deprive us of her reward and do not put us to trial after her, and forgive us and her.`,
+						count: `After 4th Takbeer`,
+						reward: `Then make one Tasleem to the right: "As-salāmu ʻalaykum wa rahmatullāh".`,
+						source: `Al-Hakim · Ibn Majah`
+					}
+				]
+			}
+		}
 	},
 	afterSalah: {
 		title: 'Dhikr after Salah',

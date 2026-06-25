@@ -1,7 +1,11 @@
 <script>
 	import { adhkarView, closeAdhkar, ADHKAR } from '$lib/adhkar.js';
 
+	let gender = 'male';
 	$: data = $adhkarView ? ADHKAR[$adhkarView] : null;
+	$: if ($adhkarView) gender = 'male';
+	$: tabItems = data?.tabs ? data.tabs[gender].items : [];
+	$: allItems = data ? [...(data.items ?? []), ...tabItems] : [];
 
 	function onKey(e) {
 		if (e.key === 'Escape') closeAdhkar();
@@ -21,8 +25,18 @@
 				<button class="x" on:click={closeAdhkar} aria-label="close">×</button>
 			</header>
 
+			{#if data.tabs}
+				<div class="tabs">
+					{#each Object.entries(data.tabs) as [key, tab]}
+						<button class="tab" class:active={gender === key} on:click={() => gender = key}>
+							{tab.label}
+						</button>
+					{/each}
+				</div>
+			{/if}
+
 			<div class="list">
-				{#each data.items as it, i}
+				{#each allItems as it, i}
 					<article class="item">
 						<div class="top">
 							<span class="num">{i + 1}</span>
@@ -104,6 +118,29 @@
 	}
 	.x:hover {
 		color: var(--text);
+	}
+	.tabs {
+		display: flex;
+		gap: 8px;
+		padding: 10px 16px;
+		border-bottom: 1px solid var(--border);
+		background: var(--surface-2);
+	}
+	.tab {
+		flex: 1;
+		padding: 7px 0;
+		border-radius: 8px;
+		font-size: 0.84rem;
+		font-weight: 600;
+		color: var(--text-dim);
+		background: var(--bg-soft);
+		border: 1px solid var(--border);
+		transition: all 0.15s ease;
+	}
+	.tab.active {
+		background: var(--teal);
+		border-color: var(--teal);
+		color: #042f2a;
 	}
 	.list {
 		overflow-y: auto;

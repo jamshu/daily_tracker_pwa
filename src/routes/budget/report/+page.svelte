@@ -14,7 +14,7 @@
 			total: Object.values(cats).reduce((s, c) => s + (c.actual ?? 0), 0)
 		}))
 		.filter(r => r.total > 0)
-		.sort((a, b) => b.key.localeCompare(a.key));
+		.sort((a, b) => a.key.localeCompare(b.key));
 
 	$: grandTotal = rows.reduce((s, r) => s + r.total, 0);
 

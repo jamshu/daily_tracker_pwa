@@ -83,14 +83,20 @@
 	}
 
 	async function deleteTodo(id) {
+		error = '';
 		try {
-			await fetch(`${base}/api/todos`, {
+			const res = await fetch(`${base}/api/todos`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ action: 'delete', id })
 			});
+			const d = await res.json().catch(() => ({}));
+			if (!res.ok || !d.ok) throw new Error(d.error || 'Failed to delete');
 			todos = todos.filter((t) => t.id !== id);
-		} catch { /* ignore */ }
+		} catch (e) {
+			error = e.message;
+			await load(); // revert to the authoritative server list
+		}
 	}
 
 	// Friendly relative label for a due date. `overdue` true if past and still open.

@@ -131,7 +131,7 @@
 				<!-- ripple: expanding fading waves -->
 				<span class="anim ripple">
 					{#each Array(3) as _, i}
-						<span class="wave" style="--d:{i * 1.3}s"></span>
+						<span class="wave" style="--d:{i * 2.4}s"></span>
 					{/each}
 				</span>
 			{:else}
@@ -317,13 +317,13 @@
 	.ripple .wave {
 		width: 100%;
 		height: 100%;
-		border: 3px solid hsl(var(--hue) 85% 62% / 0.6);
-		animation: rippleOut 3.9s ease-out infinite;
+		border: 2px solid hsl(var(--hue) 85% 62% / 0.5);
+		animation: rippleOut 7.2s ease-in-out infinite;
 		animation-delay: var(--d);
 	}
 	@keyframes rippleOut {
 		0% { transform: scale(0.2); opacity: 0; }
-		15% { opacity: 1; }
+		20% { opacity: 0.8; }
 		100% { transform: scale(1.35); opacity: 0; }
 	}
 

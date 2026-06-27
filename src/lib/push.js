@@ -30,13 +30,17 @@ export async function registerSW() {
 async function swReady() {
 	// vite-plugin-pwa does NOT auto-inject the registration script into SvelteKit's
 	// HTML, so register explicitly here before awaiting activation.
-	await registerSW();
+	const reg = await registerSW();
+	// First install precaches ~34 files; activation can take longer than navigator
+	// .serviceWorker.ready's resolve timing on a fresh load. Resolve as soon as an
+	// active worker exists, otherwise wait on `ready` with a generous timeout.
+	if (reg?.active) return reg;
 	return Promise.race([
 		navigator.serviceWorker.ready,
 		new Promise((_, reject) =>
 			setTimeout(
-				() => reject(new Error('SW not active after 8s — check DevTools > Application > Service Workers')),
-				8000
+				() => reject(new Error('SW not active after 30s — check DevTools > Application > Service Workers')),
+				30000
 			)
 		)
 	]);

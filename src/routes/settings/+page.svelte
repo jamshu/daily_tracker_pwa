@@ -311,12 +311,16 @@
 		</p>
 	</div>
 
-	{#if pushPermission === 'denied'}
-		<h2 class="section-title">Notifications</h2>
-		<div class="card">
+	<h2 class="section-title">Notifications</h2>
+	<div class="card">
+		{#if pushPermission === 'denied'}
 			<p class="push-denied">Notifications are blocked in your browser settings. Re-enable them there to receive push reminders.</p>
-		</div>
-	{/if}
+		{/if}
+		<p class="push-hint">
+			<strong>iPhone:</strong> if the "Allow notifications" prompt never appears, turn off
+			<strong>Settings → Safari → Block Pop-ups</strong>, then reopen the app.
+		</p>
+	</div>
 
 	{#if isAdmin}
 		<h2 class="section-title">Admin</h2>
@@ -755,6 +759,14 @@
 		color: var(--text-faint);
 		margin: 0;
 	}
+	.push-hint {
+		padding: 14px;
+		font-size: 0.84rem;
+		line-height: 1.5;
+		color: var(--text-faint);
+		margin: 0;
+	}
+	.push-hint strong { color: var(--text); font-weight: 600; }
 
 	/* admin panel */
 	.admin-section {

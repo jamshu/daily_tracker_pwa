@@ -10,7 +10,7 @@
 	import { browser } from '$app/environment';
 	import { user, checkSession } from '$lib/auth.js';
 	import { settings, applyTheme } from '$lib/settings.js';
-	import { pushSupported, currentSubscription, subscribePush } from '$lib/push.js';
+	import { pushSupported, currentSubscription, subscribePush, registerSW } from '$lib/push.js';
 	import { get } from 'svelte/store';
 
 	let ready = false;
@@ -33,9 +33,9 @@
 		if (Notification.permission === 'denied') { console.warn('[push] permission denied by user'); return; }
 		pushAttempted = true;
 		try {
-			console.log('[push] waiting for SW ready…');
-			await navigator.serviceWorker.ready;
-			console.log('[push] SW ready — checking existing subscription');
+			console.log('[push] registering SW…');
+			await registerSW();
+			console.log('[push] SW registered — checking existing subscription');
 			const existing = await currentSubscription();
 			console.log('[push] existing sub:', existing ? 'yes' : 'none');
 			if (!existing) {

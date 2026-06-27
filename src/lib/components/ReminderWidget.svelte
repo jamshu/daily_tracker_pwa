@@ -5,9 +5,47 @@
 	let loading = true;
 	let adding = false;
 	let newTitle = '';
-	let newDatetime = '';
+	let pickDate = '';
+	let pickTime = '';
 	let busy = false;
 	let error = '';
+
+	const pad = (n) => String(n).padStart(2, '0');
+
+	// Format a local Date as an Odoo UTC datetime string "YYYY-MM-DD HH:MM:SS".
+	function toOdooUtc(d) {
+		return (
+			`${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ` +
+			`${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:00`
+		);
+	}
+
+	// Fill the date/time fields (local) from a Date — used by the quick presets.
+	function setLocal(d) {
+		pickDate = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+		pickTime = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+	}
+
+	function presetIn(hours) {
+		const d = new Date(Date.now() + hours * 3600_000);
+		setLocal(d);
+	}
+	function presetToday(hour) {
+		const d = new Date();
+		d.setHours(hour, 0, 0, 0);
+		if (d.getTime() < Date.now()) d.setDate(d.getDate() + 1); // already past → tomorrow
+		setLocal(d);
+	}
+	function presetTomorrow(hour) {
+		const d = new Date();
+		d.setDate(d.getDate() + 1);
+		d.setHours(hour, 0, 0, 0);
+		setLocal(d);
+	}
+
+	// Build the UTC datetime to send from the local date+time fields.
+	$: newDatetime =
+		pickDate && pickTime ? toOdooUtc(new Date(`${pickDate}T${pickTime}`)) : '';
 
 	async function load() {
 		try {
@@ -22,7 +60,7 @@
 
 	async function addReminder() {
 		const title = newTitle.trim();
-		if (!title || !newDatetime) { adding = false; return; }
+		if (!title || !newDatetime) return;
 		busy = true;
 		error = '';
 		try {
@@ -35,7 +73,8 @@
 			if (!res.ok || !d.ok) throw new Error(d.error || 'Failed');
 			adding = false;
 			newTitle = '';
-			newDatetime = '';
+			pickDate = '';
+			pickTime = '';
 			await load();
 		} catch (e) {
 			error = e.message;
@@ -57,10 +96,11 @@
 
 	function formatDatetime(odooDatetime) {
 		if (!odooDatetime) return '';
-		// Odoo returns "YYYY-MM-DD HH:MM:SS" — treat as local time
-		const iso = odooDatetime.replace(' ', 'T');
+		// Odoo stores UTC "YYYY-MM-DD HH:MM:SS" — append Z so it parses as UTC, then
+		// toLocaleString renders it in the user's local timezone.
+		const iso = odooDatetime.replace(' ', 'T') + 'Z';
 		return new Date(iso).toLocaleString(undefined, {
-			month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+			weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
 		});
 	}
 
@@ -107,13 +147,24 @@
 					bind:value={newTitle}
 					maxlength="60"
 					autofocus
-					on:keydown={(e) => e.key === 'Enter' && addReminder()}
 				/>
-				<input
-					class="rinput"
-					type="datetime-local"
-					bind:value={newDatetime}
-				/>
+
+				<div class="rw-presets">
+					<button type="button" class="chip" on:click={() => presetIn(1)}>+1 hour</button>
+					<button type="button" class="chip" on:click={() => presetIn(3)}>+3 hours</button>
+					<button type="button" class="chip" on:click={() => presetToday(18)}>This evening</button>
+					<button type="button" class="chip" on:click={() => presetTomorrow(9)}>Tomorrow 9 AM</button>
+					<button type="button" class="chip" on:click={() => presetTomorrow(18)}>Tomorrow eve</button>
+				</div>
+
+				<div class="rw-datetime">
+					<input class="rinput" type="date" bind:value={pickDate} aria-label="date" />
+					<input class="rinput" type="time" bind:value={pickTime} aria-label="time" />
+				</div>
+
+				{#if newDatetime}
+					<p class="rw-preview">Fires: {formatDatetime(newDatetime)}</p>
+				{/if}
 				{#if error}<p class="rw-err">{error}</p>{/if}
 				<div class="rw-actions">
 					<button class="rw-add-btn" type="button" disabled={busy || !newTitle.trim() || !newDatetime} on:click={addReminder}>
@@ -216,6 +267,39 @@
 	}
 	.rinput:focus {
 		outline: none;
+	}
+	.rw-presets {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+	}
+	.chip {
+		padding: 6px 11px;
+		border-radius: 999px;
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: var(--text-dim);
+		background: var(--surface-2);
+		border: 1px solid var(--border);
+		transition: all 0.15s ease;
+	}
+	.chip:hover {
+		color: var(--teal);
+		border-color: var(--teal);
+	}
+	.rw-datetime {
+		display: flex;
+		gap: 8px;
+	}
+	.rw-datetime .rinput {
+		flex: 1;
+		min-width: 0;
+	}
+	.rw-preview {
+		font-size: 0.82rem;
+		font-weight: 600;
+		color: var(--teal);
+		margin: 0;
 	}
 	.rw-err {
 		font-size: 0.82rem;

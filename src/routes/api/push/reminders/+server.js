@@ -29,9 +29,10 @@ export async function POST({ request, cookies }) {
 
 		if (body.action === 'add') {
 			const title = String(body.title || '').trim().slice(0, 60);
-			const datetime = String(body.datetime || '');
-			// datetime-local format: "2026-06-28T20:00" — convert to Odoo datetime "YYYY-MM-DD HH:MM:SS"
-			const odooDatetime = datetime.replace('T', ' ') + ':00';
+			// Client sends a UTC datetime "YYYY-MM-DD HH:MM:SS" (already converted from the
+			// user's local time). Tolerate a trailing 'T' or missing seconds just in case.
+			let odooDatetime = String(body.datetime || '').trim().replace('T', ' ');
+			if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(odooDatetime)) odooDatetime += ':00';
 			if (!title || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(odooDatetime)) {
 				return json({ ok: false, error: 'Invalid reminder data' }, { status: 400 });
 			}

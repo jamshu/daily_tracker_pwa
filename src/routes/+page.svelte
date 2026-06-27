@@ -154,7 +154,14 @@
 				{#if SYNC_LABEL[$syncState]}
 					<span class="sync {$syncState}">{SYNC_LABEL[$syncState]}</span>
 				{/if}
-				<button class="gear trophy" on:click={() => goto(`${base}/leaderboard`)} title="Leaderboard" aria-label="leaderboard">
+				<button class="gear" on:click={() => goto(`${base}/mindfulness`)} title="Mindfulness" aria-label="mindfulness">
+						<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="3" />
+							<circle cx="12" cy="12" r="7.5" />
+							<circle cx="12" cy="12" r="11" opacity="0.5" />
+						</svg>
+					</button>
+					<button class="gear trophy" on:click={() => goto(`${base}/leaderboard`)} title="Leaderboard" aria-label="leaderboard">
 					<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z" />
 						<path d="M5 4H3v2a3 3 0 0 0 3 3M19 4h2v2a3 3 0 0 1-3 3" />

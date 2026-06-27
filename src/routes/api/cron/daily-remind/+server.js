@@ -21,6 +21,8 @@ export async function GET({ request }) {
 	// 2. Fire any active user reminders that are due
 	try {
 		const nowOdoo = new Date().toISOString().replace('T', ' ').slice(0, 19);
+		// Daily cron: fire all active reminders due on or before now.
+		// Reminders may be up to ~24h late (next daily run) — acceptable for this plan.
 		const due = await adminExecute(
 			'x_reminder',
 			'search_read',

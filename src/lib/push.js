@@ -55,6 +55,10 @@ export async function currentSubscription() {
 export async function subscribePush() {
 	if (!pushSupported()) throw new Error('Push not supported in this browser');
 	if (!PUBLIC_VAPID_PUBLIC_KEY) throw new Error('VAPID public key not configured');
+	// Explicitly request permission. Chrome only shows the prompt from a user
+	// gesture, so this must be called off a click/tap (see layout gesture hook).
+	const perm = await Notification.requestPermission();
+	if (perm !== 'granted') throw new Error(`Notification permission: ${perm}`);
 	const reg = await swReady();
 	const sub = await reg.pushManager.subscribe({
 		userVisibleOnly: true,

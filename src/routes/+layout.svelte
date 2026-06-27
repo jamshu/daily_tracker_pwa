@@ -26,11 +26,30 @@
 		if ($user && document.visibilityState === 'visible') checkSession();
 	}
 
-	async function tryPushSubscribe() {
+	function armGestureSubscribe() {
+		// Chrome only shows the permission prompt from a user gesture. When permission
+		// is still 'default', defer the subscribe to the first click/tap on the page.
+		const handler = () => {
+			window.removeEventListener('pointerdown', handler);
+			runPushSubscribe();
+		};
+		console.log('[push] permission default — waiting for first tap to prompt');
+		window.addEventListener('pointerdown', handler, { once: true });
+	}
+
+	function tryPushSubscribe() {
 		console.log('[push] tryPushSubscribe | attempted=', pushAttempted, 'supported=', pushSupported(), 'permission=', typeof Notification !== 'undefined' ? Notification.permission : 'N/A');
 		if (pushAttempted) return;
 		if (!pushSupported()) { console.warn('[push] push not supported in this browser'); return; }
 		if (Notification.permission === 'denied') { console.warn('[push] permission denied by user'); return; }
+		// Already granted → subscribe immediately (no gesture needed). Otherwise wait
+		// for a user gesture so Chrome actually shows the permission prompt.
+		if (Notification.permission === 'granted') runPushSubscribe();
+		else armGestureSubscribe();
+	}
+
+	async function runPushSubscribe() {
+		if (pushAttempted) return;
 		pushAttempted = true;
 		try {
 			console.log('[push] registering SW…');

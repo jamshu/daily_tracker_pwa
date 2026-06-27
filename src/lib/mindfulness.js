@@ -17,35 +17,40 @@ export const DHIKR = [
 		ar: 'أَسْتَغْفِرُ اللَّهَ',
 		tr: 'Astaghfirullāh',
 		en: 'I seek the forgiveness of Allah.',
-		hue: 265
+		hue: 265,
+		target: 100
 	},
 	{
 		id: 'subhanallah',
 		ar: 'سُبْحَانَ اللَّهِ',
 		tr: 'Subhānallāh',
 		en: 'Glory be to Allah.',
-		hue: 190
+		hue: 190,
+		target: 33
 	},
 	{
 		id: 'alhamdulillah',
 		ar: 'الْحَمْدُ لِلَّهِ',
 		tr: 'Alhamdulillāh',
 		en: 'All praise is due to Allah.',
-		hue: 145
+		hue: 145,
+		target: 33
 	},
 	{
 		id: 'allahuakbar',
 		ar: 'اللَّهُ أَكْبَرُ',
 		tr: 'Allāhu Akbar',
 		en: 'Allah is the Greatest.',
-		hue: 25
+		hue: 25,
+		target: 33
 	},
 	{
 		id: 'subhanallahwabihamdihi',
 		ar: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
 		tr: 'Subhānallāhi wa bihamdih',
 		en: 'Glory and praise be to Allah.',
-		hue: 330
+		hue: 330,
+		target: 100
 	}
 ];
 

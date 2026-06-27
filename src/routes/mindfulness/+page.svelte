@@ -3,6 +3,8 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { DHIKR, counts, loadCounts, increment, reset } from '$lib/mindfulness.js';
+	import { celebrate } from '$lib/toast.js';
+	import CelebrationToast from '$lib/components/CelebrationToast.svelte';
 
 	let active = 0; // index into DHIKR
 	let pulse = false; // brief scale-pulse on each tap
@@ -28,7 +30,10 @@
 	});
 
 	function tap() {
+		const next = count + 1;
 		increment(dhikr.id);
+		// celebrate each completed tasbih set (every multiple of the target)
+		if (dhikr.target && next % dhikr.target === 0) celebrate('dhikr');
 		pulse = false;
 		// retrigger the pulse animation
 		requestAnimationFrame(() => (pulse = true));
@@ -116,7 +121,7 @@
 				<!-- rings: concentric pulses -->
 				<span class="anim rings">
 					{#each Array(4) as _, i}
-						<span class="ring" style="--d:{i * 0.7}s"></span>
+						<span class="ring" style="--d:{i * 1.75}s"></span>
 					{/each}
 				</span>
 			{:else if variant === 2}
@@ -165,6 +170,8 @@
 		{confirmReset ? 'Tap again to reset' : 'Reset'}
 	</button>
 </div>
+
+<CelebrationToast />
 
 <style>
 	.screen {
@@ -284,12 +291,12 @@
 		height: 100%;
 		border: 2px solid hsl(var(--hue) 85% 62% / 0.5);
 		background: hsl(var(--hue) 85% 60% / 0.06);
-		animation: ringPulse 4s ease-in-out infinite;
+		animation: ringPulse 7s ease-in-out infinite;
 		animation-delay: var(--d);
 	}
 	@keyframes ringPulse {
-		0%, 100% { transform: scale(0.35); opacity: 0.2; }
-		50% { transform: scale(1.25); opacity: 0.9; }
+		0%, 100% { transform: scale(0.35); opacity: 0.15; }
+		50% { transform: scale(1.25); opacity: 0.85; }
 	}
 
 	/* 2 — orbit: satellites circling a breathing halo */
@@ -318,13 +325,14 @@
 		width: 100%;
 		height: 100%;
 		border: 2px solid hsl(var(--hue) 85% 62% / 0.5);
-		animation: rippleOut 7.2s ease-in-out infinite;
+		animation: rippleOut 9s ease-out infinite;
 		animation-delay: var(--d);
 	}
 	@keyframes rippleOut {
 		0% { transform: scale(0.2); opacity: 0; }
-		20% { opacity: 0.8; }
-		100% { transform: scale(1.35); opacity: 0; }
+		25% { opacity: 0.7; }
+		60% { opacity: 0.5; }
+		100% { transform: scale(1.4); opacity: 0; }
 	}
 
 	/* 4 — glow: single soft orb, large pulse */

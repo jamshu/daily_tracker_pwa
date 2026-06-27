@@ -67,6 +67,7 @@ export async function GET({ cookies }) {
 		return json({ ok: true, settings: parseSettings(rows?.[0]?.[SETTINGS_FIELD]) });
 	} catch (e) {
 		const status = e?.status || 500;
+		if (status >= 500) console.error('[settings] GET failed:', e?.message, e?.data?.message || '');
 		if (status === 401) clearSessionCookie(cookies);
 		return json({ ok: false, error: e?.message || 'Could not load settings' }, { status });
 	}

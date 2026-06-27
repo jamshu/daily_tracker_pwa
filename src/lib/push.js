@@ -20,16 +20,28 @@ export async function getPermission() {
 	return Notification.permission;
 }
 
+async function swReady() {
+	return Promise.race([
+		navigator.serviceWorker.ready,
+		new Promise((_, reject) =>
+			setTimeout(
+				() => reject(new Error('SW not active after 8s — check DevTools > Application > Service Workers')),
+				8000
+			)
+		)
+	]);
+}
+
 export async function currentSubscription() {
 	if (!pushSupported()) return null;
-	const reg = await navigator.serviceWorker.ready;
+	const reg = await swReady();
 	return reg.pushManager.getSubscription();
 }
 
 export async function subscribePush() {
 	if (!pushSupported()) throw new Error('Push not supported in this browser');
 	if (!PUBLIC_VAPID_PUBLIC_KEY) throw new Error('VAPID public key not configured');
-	const reg = await navigator.serviceWorker.ready;
+	const reg = await swReady();
 	const sub = await reg.pushManager.subscribe({
 		userVisibleOnly: true,
 		applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_PUBLIC_KEY)
@@ -46,7 +58,7 @@ export async function subscribePush() {
 
 export async function unsubscribePush() {
 	if (!pushSupported()) return;
-	const reg = await navigator.serviceWorker.ready;
+	const reg = await swReady();
 	const sub = await reg.pushManager.getSubscription();
 	if (sub) {
 		await sub.unsubscribe();

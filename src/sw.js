@@ -7,14 +7,15 @@ precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 
 self.addEventListener('push', (event) => {
-	if (!event.data) return;
-	let payload;
-	try {
-		payload = event.data.json();
-	} catch {
-		payload = { title: 'Daily Tracker', body: event.data.text() };
+	let payload = {};
+	if (event.data) {
+		try {
+			payload = event.data.json();
+		} catch {
+			payload = { body: event.data.text() };
+		}
 	}
-	const { title = 'Daily Tracker', body = '', url = '/' } = payload;
+	const { title = 'Daily Tracker', body = 'Test notification', url = '/' } = payload;
 	event.waitUntil(
 		self.registration.showNotification(title, {
 			body,

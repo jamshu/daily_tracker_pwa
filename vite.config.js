@@ -2,6 +2,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+
 // Vite envPrefix is VITE_ by default; allow PUBLIC_ vars on import.meta.env too,
 // and read them idiomatically via $env/dynamic/public in app code.
 export default defineConfig({

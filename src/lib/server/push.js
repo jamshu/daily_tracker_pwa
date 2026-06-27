@@ -7,7 +7,18 @@ const SUB_MODEL = 'x_push_subscription';
 let vapidSet = false;
 function ensureVapid() {
 	if (vapidSet) return;
-	webpush.setVapidDetails(env.VAPID_SUBJECT, env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY);
+	let subject = (env.VAPID_SUBJECT || '').trim();
+	// web-push requires the subject to be a mailto: or https: URL. Normalize a bare
+	// email or domain so a misconfigured env var can't break every push silently.
+	if (subject && !/^(mailto:|https?:)/.test(subject)) {
+		subject = subject.includes('@') ? `mailto:${subject}` : `https://${subject}`;
+	}
+	const pub = (env.VAPID_PUBLIC_KEY || '').trim();
+	const priv = (env.VAPID_PRIVATE_KEY || '').trim();
+	console.log(
+		`[push] vapid setup: subject=${subject || 'MISSING'} pubLen=${pub.length} privLen=${priv.length}`
+	);
+	webpush.setVapidDetails(subject, pub, priv);
 	vapidSet = true;
 }
 
@@ -22,12 +33,12 @@ async function removeStaleSub(endpoint) {
 
 /** Send a push to one subscription object {endpoint, keys:{p256dh, auth}}. */
 export async function sendPush(sub, payload) {
-	ensureVapid();
 	try {
+		ensureVapid();
 		await webpush.sendNotification(sub, JSON.stringify(payload));
 	} catch (err) {
 		console.error(
-			`[push] sendNotification failed: status=${err.statusCode} body=${err.body} endpoint=${sub.endpoint?.slice(0, 40)}`
+			`[push] sendNotification failed: status=${err.statusCode} body=${err.body} msg=${err.message} endpoint=${sub.endpoint?.slice(0, 40)}`
 		);
 		if (err.statusCode === 404 || err.statusCode === 410) {
 			await removeStaleSub(sub.endpoint);

@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 import { base } from '$app/paths';
-import { env } from '$env/dynamic/public';
+import { PUBLIC_VAPID_PUBLIC_KEY } from '$env/static/public';
 
 function getDeviceId() {
 	let id = localStorage.getItem('push_device_id');
@@ -28,10 +28,11 @@ export async function currentSubscription() {
 
 export async function subscribePush() {
 	if (!pushSupported()) throw new Error('Push not supported in this browser');
+	if (!PUBLIC_VAPID_PUBLIC_KEY) throw new Error('VAPID public key not configured');
 	const reg = await navigator.serviceWorker.ready;
 	const sub = await reg.pushManager.subscribe({
 		userVisibleOnly: true,
-		applicationServerKey: urlBase64ToUint8Array(env.PUBLIC_VAPID_PUBLIC_KEY)
+		applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_PUBLIC_KEY)
 	});
 	const raw = sub.toJSON();
 	const res = await fetch(`${base}/api/push/subscribe`, {

@@ -98,7 +98,8 @@ export async function POST({ request, cookies }) {
 		);
 		const sex = coerceSex(body?.sex ?? current.sex);
 		const customActivities = sanitizeCustomActivities(body?.customActivities);
-		const settings = { activities, theme, shareGlobal, sex, customActivities };
+		// Spread `current` first so unknown keys (e.g. is_admin, push state) survive the save.
+		const settings = { ...current, activities, theme, shareGlobal, sex, customActivities };
 
 		await adminExecute('res.users', 'write', [[uid], { [SETTINGS_FIELD]: JSON.stringify(settings) }]);
 		return json({ ok: true, settings });

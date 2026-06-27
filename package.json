@@ -18,6 +18,10 @@
   },
   "dependencies": {
     "@fontsource-variable/fraunces": "^5.2.9",
-    "@fontsource-variable/inter": "^5.2.8"
+    "@fontsource-variable/inter": "^5.2.8",
+    "web-push": "^3.6.7"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-darwin-x64": "^4.62.2"
   }
 }

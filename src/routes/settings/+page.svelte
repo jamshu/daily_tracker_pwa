@@ -5,6 +5,7 @@
 	import { ACTIVITIES } from '$lib/config.js';
 	import { settings, loadSettings, saveSettings, applyTheme } from '$lib/settings.js';
 	import { THEMES, DEFAULT_THEME } from '$lib/themes.js';
+	import { pushSupported, getPermission, subscribePush, unsubscribePush, currentSubscription } from '$lib/push.js';
 
 	// form state: activity id -> target value
 	let form = Object.fromEntries(ACTIVITIES.map((a) => [a.id, a.target]));
@@ -25,6 +26,20 @@
 	let newCustomStep = 1;
 	let newCustomTarget = 1;
 
+	// push notification state
+	let pushPermission = 'unsupported';
+	let pushEnabled = false;
+	let pushBusy = false;
+
+	// admin state
+	let isAdmin = false;
+	let announceTitle = '';
+	let announceBody = '';
+	let announceBusy = false;
+	let announceStatus = '';
+	let remindBusy = false;
+	let remindStatus = '';
+
 	onMount(async () => {
 		await loadSettings();
 		form = { ...form, ...$settings.activities };
@@ -32,7 +47,15 @@
 		shareGlobal = $settings.shareGlobal === true;
 		sex = $settings.sex === 'female' ? 'female' : 'male';
 		customActivities = [...($settings.customActivities ?? [])];
+		isAdmin = $settings.is_admin === true;
 		mounted = true;
+
+		// Check push notification state after SW is ready
+		if (pushSupported()) {
+			pushPermission = await getPermission();
+			const sub = await currentSubscription();
+			pushEnabled = !!sub;
+		}
 	});
 
 	function scheduleAutoSave() {
@@ -91,6 +114,63 @@
 	function deleteCustom(id) {
 		customActivities = customActivities.filter((a) => a.id !== id);
 		scheduleAutoSave();
+	}
+
+	async function togglePush() {
+		pushBusy = true;
+		try {
+			if (pushEnabled) {
+				await unsubscribePush();
+				pushEnabled = false;
+			} else {
+				await subscribePush();
+				pushEnabled = true;
+				pushPermission = await getPermission();
+			}
+		} catch {
+			pushPermission = await getPermission();
+		} finally {
+			pushBusy = false;
+		}
+	}
+
+	async function sendAnnouncement() {
+		announceBusy = true;
+		announceStatus = '';
+		try {
+			const res = await fetch(`${base}/api/push/announce`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ title: announceTitle, message: announceBody })
+			});
+			const d = await res.json().catch(() => ({}));
+			if (!res.ok || !d.ok) throw new Error(d.error || 'Failed');
+			announceStatus = 'Sent!';
+			announceTitle = '';
+			announceBody = '';
+		} catch (e) {
+			announceStatus = e.message;
+		} finally {
+			announceBusy = false;
+		}
+	}
+
+	async function sendReminder() {
+		remindBusy = true;
+		remindStatus = '';
+		try {
+			const res = await fetch(`${base}/api/push/remind`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' }
+			});
+			const d = await res.json().catch(() => ({}));
+			if (!res.ok || !d.ok) throw new Error(d.error || 'Failed');
+			remindStatus = 'Reminder sent!';
+		} catch (e) {
+			remindStatus = e.message;
+		} finally {
+			remindBusy = false;
+		}
 	}
 </script>
 
@@ -254,6 +334,65 @@
 			acceptance from Allah, not the praise of people. “Actions are but by intentions.”
 		</p>
 	</div>
+
+	{#if pushPermission !== 'unsupported'}
+		<h2 class="section-title">Notifications</h2>
+		<div class="card">
+			{#if pushPermission === 'denied'}
+				<p class="push-denied">Notifications are blocked in your browser settings. Re-enable them there to use this feature.</p>
+			{:else}
+				<button
+					type="button"
+					class="toggle-row"
+					role="switch"
+					aria-checked={pushEnabled}
+					disabled={pushBusy}
+					on:click={togglePush}
+				>
+					<span class="meta">
+						<span class="name">Push reminders</span>
+						<span class="unit">Receive push notifications for reminders and announcements. On iOS 16.4+, install the app to your home screen first.</span>
+					</span>
+					<span class="switch" class:on={pushEnabled} aria-hidden="true"><span class="knob" /></span>
+				</button>
+			{/if}
+		</div>
+	{/if}
+
+	{#if isAdmin}
+		<h2 class="section-title">Admin</h2>
+		<div class="card">
+			<div class="admin-section">
+				<p class="admin-label">Send announcement to all subscribers</p>
+				<div class="add-custom-form" style="flex-direction:column;align-items:stretch;gap:8px;">
+					<input class="cinput" type="text" placeholder="Title" bind:value={announceTitle} maxlength="80" />
+					<textarea class="cinput admin-textarea" rows="3" placeholder="Message (optional)" bind:value={announceBody}></textarea>
+					<button
+						class="confirm-btn"
+						type="button"
+						disabled={announceBusy || !announceTitle.trim()}
+						on:click={sendAnnouncement}
+					>
+						{announceBusy ? 'Sending…' : 'Send announcement'}
+					</button>
+					{#if announceStatus}<p class="ok" style="margin:4px 0 0">{announceStatus}</p>{/if}
+				</div>
+			</div>
+			<div class="admin-section" style="border-top:1px solid var(--border);margin-top:4px;padding-top:4px;">
+				<p class="admin-label">Send score reminder to all subscribers</p>
+				<button
+					class="confirm-btn"
+					type="button"
+					disabled={remindBusy}
+					on:click={sendReminder}
+					style="margin:8px 14px 14px;"
+				>
+					{remindBusy ? 'Sending…' : 'Send score reminder now'}
+				</button>
+				{#if remindStatus}<p class="ok" style="margin:0 14px 12px">{remindStatus}</p>{/if}
+			</div>
+		</div>
+	{/if}
 
 	<div class="reset-row">
 		<button class="ghost" type="button" on:click={resetDefaults} disabled={busy}>Reset to defaults</button>
@@ -649,4 +788,29 @@
 		transition: color 0.15s ease;
 	}
 	.add-custom:hover { color: var(--teal); }
+
+	/* notifications */
+	.push-denied {
+		padding: 14px;
+		font-size: 0.84rem;
+		color: var(--text-faint);
+		margin: 0;
+	}
+
+	/* admin panel */
+	.admin-section {
+		padding: 4px 0;
+	}
+	.admin-label {
+		padding: 12px 14px 4px;
+		font-size: 0.84rem;
+		font-weight: 700;
+		color: var(--text-dim);
+		margin: 0;
+	}
+	.admin-textarea {
+		resize: vertical;
+		min-height: 68px;
+		font-family: inherit;
+	}
 </style>

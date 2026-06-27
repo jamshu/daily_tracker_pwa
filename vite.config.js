@@ -12,7 +12,9 @@ export default defineConfig({
 			// Offline-write sync is intentionally NOT included (not needed for this app).
 			// This only precaches the app shell so it installs and opens like a native app.
 			workbox: {
-				globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}']
+				globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+				// Import the push notification handler into the generated service worker.
+				importScripts: ['/push-handler.js']
 			},
 			manifest: {
 				id: '/',

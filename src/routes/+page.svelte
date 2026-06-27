@@ -38,6 +38,7 @@
 	import { loadFifa } from '$lib/fifa.js';
 	import NewsCard from '$lib/components/NewsCard.svelte';
 	import { loadNews } from '$lib/news.js';
+	import ReminderWidget from '$lib/components/ReminderWidget.svelte';
 
 	const todayK = dateKey();
 
@@ -319,6 +320,11 @@
 	<h2 class="section-title fade-in" style="--fade-delay:0.52s">Notes</h2>
 	<div class="fade-in" style="--fade-delay:0.54s">
 		<NotesCard date={$selectedDate} notes={$currentNotes} />
+	</div>
+
+	<h2 class="section-title fade-in" style="--fade-delay:0.56s">Reminders</h2>
+	<div class="card fade-in" style="--fade-delay:0.58s">
+		<ReminderWidget />
 	</div>
 
 	<p class="foot">Synced to Backend · {$selectedDate}</p>

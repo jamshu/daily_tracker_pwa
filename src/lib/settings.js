@@ -30,13 +30,14 @@ function initialTheme() {
 	return DEFAULT_THEME;
 }
 
-// { activities: { exercise, books, quran }, theme, shareGlobal, sex, customActivities } — effective settings.
+// { activities, theme, shareGlobal, sex, customActivities, is_admin } — effective settings.
 export const settings = writable({
 	activities: defaultTargets(),
 	theme: initialTheme(),
 	shareGlobal: false,
 	sex: 'male',
-	customActivities: []
+	customActivities: [],
+	is_admin: false
 });
 
 // Apply a theme to <html> immediately and cache it for pre-paint (app.html).
@@ -69,7 +70,8 @@ export function resetSettings() {
 		theme: initialTheme(),
 		shareGlobal: false,
 		sex: 'male',
-		customActivities: []
+		customActivities: [],
+		is_admin: false
 	});
 }
 
@@ -85,7 +87,8 @@ export async function loadSettings() {
 			theme,
 			shareGlobal: d?.settings?.shareGlobal === true,
 			sex: coerceSex(d?.settings?.sex),
-			customActivities: Array.isArray(d?.settings?.customActivities) ? d.settings.customActivities : []
+			customActivities: Array.isArray(d?.settings?.customActivities) ? d.settings.customActivities : [],
+			is_admin: d?.settings?.is_admin === true
 		});
 		applyTheme(theme);
 	} catch {

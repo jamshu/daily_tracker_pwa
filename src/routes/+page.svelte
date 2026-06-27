@@ -265,6 +265,22 @@
 		</svg>
 	</button>
 
+	<button class="dhikr-link fade-in" style="--fade-delay:0.235s" on:click={() => goto(`${base}/recitations`)}>
+		<span class="dl-icon">
+			<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M12 22s-8-4.5-8-11.5V5l8-3 8 3v5.5C20 17.5 12 22 12 22z" />
+				<path d="M9 11l2 2 4-4" />
+			</svg>
+		</span>
+		<span class="dl-text">
+			<strong>Protective Recitations</strong>
+			<small>Ayatul Kursi & the three Quls — Ikhlās, Falaq, Nās</small>
+		</span>
+		<svg class="dl-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="M9 18l6-6-6-6" />
+		</svg>
+	</button>
+
 	<h2 class="section-title fade-in" style="--fade-delay:0.24s">Prayers · Jamāʻah, Sunnah &amp; Dhikr</h2>
 	<div class="card fade-in" style="--fade-delay:0.28s">
 		{#each PRAYERS as p (p.id)}

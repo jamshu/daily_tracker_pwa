@@ -39,26 +39,15 @@
 	import NewsCard from '$lib/components/NewsCard.svelte';
 	import { loadNews } from '$lib/news.js';
 	import ReminderWidget from '$lib/components/ReminderWidget.svelte';
-	import { pushSupported, currentSubscription, subscribePush } from '$lib/push.js';
 
 	const todayK = dateKey();
 
-	onMount(async () => {
+	onMount(() => {
 		load();
 		loadSettings();
 		loadGroups(); // for the leaderboard invite badge
 		loadFifa();
 		loadNews();
-		// Auto-subscribe to push if supported and not already subscribed.
-		// Browser will prompt for permission on first visit; if denied, silently skips.
-		if (pushSupported() && Notification.permission !== 'denied') {
-			try {
-				const existing = await currentSubscription();
-				if (!existing) await subscribePush();
-			} catch (e) {
-				console.error('[push] subscribe failed:', e?.message);
-			}
-		}
 	});
 
 	async function doLogout() {

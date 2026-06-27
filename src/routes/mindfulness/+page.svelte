@@ -9,10 +9,23 @@
 	let confirmReset = false; // reset button two-step confirm
 	let resetTimer = null;
 
+	const VARIANTS = 5; // number of distinct breathing animations
+	let variant = 0; // which one is showing now
+
 	$: dhikr = DHIKR[active];
 	$: count = $counts[dhikr.id] || 0;
 
-	onMount(loadCounts);
+	// Pick a fresh random animation, never the same one twice in a row.
+	function pickVariant() {
+		let v = variant;
+		while (v === variant) v = Math.floor(Math.random() * VARIANTS);
+		variant = v;
+	}
+
+	onMount(() => {
+		loadCounts();
+		variant = Math.floor(Math.random() * VARIANTS);
+	});
 
 	function tap() {
 		increment(dhikr.id);
@@ -23,6 +36,13 @@
 
 	function go(dir) {
 		active = (active + dir + DHIKR.length) % DHIKR.length;
+		pickVariant();
+		cancelConfirm();
+	}
+
+	function selectDhikr(i) {
+		active = i;
+		pickVariant();
 		cancelConfirm();
 	}
 
@@ -84,12 +104,40 @@
 	<div class="stage">
 		<button class="arrow left" on:click={() => go(-1)} aria-label="previous dhikr">‹</button>
 
-		<button class="flower" class:pulse on:click={tap} on:animationend={() => (pulse = false)} aria-label="add count">
-			<span class="petals">
-				{#each Array(6) as _, i}
-					<span class="petal" style="--r:{i * 60}deg"></span>
-				{/each}
-			</span>
+		<button class="flower v{variant}" class:pulse on:click={tap} on:animationend={() => (pulse = false)} aria-label="add count">
+			{#if variant === 0}
+				<!-- bloom: rotating petals -->
+				<span class="anim bloom">
+					{#each Array(6) as _, i}
+						<span class="petal" style="--r:{i * 60}deg"></span>
+					{/each}
+				</span>
+			{:else if variant === 1}
+				<!-- rings: concentric pulses -->
+				<span class="anim rings">
+					{#each Array(4) as _, i}
+						<span class="ring" style="--d:{i * 0.7}s"></span>
+					{/each}
+				</span>
+			{:else if variant === 2}
+				<!-- orbit: dots circling a breathing core -->
+				<span class="anim orbit">
+					<span class="halo"></span>
+					{#each Array(8) as _, i}
+						<span class="sat" style="--r:{i * 45}deg"></span>
+					{/each}
+				</span>
+			{:else if variant === 3}
+				<!-- ripple: expanding fading waves -->
+				<span class="anim ripple">
+					{#each Array(3) as _, i}
+						<span class="wave" style="--d:{i * 1.3}s"></span>
+					{/each}
+				</span>
+			{:else}
+				<!-- glow: single soft pulsing orb -->
+				<span class="anim glow"><span class="orb"></span></span>
+			{/if}
 			<span class="core">
 				<span class="ar" dir="rtl" lang="ar">{dhikr.ar}</span>
 				<span class="count">{count}</span>
@@ -106,7 +154,7 @@
 				class="dot"
 				class:on={i === active}
 				role="tab"
-				on:click={() => { active = i; cancelConfirm(); }}
+				on:click={() => selectDhikr(i)}
 				aria-label={d.tr}
 				aria-selected={i === active}
 			></button>
@@ -191,7 +239,7 @@
 	.flower {
 		position: relative;
 		flex: 1;
-		max-width: 340px;
+		max-width: 360px;
 		aspect-ratio: 1;
 		border: none;
 		background: transparent;
@@ -200,26 +248,96 @@
 		display: grid;
 		place-items: center;
 	}
-	.petals {
+	/* each variant lives in a full-size animated layer behind .core */
+	.anim {
 		position: absolute;
-		inset: 12%;
-		animation: breathe 6s ease-in-out infinite;
+		inset: 0;
+		display: grid;
+		place-items: center;
+		pointer-events: none;
 	}
-	.petal {
+	.anim > * {
 		position: absolute;
 		inset: 0;
 		margin: auto;
-		width: 62%;
-		height: 62%;
 		border-radius: 50%;
-		background: hsl(var(--hue) 85% 60% / 0.32);
 		mix-blend-mode: screen;
-		transform: rotate(var(--r)) translateY(-26%);
+	}
+
+	/* 0 — bloom: rotating petals, big swell */
+	.bloom { animation: breathe 6s ease-in-out infinite; }
+	.bloom .petal {
+		width: 64%;
+		height: 64%;
+		background: hsl(var(--hue) 85% 60% / 0.34);
+		transform: rotate(var(--r)) translateY(-30%);
 		filter: blur(2px);
 	}
 	@keyframes breathe {
-		0%, 100% { transform: scale(0.72) rotate(0deg); }
-		50% { transform: scale(1) rotate(180deg); }
+		0%, 100% { transform: scale(0.6) rotate(0deg); }
+		50% { transform: scale(1.3) rotate(180deg); }
+	}
+
+	/* 1 — rings: concentric circles pulsing outward */
+	.rings .ring {
+		width: 100%;
+		height: 100%;
+		border: 2px solid hsl(var(--hue) 85% 62% / 0.5);
+		background: hsl(var(--hue) 85% 60% / 0.06);
+		animation: ringPulse 4s ease-in-out infinite;
+		animation-delay: var(--d);
+	}
+	@keyframes ringPulse {
+		0%, 100% { transform: scale(0.35); opacity: 0.2; }
+		50% { transform: scale(1.25); opacity: 0.9; }
+	}
+
+	/* 2 — orbit: satellites circling a breathing halo */
+	.orbit { animation: spin 14s linear infinite; }
+	.orbit .halo {
+		width: 55%;
+		height: 55%;
+		background: radial-gradient(circle, hsl(var(--hue) 85% 60% / 0.5), transparent 70%);
+		animation: breathe2 5s ease-in-out infinite;
+	}
+	.orbit .sat {
+		width: 16%;
+		height: 16%;
+		background: hsl(var(--hue) 90% 68% / 0.85);
+		transform: rotate(var(--r)) translateY(-150%);
+		filter: blur(1px);
+	}
+	@keyframes spin { to { transform: rotate(360deg); } }
+	@keyframes breathe2 {
+		0%, 100% { transform: scale(0.7); }
+		50% { transform: scale(1.3); }
+	}
+
+	/* 3 — ripple: expanding fading waves */
+	.ripple .wave {
+		width: 100%;
+		height: 100%;
+		border: 3px solid hsl(var(--hue) 85% 62% / 0.6);
+		animation: rippleOut 3.9s ease-out infinite;
+		animation-delay: var(--d);
+	}
+	@keyframes rippleOut {
+		0% { transform: scale(0.2); opacity: 0; }
+		15% { opacity: 1; }
+		100% { transform: scale(1.35); opacity: 0; }
+	}
+
+	/* 4 — glow: single soft orb, large pulse */
+	.glow .orb {
+		width: 70%;
+		height: 70%;
+		background: radial-gradient(circle, hsl(var(--hue) 90% 65% / 0.6), hsl(var(--hue) 85% 55% / 0.1) 70%, transparent);
+		box-shadow: 0 0 80px hsl(var(--hue) 85% 55% / 0.5);
+		animation: glowPulse 4.5s ease-in-out infinite;
+	}
+	@keyframes glowPulse {
+		0%, 100% { transform: scale(0.55); opacity: 0.55; }
+		50% { transform: scale(1.35); opacity: 1; }
 	}
 
 	.flower.pulse .core { animation: pop 0.25s ease; }
@@ -294,7 +412,8 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.petals { animation: none; transform: scale(0.88); }
+		.anim, .anim > * { animation: none !important; }
+		.bloom { transform: scale(1); }
 		.flower.pulse .core { animation: none; }
 		.screen { transition: none; }
 	}

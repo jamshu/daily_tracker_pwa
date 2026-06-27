@@ -27,11 +27,25 @@
 	}
 
 	function armGestureSubscribe() {
-		// Chrome only shows the permission prompt from a user gesture. When permission
-		// is still 'default', defer the subscribe to the first click/tap on the page.
+		// Browsers only show the permission prompt from a user gesture. When permission
+		// is still 'default', defer to the first tap. CRITICAL for iOS Safari: the call
+		// to Notification.requestPermission() must happen synchronously inside the gesture
+		// BEFORE any await, or iOS drops the user-activation and suppresses the prompt.
 		const handler = () => {
 			window.removeEventListener('pointerdown', handler);
-			runPushSubscribe();
+			console.log('[push] tap received — requesting permission');
+			let req;
+			try {
+				req = Notification.requestPermission();
+			} catch (e) {
+				console.error('[push] requestPermission threw:', e?.message);
+				return;
+			}
+			Promise.resolve(req).then((perm) => {
+				console.log('[push] permission result:', perm);
+				if (perm === 'granted') runPushSubscribe();
+				else console.warn('[push] not granted:', perm);
+			});
 		};
 		console.log('[push] permission default — waiting for first tap to prompt');
 		window.addEventListener('pointerdown', handler, { once: true });

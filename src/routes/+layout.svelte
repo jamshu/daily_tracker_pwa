@@ -10,7 +10,7 @@
 	import { browser } from '$app/environment';
 	import { user, checkSession } from '$lib/auth.js';
 	import { settings, applyTheme } from '$lib/settings.js';
-	import { pushSupported, currentSubscription, subscribePush, registerSW } from '$lib/push.js';
+	import { pushSupported, subscribePush, registerSW } from '$lib/push.js';
 	import { get } from 'svelte/store';
 
 	let ready = false;
@@ -35,14 +35,13 @@
 		try {
 			console.log('[push] registering SW…');
 			await registerSW();
-			console.log('[push] SW registered — checking existing subscription');
-			const existing = await currentSubscription();
-			console.log('[push] existing sub:', existing ? 'yes' : 'none');
-			if (!existing) {
-				console.log('[push] calling subscribePush — browser dialog should appear');
-				await subscribePush();
-				console.log('[push] subscribePush done');
-			}
+			// Always (re)subscribe + save to backend. pushManager.subscribe is idempotent
+			// when the VAPID key matches (returns the existing browser sub, no new prompt),
+			// and the subscribe endpoint upserts by deviceId — so this re-creates the Odoo
+			// row even if it was deleted server-side while the browser sub still exists.
+			console.log('[push] subscribePush — syncing subscription to backend');
+			await subscribePush();
+			console.log('[push] subscribePush done');
 		} catch (e) {
 			console.error('[push] subscribe failed:', e?.message, e);
 			pushAttempted = false;

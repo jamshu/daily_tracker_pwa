@@ -20,7 +20,17 @@ export async function getPermission() {
 	return Notification.permission;
 }
 
+export async function registerSW() {
+	if (!browser || !('serviceWorker' in navigator)) return null;
+	const existing = await navigator.serviceWorker.getRegistration();
+	if (existing) return existing;
+	return navigator.serviceWorker.register('/sw.js', { type: 'classic' });
+}
+
 async function swReady() {
+	// vite-plugin-pwa does NOT auto-inject the registration script into SvelteKit's
+	// HTML, so register explicitly here before awaiting activation.
+	await registerSW();
 	return Promise.race([
 		navigator.serviceWorker.ready,
 		new Promise((_, reject) =>

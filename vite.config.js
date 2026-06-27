@@ -13,6 +13,9 @@ export default defineConfig({
 			srcDir: 'src',
 			filename: 'sw.js',
 			registerType: 'autoUpdate',
+			// SvelteKit has no static index.html for vite-plugin-pwa to transform, so its
+			// auto-injected registration never runs. We register manually in src/lib/push.js.
+			injectRegister: false,
 			injectManifest: {
 				globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}']
 			},

@@ -11,7 +11,7 @@
 	let confirmReset = false; // reset button two-step confirm
 	let resetTimer = null;
 
-	const VARIANTS = 5; // number of distinct breathing animations
+	const VARIANTS = 10; // number of distinct breathing animations / combos
 	let variant = 0; // which one is showing now
 
 	$: dhikr = DHIKR[active];
@@ -139,8 +139,64 @@
 						<span class="wave" style="--d:{i * 2.4}s"></span>
 					{/each}
 				</span>
-			{:else}
+			{:else if variant === 4}
 				<!-- glow: single soft pulsing orb -->
+				<span class="anim glow"><span class="orb"></span></span>
+			{:else if variant === 5}
+				<!-- bloom + glow -->
+				<span class="anim glow"><span class="orb"></span></span>
+				<span class="anim bloom">
+					{#each Array(6) as _, i}
+						<span class="petal" style="--r:{i * 60}deg"></span>
+					{/each}
+				</span>
+			{:else if variant === 6}
+				<!-- rings + orbit -->
+				<span class="anim rings">
+					{#each Array(4) as _, i}
+						<span class="ring" style="--d:{i * 1.75}s"></span>
+					{/each}
+				</span>
+				<span class="anim orbit">
+					<span class="halo"></span>
+					{#each Array(8) as _, i}
+						<span class="sat" style="--r:{i * 45}deg"></span>
+					{/each}
+				</span>
+			{:else if variant === 7}
+				<!-- ripple + glow -->
+				<span class="anim glow"><span class="orb"></span></span>
+				<span class="anim ripple">
+					{#each Array(3) as _, i}
+						<span class="wave" style="--d:{i * 2.4}s"></span>
+					{/each}
+				</span>
+			{:else if variant === 8}
+				<!-- orbit + bloom (counter-rotating) -->
+				<span class="anim orbit reverse">
+					{#each Array(6) as _, i}
+						<span class="sat" style="--r:{i * 60}deg"></span>
+					{/each}
+				</span>
+				<span class="anim bloom">
+					{#each Array(6) as _, i}
+						<span class="petal" style="--r:{i * 60}deg"></span>
+					{/each}
+				</span>
+			{:else if variant === 9}
+				<!-- rings + bloom -->
+				<span class="anim rings">
+					{#each Array(3) as _, i}
+						<span class="ring" style="--d:{i * 2.3}s"></span>
+					{/each}
+				</span>
+				<span class="anim bloom">
+					{#each Array(6) as _, i}
+						<span class="petal" style="--r:{i * 60}deg"></span>
+					{/each}
+				</span>
+			{:else}
+				<!-- fallback -->
 				<span class="anim glow"><span class="orb"></span></span>
 			{/if}
 			<span class="core">
@@ -314,7 +370,9 @@
 		transform: rotate(var(--r)) translateY(-150%);
 		filter: blur(1px);
 	}
+	.orbit.reverse { animation: spinRev 16s linear infinite; }
 	@keyframes spin { to { transform: rotate(360deg); } }
+	@keyframes spinRev { to { transform: rotate(-360deg); } }
 	@keyframes breathe2 {
 		0%, 100% { transform: scale(0.7); }
 		50% { transform: scale(1.3); }

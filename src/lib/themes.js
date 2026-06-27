@@ -5,7 +5,7 @@
 // `midnight` is the base :root palette; `claude` is the default applied for
 // new users (and as the pre-paint fallback in app.html).
 
-export const DEFAULT_THEME = 'github-light';
+export const DEFAULT_THEME = 'github-dark';
 
 // swatch = [accent, surface, bg] — three colors shown in the picker preview.
 export const THEMES = [

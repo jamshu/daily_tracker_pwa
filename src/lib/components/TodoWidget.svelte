@@ -144,15 +144,18 @@
 
 		{#if adding}
 			<div class="tw-form">
-				<input
-					class="tinput"
-					type="text"
-					placeholder="What needs doing?"
-					bind:value={newTitle}
-					maxlength="60"
-					autofocus
-					on:keydown={(e) => e.key === 'Enter' && addTodo()}
-				/>
+				<div class="tw-top-row">
+					<input
+						class="tinput"
+						type="text"
+						placeholder="What needs doing?"
+						bind:value={newTitle}
+						maxlength="60"
+						autofocus
+						on:keydown={(e) => e.key === 'Enter' && addTodo()}
+					/>
+					<input class="tinput tdate" type="date" bind:value={pickDate} aria-label="due date" />
+				</div>
 
 				<div class="tw-presets">
 					<button type="button" class="chip" on:click={presetToday}>Today</button>
@@ -160,8 +163,6 @@
 					<button type="button" class="chip" on:click={presetNextWeek}>Next week</button>
 					<button type="button" class="chip" on:click={() => (pickDate = '')}>No date</button>
 				</div>
-
-				<input class="tinput" type="date" bind:value={pickDate} aria-label="due date" />
 
 				{#if error}<p class="tw-err">{error}</p>{/if}
 				<div class="tw-actions">
@@ -321,6 +322,26 @@
 	}
 	.tinput:focus {
 		outline: none;
+	}
+	.tw-top-row {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+	}
+	.tw-top-row .tinput {
+		flex: 1;
+		min-width: 0;
+	}
+	/* Native date control has a min intrinsic width and ignores width:100% on
+	   iOS — size it to content and cap so it never overflows the row. */
+	.tdate {
+		flex: 0 0 auto;
+		width: auto;
+		max-width: 45%;
+		-webkit-appearance: none;
+		appearance: none;
+		font-size: 0.84rem;
+		padding: 7px 9px;
 	}
 	.tw-presets {
 		display: flex;

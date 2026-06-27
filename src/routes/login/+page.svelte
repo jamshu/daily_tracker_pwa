@@ -3,7 +3,7 @@
 	import { base } from '$app/paths';
 	import { login, signup, requestReset, resetPassword } from '$lib/auth.js';
 
-	let mode = 'login'; // 'login' | 'signup' | 'forgot' | 'reset'
+	let mode = 'signup'; // 'login' | 'signup' | 'forgot' | 'reset'
 	let name = '';
 	let email = '';
 	let sex = ''; // 'male' | 'female' (signup only)

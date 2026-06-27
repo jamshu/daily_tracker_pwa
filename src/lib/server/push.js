@@ -26,6 +26,9 @@ export async function sendPush(sub, payload) {
 	try {
 		await webpush.sendNotification(sub, JSON.stringify(payload));
 	} catch (err) {
+		console.error(
+			`[push] sendNotification failed: status=${err.statusCode} body=${err.body} endpoint=${sub.endpoint?.slice(0, 40)}`
+		);
 		if (err.statusCode === 404 || err.statusCode === 410) {
 			await removeStaleSub(sub.endpoint);
 		}

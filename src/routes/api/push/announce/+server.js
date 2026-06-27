@@ -34,8 +34,8 @@ export async function POST({ request, cookies }) {
 				x_studio_sent_at: now
 			}
 		]);
-		await sendToAll({ title: title.trim(), body: (message || '').trim(), url: '/' });
-		return json({ ok: true });
+		const count = await sendToAll({ title: title.trim(), body: (message || '').trim(), url: '/' });
+		return json({ ok: true, count });
 	} catch (e) {
 		return json({ ok: false, error: e?.message }, { status: e?.status || 500 });
 	}

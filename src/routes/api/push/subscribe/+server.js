@@ -34,6 +34,7 @@ export async function POST({ request, cookies }) {
 		]);
 		return json({ ok: true });
 	} catch (e) {
+		console.error('[push/subscribe] POST failed:', e?.message);
 		return json({ ok: false, error: e?.message }, { status: e?.status || 500 });
 	}
 }

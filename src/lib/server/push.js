@@ -54,12 +54,14 @@ export async function sendToUser(userId, payload) {
 	);
 }
 
-/** Broadcast to all subscribed users. */
+/** Broadcast to all subscribed users. Returns subscriber count. */
 export async function sendToAll(payload) {
 	const rows = await adminExecute(SUB_MODEL, 'search_read', [[]], {
 		fields: ['x_studio_user_id', 'x_studio_endpoint', 'x_studio_keys_p256dh', 'x_studio_keys_auth']
 	});
-	await Promise.allSettled(
+	console.log(`[push] sendToAll: ${rows.length} subscription(s) found`);
+	if (!rows.length) return 0;
+	const results = await Promise.allSettled(
 		rows.map((r) =>
 			sendPush(
 				{
@@ -70,4 +72,7 @@ export async function sendToAll(payload) {
 			)
 		)
 	);
+	const failed = results.filter((r) => r.status === 'rejected').length;
+	if (failed) console.error(`[push] sendToAll: ${failed}/${rows.length} push(es) failed`);
+	return rows.length;
 }

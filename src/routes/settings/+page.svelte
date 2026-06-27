@@ -5,7 +5,7 @@
 	import { ACTIVITIES } from '$lib/config.js';
 	import { settings, loadSettings, saveSettings, applyTheme } from '$lib/settings.js';
 	import { THEMES, DEFAULT_THEME } from '$lib/themes.js';
-	import { pushSupported, getPermission, subscribePush, unsubscribePush, currentSubscription } from '$lib/push.js';
+	import { getPermission } from '$lib/push.js';
 
 	// form state: activity id -> target value
 	let form = Object.fromEntries(ACTIVITIES.map((a) => [a.id, a.target]));
@@ -26,10 +26,8 @@
 	let newCustomStep = 1;
 	let newCustomTarget = 1;
 
-	// push notification state
+	// push notification state (only used to show "blocked" warning)
 	let pushPermission = 'unsupported';
-	let pushEnabled = false;
-	let pushBusy = false;
 
 	// admin state
 	let isAdmin = false;
@@ -50,12 +48,8 @@
 		isAdmin = $settings.is_admin === true;
 		mounted = true;
 
-		// Check push notification state after SW is ready
-		if (pushSupported()) {
-			pushPermission = await getPermission();
-			const sub = await currentSubscription();
-			pushEnabled = !!sub;
-		}
+		// Only needed to show "blocked" warning
+		pushPermission = await getPermission();
 	});
 
 	function scheduleAutoSave() {
@@ -116,24 +110,6 @@
 		scheduleAutoSave();
 	}
 
-	async function togglePush() {
-		pushBusy = true;
-		try {
-			if (pushEnabled) {
-				await unsubscribePush();
-				pushEnabled = false;
-			} else {
-				await subscribePush();
-				pushEnabled = true;
-				pushPermission = await getPermission();
-			}
-		} catch {
-			pushPermission = await getPermission();
-		} finally {
-			pushBusy = false;
-		}
-	}
-
 	async function sendAnnouncement() {
 		announceBusy = true;
 		announceStatus = '';
@@ -145,7 +121,7 @@
 			});
 			const d = await res.json().catch(() => ({}));
 			if (!res.ok || !d.ok) throw new Error(d.error || 'Failed');
-			announceStatus = 'Sent!';
+			announceStatus = d.count != null ? `Sent to ${d.count} subscriber(s)` : 'Sent!';
 			announceTitle = '';
 			announceBody = '';
 		} catch (e) {
@@ -335,27 +311,10 @@
 		</p>
 	</div>
 
-	{#if pushPermission !== 'unsupported'}
+	{#if pushPermission === 'denied'}
 		<h2 class="section-title">Notifications</h2>
 		<div class="card">
-			{#if pushPermission === 'denied'}
-				<p class="push-denied">Notifications are blocked in your browser settings. Re-enable them there to use this feature.</p>
-			{:else}
-				<button
-					type="button"
-					class="toggle-row"
-					role="switch"
-					aria-checked={pushEnabled}
-					disabled={pushBusy}
-					on:click={togglePush}
-				>
-					<span class="meta">
-						<span class="name">Push reminders</span>
-						<span class="unit">Receive push notifications for reminders and announcements. On iOS 16.4+, install the app to your home screen first.</span>
-					</span>
-					<span class="switch" class:on={pushEnabled} aria-hidden="true"><span class="knob" /></span>
-				</button>
-			{/if}
+			<p class="push-denied">Notifications are blocked in your browser settings. Re-enable them there to receive push reminders.</p>
 		</div>
 	{/if}
 

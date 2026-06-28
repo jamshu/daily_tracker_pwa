@@ -13,20 +13,25 @@
 
 	const VARIANTS = 10; // number of distinct breathing animations / combos
 	let variant = 0; // which one is showing now
+	let hue = 200; // randomised colour, refreshed on load and each switch
 
 	$: dhikr = DHIKR[active];
 	$: count = $counts[dhikr.id] || 0;
 
-	// Pick a fresh random animation, never the same one twice in a row.
+	// Pick a fresh random animation + colour, never the same one twice in a row.
 	function pickVariant() {
 		let v = variant;
 		while (v === variant) v = Math.floor(Math.random() * VARIANTS);
 		variant = v;
+		let h = hue;
+		while (Math.abs(h - hue) < 40) h = Math.floor(Math.random() * 360);
+		hue = h;
 	}
 
 	onMount(() => {
 		loadCounts();
 		variant = Math.floor(Math.random() * VARIANTS);
+		hue = Math.floor(Math.random() * 360);
 	});
 
 	function tap() {
@@ -89,7 +94,7 @@
 
 <div
 	class="screen"
-	style="--hue:{dhikr.hue}"
+	style="--hue:{hue}"
 	role="application"
 	aria-label="Dhikr counter"
 	on:touchstart={touchStart}

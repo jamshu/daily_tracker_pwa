@@ -310,7 +310,7 @@
 				deed={d}
 				done={$currentDay.deeds?.[d.id] || false}
 				on:toggle={() => onDeedToggle(d)}
-				on:info={() => openAdhkar(d.guide)}
+				on:info={() => (d.guide === 'morning' || d.guide === 'evening') ? goto(`${base}/adhkar/${d.guide}`) : openAdhkar(d.guide)}
 			/>
 		{/each}
 	</div>

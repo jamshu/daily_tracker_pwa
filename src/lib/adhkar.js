@@ -4,11 +4,28 @@
 // (Hisn al-Muslim and its references). Values use backticks so apostrophes in
 // the English are safe.
 import { writable } from 'svelte/store';
+import { RECITATIONS } from './recitations.js';
 
 // which collection the modal is showing: 'morning' | 'evening' | 'afterSalah' | null
 export const adhkarView = writable(null);
 export const openAdhkar = (key) => adhkarView.set(key);
 export const closeAdhkar = () => adhkarView.set(null);
+
+// The three protective surahs as standalone adhkār screens (full āyāt + bismillah),
+// reusing the verified mushaf text from recitations.js so there's one source.
+const QULS = ['al-ikhlas', 'al-falaq', 'an-nas'].map((id) => {
+	const r = RECITATIONS.find((x) => x.id === id);
+	return {
+		bismillah: r.bismillah,
+		verses: r.verses,
+		ar: r.verses.join(' '), // fallback for the list/modal view
+		tr: r.tr,
+		en: r.en,
+		count: `3×`,
+		reward: `Whoever recites them three times in the morning and evening, they will suffice him against everything.`,
+		source: `Abu Dawud · Tirmidhi`
+	};
+});
 
 export const ADHKAR = {
 	morning: {
@@ -23,14 +40,7 @@ export const ADHKAR = {
 				reward: `Whoever recites it in the morning is protected by Allah from the jinn until evening.`,
 				source: `Al-Hakim · al-Nasaʼi`
 			},
-			{
-				ar: `قُلْ هُوَ اللَّهُ أَحَدٌ — قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ — قُلْ أَعُوذُ بِرَبِّ النَّاسِ`,
-				tr: `Al-Ikhlās, Al-Falaq, An-Nās`,
-				en: `Recite the three protective surahs — "Say: He is Allah, the One"; "Say: I seek refuge in the Lord of daybreak"; "Say: I seek refuge in the Lord of mankind".`,
-				count: `3× each`,
-				reward: `They will suffice you against everything.`,
-				source: `Abu Dawud · Tirmidhi`
-			},
+			...QULS,
 			{
 				ar: `اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ`,
 				tr: `Sayyid al-Istighfār`,
@@ -101,14 +111,7 @@ export const ADHKAR = {
 				reward: `Whoever recites it in the morning is protected by Allah from the jinn until evening.`,
 				source: `Al-Hakim · al-Nasaʼi`
 			},
-			{
-				ar: `قُلْ هُوَ اللَّهُ أَحَدٌ — قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ — قُلْ أَعُوذُ بِرَبِّ النَّاسِ`,
-				tr: `Al-Ikhlās, Al-Falaq, An-Nās`,
-				en: `Recite the three protective surahs.`,
-				count: `3× each`,
-				reward: `They will suffice you against everything.`,
-				source: `Abu Dawud · Tirmidhi`
-			},
+			...QULS,
 			{
 				ar: `أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ`,
 				tr: `Amsaynā wa amsal-mulku lillāh...`,

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "47447045338",
+    "project_id": "dailydeedtracker",
+    "storage_bucket": "dailydeedtracker.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:47447045338:android:ac864aeb50609f81f1e1e3",
+        "android_client_info": {
+          "package_name": "com.jamshid.dailytracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeuWJCzStI3i0FSwHk3ntrGtO2_6c2DPU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

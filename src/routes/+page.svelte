@@ -224,6 +224,11 @@
 					<span class="lbl">deeds done</span>
 				</div>
 			</div>
+			<p class="score-note">
+				The score only measures your daily progress. The true reward is with God,
+				weighed by your sincerity and intention — let it move you to do more, never
+				to chase the number. May God accept your deeds and mine.
+			</p>
 		</div>
 	</section>
 
@@ -551,6 +556,16 @@
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
 		color: var(--text-faint);
+	}
+	.score-note {
+		margin: 0;
+		padding-top: 12px;
+		border-top: 1px solid var(--border);
+		font-family: var(--font-body);
+		font-size: 0.68rem;
+		line-height: 1.55;
+		color: var(--text-faint);
+		max-width: 42ch;
 	}
 	.activities {
 		display: grid;

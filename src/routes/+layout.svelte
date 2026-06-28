@@ -11,10 +11,39 @@
 	import { user, checkSession } from '$lib/auth.js';
 	import { settings, applyTheme } from '$lib/settings.js';
 	import { pushSupported, subscribePush, registerSW } from '$lib/push.js';
+	import { initNativePush } from '$lib/nativePush.js';
 	import { get } from 'svelte/store';
 
 	let ready = false;
 	let pushAttempted = false;
+	let backBtnHandle = null;
+	let isNative = false; // set by initNative(); gates VAPID vs FCM push path
+
+	// Native (Capacitor) shell init: status bar, splash hide, Android back button.
+	// All guarded by isNativePlatform() so the web/PWA build is a no-op.
+	async function initNative() {
+		const { Capacitor } = await import('@capacitor/core');
+		if (!Capacitor.isNativePlatform()) return;
+		isNative = true;
+		try {
+			const { StatusBar, Style } = await import('@capacitor/status-bar');
+			await StatusBar.setStyle({ style: Style.Dark }); // light text on dark theme
+			if (Capacitor.getPlatform() === 'android') {
+				await StatusBar.setBackgroundColor({ color: '#0b1120' });
+			}
+		} catch {}
+		try {
+			const { App: CapApp } = await import('@capacitor/app');
+			backBtnHandle = await CapApp.addListener('backButton', ({ canGoBack }) => {
+				if (canGoBack) window.history.back();
+				else CapApp.exitApp();
+			});
+		} catch {}
+		try {
+			const { SplashScreen } = await import('@capacitor/splash-screen');
+			await SplashScreen.hide();
+		} catch {}
+	}
 
 	// Keepalive: while logged in, re-sync the session every 10 min and whenever the
 	// tab becomes visible. Each /api/auth/me call refreshes the rotated session id
@@ -52,6 +81,8 @@
 	}
 
 	function tryPushSubscribe() {
+		// On native (Capacitor), FCM handles push — VAPID/SW path is skipped entirely
+		if (isNative) return;
 		console.log('[push] tryPushSubscribe | attempted=', pushAttempted, 'supported=', pushSupported(), 'permission=', typeof Notification !== 'undefined' ? Notification.permission : 'N/A');
 		if (pushAttempted) return;
 		if (!pushSupported()) { console.warn('[push] push not supported in this browser'); return; }
@@ -82,18 +113,23 @@
 	}
 
 	onMount(async () => {
+		await initNative(); // await so isNative flag is set before checkSession resolves
 		await checkSession();
 		ready = true;
 		document.addEventListener('visibilitychange', pingIfVisible);
 		keepaliveTimer = setInterval(pingIfVisible, KEEPALIVE_MS);
 		// Try after initial session check (handles already-logged-in case)
-		if (get(user)) tryPushSubscribe();
+		if (get(user)) {
+			if (isNative) initNativePush();
+			else tryPushSubscribe();
+		}
 	});
 
 	onDestroy(() => {
 		if (!browser) return;
 		if (keepaliveTimer) clearInterval(keepaliveTimer);
 		document.removeEventListener('visibilitychange', pingIfVisible);
+		backBtnHandle?.remove?.();
 	});
 
 	// Keep <html data-theme> in sync once settings load / change.
@@ -101,8 +137,11 @@
 
 	// Subscribe to user store to catch login event (fires when $user goes undefined → object)
 	user.subscribe((u) => {
-		console.log('[push] user store changed — browser=', browser, 'user=', !!u);
-		if (browser && u) tryPushSubscribe();
+		console.log('[push] user store changed — browser=', browser, 'user=', !!u, 'native=', isNative);
+		if (browser && u) {
+			if (isNative) initNativePush();
+			else tryPushSubscribe();
+		}
 	});
 
 	$: path = $page.url.pathname.replace(base, '') || '/';

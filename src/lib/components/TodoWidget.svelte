@@ -337,18 +337,21 @@
 		display: flex;
 		gap: 8px;
 		align-items: center;
+		flex-wrap: wrap;
 	}
 	.tw-top-row .tinput {
-		flex: 1;
+		flex: 1 1 150px;
 		min-width: 0;
 	}
-	/* Native date control has a min intrinsic width and ignores width:100% on
-	   iOS — size it to content and cap so it never overflows the row. */
+	/* Native date control reports a large min intrinsic width on mobile (Android
+	   Chrome / iOS Safari) that ignores max-width/flex-shrink and pushes the row
+	   past the card → horizontal page scroll. Let the row wrap instead: the date
+	   drops to its own full-width line when it can't fit beside the title. */
 	.tdate {
-		flex: 0 1 auto;
+		flex: 1 1 140px;
 		width: auto;
 		min-width: 0;
-		max-width: 45%;
+		max-width: 100%;
 		-webkit-appearance: none;
 		appearance: none;
 		font-size: 0.84rem;

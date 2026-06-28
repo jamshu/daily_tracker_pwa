@@ -19,9 +19,9 @@ export const PRAYER_MARKS = PRAYERS.reduce((n, p) => n + 2 + (p.hasSunnah ? 1 : 
 /** Target-based activities. value counts toward `target` in `unit`. */
 export const ACTIVITIES = [
 	{ id: 'exercise', name: 'Exercise', unit: 'min', target: 30, step: 5 },
-	{ id: 'books', name: 'Salam Count', unit: 'times', target: 10, step: 1 },
+	{ id: 'books', name: 'Read Books', unit: 'min', target: 10, step: 1 },
 	{ id: 'quran', name: 'Read Qurʻan', unit: 'pages', target: 5, step: 1 },
-	{ id: 'sleep', name: 'Smile Count', unit: 'times', target: 20, step: 1 },
+	{ id: 'sleep', name: 'Sleep', unit: 'hours', target: 6, step: 1 },
 	{ id: 'hydration', name: 'Hydration', unit: 'glasses', target: 8, step: 1 }
 ];
 

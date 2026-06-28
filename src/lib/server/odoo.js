@@ -55,6 +55,7 @@ function parseSessionId(setCookieArr) {
 /* ------------------------------ admin context ----------------------------- */
 
 let adminUid = null;
+let _adminLoginPromise = null;
 
 async function service(serviceName, method, args) {
 	const res = await fetch(`${baseUrl()}/jsonrpc`, {
@@ -74,9 +75,16 @@ async function service(serviceName, method, args) {
 
 async function adminLogin() {
 	if (adminUid) return adminUid;
-	adminUid = await service('common', 'login', [env.ODOO_DB, env.ODOO_USERNAME, env.ODOO_API_KEY]);
-	if (!adminUid) throw new Error('Admin (API) authentication failed — check ODOO_USERNAME / ODOO_API_KEY');
-	return adminUid;
+	if (!_adminLoginPromise) {
+		_adminLoginPromise = service('common', 'login', [env.ODOO_DB, env.ODOO_USERNAME, env.ODOO_API_KEY])
+			.then(uid => {
+				if (!uid) throw new Error('Admin (API) authentication failed — check ODOO_USERNAME / ODOO_API_KEY');
+				adminUid = uid;
+				return uid;
+			})
+			.finally(() => { _adminLoginPromise = null; });
+	}
+	return _adminLoginPromise;
 }
 
 export async function adminExecute(model, method, args = [], kwargs = {}) {
@@ -95,24 +103,20 @@ export async function adminExecute(model, method, args = [], kwargs = {}) {
 /**
  * Create a tenant: a fresh company + a user assigned to it. Data isolation then
  * comes from Odoo's multi-company record rules on x_dailytracker.
+ *
+ * Order: user first, company second. If company creation fails the user is
+ * deleted so a retry starts clean (avoids "company name must be unique" on retry
+ * caused by an orphaned company from a previous partial attempt).
  */
 export async function createTenantUser({ name, email, password, sex }) {
 	const displayName = name || email;
 
-	// 1) new company for this tenant. The company name embeds the (unique) email
-	// so two users with the same display name don't collide on company name.
-	const companyName = `${displayName} (${email})`;
-	const companyId = await adminExecute('res.company', 'create', [{ name: companyName }]);
-
-	// 2) internal-user group (best-effort; ACLs still configured in Odoo)
+	// 1) user — if this fails nothing else was created, retry is safe
 	const vals = {
 		name: displayName,
 		login: email,
 		email,
 		password,
-		company_id: companyId,
-		company_ids: [[6, 0, [companyId]]],
-		// Seed per-user settings JSON with sex (drives sex-based prayer scoring).
 		x_studio_settings: JSON.stringify({ sex: sex === 'female' ? 'female' : 'male' })
 	};
 	try {
@@ -122,18 +126,51 @@ export async function createTenantUser({ name, email, password, sex }) {
 		/* fall back to Odoo default groups */
 	}
 
-	// 3) the user
-	try {
-		const userId = await adminExecute('res.users', 'create', [vals]);
-		return { userId, companyId };
-	} catch (e) {
-		if (/login.*already|already.*registered|duplicate|unique|in use/i.test(e.message)) {
-			const er = new Error('That email is already registered');
-			er.status = 409;
-			throw er;
+	let userId;
+	let _lastUserErr;
+	for (let attempt = 0; attempt < 3; attempt++) {
+		try {
+			userId = await adminExecute('res.users', 'create', [vals]);
+			break;
+		} catch (e) {
+			if (/transaction.*aborted|deadlock|serialize|could not obtain/i.test(e.message)) {
+				_lastUserErr = e;
+				await new Promise(r => setTimeout(r, 150 * (attempt + 1)));
+				continue;
+			}
+			if (/login.*already|already.*registered|duplicate|unique|in use/i.test(e.message)) {
+				const er = new Error('That email is already registered');
+				er.status = 409;
+				throw er;
+			}
+			throw e;
 		}
+	}
+	if (!userId) throw _lastUserErr;
+
+	// 2) company — on failure, delete user so retry starts clean
+	const companyName = `${displayName} (${email})`;
+	let companyId;
+	try {
+		companyId = await adminExecute('res.company', 'create', [{ name: companyName }]);
+	} catch (e) {
+		try { await adminExecute('res.users', 'unlink', [[userId]]); } catch {}
 		throw e;
 	}
+
+	// 3) assign company to user — on failure, delete both so retry starts clean
+	try {
+		await adminExecute('res.users', 'write', [[userId], {
+			company_id: companyId,
+			company_ids: [[6, 0, [companyId]]]
+		}]);
+	} catch (e) {
+		try { await adminExecute('res.users', 'unlink', [[userId]]); } catch {}
+		try { await adminExecute('res.company', 'unlink', [[companyId]]); } catch {}
+		throw e;
+	}
+
+	return { userId, companyId };
 }
 
 /* ------------------------------ user session ------------------------------ */

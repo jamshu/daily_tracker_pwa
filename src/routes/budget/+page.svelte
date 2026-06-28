@@ -73,10 +73,6 @@
 		return Number.isFinite(n) ? n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }) : '—';
 	}
 
-	function fmtPct(pct) {
-		return pct === null ? '—' : `${Math.round(pct)}%`;
-	}
-
 	function fmtDiff(diff) {
 		return diff === 0 ? '0' : (diff > 0 ? '+' : '') + fmt(diff);
 	}
@@ -270,7 +266,6 @@
 						<th>Budget</th>
 						<th>Actual</th>
 						<th>Diff</th>
-						<th>%</th>
 						<th class="del-col"></th>
 					</tr>
 				</thead>
@@ -325,7 +320,6 @@
 								</div>
 							</td>
 							<td class="num" class:red={calc.over} class:green={!calc.over && calc.diff < 0}>{fmtDiff(calc.diff)}</td>
-							<td class="num" class:red={calc.over} class:green={calc.pct !== null && calc.pct <= 100}>{fmtPct(calc.pct)}</td>
 							<td class="del-col">
 								{#if !isDefaultCategory(cat.id)}
 									<button class="del" on:click={() => deleteCat(cat.id)} aria-label="delete {cat.label}">
@@ -344,9 +338,6 @@
 						<td class="num bold">{fmt(totalBudget)}</td>
 						<td class="num bold">{fmt(totalActual)}</td>
 						<td class="num bold" class:red={totalOver} class:green={!totalOver && totalDiff !== 0}>{fmtDiff(totalDiff)}</td>
-						<td class="num bold" class:red={totalOver} class:green={!totalOver && totalBudget > 0}>
-							{totalBudget > 0 ? fmtPct((totalActual / totalBudget) * 100) : '—'}
-						</td>
 						<td class="del-col"></td>
 					</tr>
 				</tfoot>

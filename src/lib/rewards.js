@@ -82,19 +82,19 @@ export const REWARDS = {
 	],
 	books: [
 		{
-			title: 'A path made easy to Paradise',
-			quote: 'Whoever treads a path seeking knowledge, Allah will make easy for him a path to Paradise.',
+			title: 'Spread peace among you',
+			quote: 'You will not enter Paradise until you believe, and you will not believe until you love one another. Spread salam among yourselves.',
 			source: 'Muslim'
 		},
 		{
-			title: 'The angels spread their wings',
-			quote: 'The angels lower their wings for the seeker of knowledge, pleased with what he seeks.',
-			source: 'Abu Dawud'
+			title: 'The best of Islam',
+			quote: 'Feed the hungry and give the greeting of salam to those you know and those you do not know.',
+			source: 'Bukhari & Muslim'
 		},
 		{
-			title: 'Maa shaa Allah — always learning',
-			quote: 'Seeking knowledge is an obligation upon every Muslim.',
-			source: 'Ibn Majah'
+			title: 'Ten good deeds',
+			quote: 'When someone greets with "As-salamu ʻalaykum," ten good deeds are recorded for him.',
+			source: 'Abu Dawud'
 		}
 	],
 	quran: [
@@ -116,19 +116,19 @@ export const REWARDS = {
 	],
 	sleep: [
 		{
-			title: 'Maa shaa Allah — rest is a mercy',
-			quote: 'And We made your sleep [a means for] rest.',
-			source: 'Qurʼan 78:9'
+			title: 'Your smile is charity',
+			quote: 'Your smiling in the face of your brother is charity.',
+			source: 'Tirmidhi'
 		},
 		{
-			title: 'Your eyes have a right over you',
-			quote: 'Your body has a right over you, and your eye has a right over you.',
-			source: 'Bukhari & Muslim'
+			title: 'Do not belittle any good',
+			quote: 'Do not belittle any good deed, even meeting your brother with a cheerful face.',
+			source: 'Muslim'
 		},
 		{
-			title: 'Sleep early, rise for good',
-			quote: 'The Prophet ﷺ would sleep in the early night and rise in its later part to stand in prayer.',
-			source: 'based on Bukhari & Muslim'
+			title: 'A cheerful face',
+			quote: 'The Prophet ﷺ was the one who smiled the most and was the most cheerful of people.',
+			source: 'Tirmidhi'
 		}
 	],
 	hydration: [

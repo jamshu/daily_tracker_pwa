@@ -27,7 +27,7 @@
 <div class="activity card" class:met>
 	<div class="head">
 		<span class="name">{activity.name}</span>
-		<span class="goal" class:met>/ {tgt} {activity.unit}</span>
+		<span class="goal" class:met>{tgt} {activity.unit}</span>
 	</div>
 	<div class="controls">
 		<div class="bar" style="--fill:{fill}%"><span class="fill"></span></div>

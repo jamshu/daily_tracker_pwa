@@ -79,6 +79,9 @@
 		inset: 0;
 		z-index: 70;
 		pointer-events: none;
+		/* Clip confetti/balloons to the viewport so the toast can never add
+		   page scroll or shift content. */
+		overflow: hidden;
 		display: flex;
 		justify-content: center;
 		align-items: flex-start;
@@ -158,10 +161,15 @@
 		display: flex;
 		gap: 14px;
 		padding: 16px 18px;
-		border: 1px solid var(--border);
-		background: linear-gradient(160deg, var(--surface-2), var(--surface));
-		box-shadow: var(--shadow);
-		backdrop-filter: blur(2px);
+		border-radius: var(--radius);
+		/* Frosted glass — translucent surface + heavy blur, adapts to theme. */
+		border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+		background: color-mix(in srgb, var(--surface) 55%, transparent);
+		backdrop-filter: blur(18px) saturate(1.4);
+		-webkit-backdrop-filter: blur(18px) saturate(1.4);
+		box-shadow:
+			0 10px 40px rgba(0, 0, 0, 0.32),
+			inset 0 1px 0 color-mix(in srgb, var(--text) 10%, transparent);
 		animation: pop 0.5s cubic-bezier(0.18, 1.3, 0.5, 1) both;
 	}
 	@keyframes pop {
@@ -184,9 +192,10 @@
 		border-radius: 12px;
 		display: grid;
 		place-items: center;
-		color: #2a1e05;
-		background: linear-gradient(135deg, var(--gold), var(--teal));
-		box-shadow: 0 0 0 4px rgba(214, 166, 74, 0.12);
+		color: var(--gold);
+		border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
+		background: color-mix(in srgb, var(--gold) 16%, transparent);
+		box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text) 12%, transparent);
 		animation: badge 0.9s ease-in-out;
 	}
 	@keyframes badge {

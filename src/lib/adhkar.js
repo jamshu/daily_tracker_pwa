@@ -289,10 +289,34 @@ export const ADHKAR = {
 				source: `Muslim`
 			},
 			{
-				ar: `سُبْحَانَ اللَّهِ (33) — الْحَمْدُ لِلَّهِ (33) — اللَّهُ أَكْبَرُ (33)، ثُمَّ: لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ`,
-				tr: `SubhānAllāh, Alhamdulillāh, Allāhu Akbar`,
-				en: `Glory be to Allah (33), praise be to Allah (33), Allah is the Greatest (33), then complete the hundred with the testification above.`,
-				count: `33× each`,
+				ar: `سُبْحَانَ اللَّهِ`,
+				tr: `SubhānAllāh`,
+				en: `Glory be to Allah.`,
+				count: `33×`,
+				reward: `Part of the post-prayer tasbīh that completes one hundred.`,
+				source: `Muslim`
+			},
+			{
+				ar: `الْحَمْدُ لِلَّهِ`,
+				tr: `Alhamdulillāh`,
+				en: `All praise is for Allah.`,
+				count: `33×`,
+				reward: `Part of the post-prayer tasbīh that completes one hundred.`,
+				source: `Muslim`
+			},
+			{
+				ar: `اللَّهُ أَكْبَرُ`,
+				tr: `Allāhu Akbar`,
+				en: `Allah is the Greatest.`,
+				count: `33×`,
+				reward: `Part of the post-prayer tasbīh that completes one hundred.`,
+				source: `Muslim`
+			},
+			{
+				ar: `لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ`,
+				tr: `Lā ilāha illallāhu wahdahu lā sharīka lah...`,
+				en: `There is no god but Allah alone, with no partner; His is the dominion and the praise, and He is able to do all things — said once to complete the hundred.`,
+				count: `1×`,
 				reward: `Whoever does this, his sins are forgiven even if they were like the foam of the sea.`,
 				source: `Muslim`
 			},

@@ -4,7 +4,9 @@
 	import { base } from '$app/paths';
 	import { page } from '$app/stores';
 	import { ADHKAR } from '$lib/adhkar.js';
+	import { celebrate } from '$lib/toast.js';
 	import ImmersiveBg from '$lib/components/ImmersiveBg.svelte';
+	import CelebrationToast from '$lib/components/CelebrationToast.svelte';
 
 	$: set = $page.params.set;
 	$: coll = ADHKAR[set];
@@ -12,6 +14,24 @@
 
 	let active = 0;
 	let showDetails = false;
+
+	// tap counter — only for dhikr repeated more than once (e.g. "33× each").
+	// In-memory per screen; first integer in the count string is the target.
+	let counts = {}; // { [index]: tapped }
+	$: target = parseInt(item?.count, 10) || 1;
+	$: n = counts[active] || 0;
+	$: displayN = n === 0 ? 0 : n % target || target; // cycles 1..target per set
+
+	function tap() {
+		const next = n + 1;
+		counts = { ...counts, [active]: next };
+		if (next % target === 0) celebrate('dhikr');
+	}
+
+	function onCard() {
+		if (target > 1) tap();
+		else showDetails = !showDetails;
+	}
 
 	const VARIANTS = 10;
 	let variant = 0;
@@ -89,8 +109,17 @@
 				<p class="tr">{coll.title}</p>
 				<p class="en">{coll.subtitle}</p>
 			</div>
-			<span class="spacer"></span>
+			<button class="icon" on:click={() => (showDetails = !showDetails)} aria-label="details" title="Details" aria-pressed={showDetails}>
+				<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg>
+			</button>
 		</header>
+
+		{#if target > 1}
+			<button class="counter" on:click={tap} aria-label="tap counter">
+				<span class="cn">{displayN}</span>
+				<span class="ct">/ {target}</span>
+			</button>
+		{/if}
 
 		<div class="stage">
 			<button class="arrow left" on:click={() => go(-1)} aria-label="previous">‹</button>
@@ -99,7 +128,7 @@
 				<ImmersiveBg {variant} />
 
 				<!-- one dhikr per screen — Arabic + count, tap to reveal details -->
-				<article class="recite" on:click={() => (showDetails = !showDetails)} role="button" tabindex="0" on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && (showDetails = !showDetails)}>
+				<article class="recite" on:click={onCard} role="button" tabindex="0" on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && onCard()}>
 					<span class="count">{item.count}</span>
 					{#if item.bismillah}<p class="bismillah" dir="rtl" lang="ar">{item.bismillah}</p>{/if}
 					{#if item.verses}
@@ -130,7 +159,7 @@
 							{#if item.source}<p class="src">{item.source}</p>{/if}
 						</div>
 					{:else}
-						<span class="hint-tap">tap for details</span>
+						<span class="hint-tap">{target > 1 ? 'tap to count' : 'tap for details'}</span>
 					{/if}
 				</article>
 			</div>
@@ -152,6 +181,8 @@
 		</div>
 	</div>
 {/if}
+
+<CelebrationToast />
 
 <style>
 	.screen {
@@ -195,7 +226,31 @@
 	.label { flex: 1; text-align: center; }
 	.label .tr { margin: 0; font-weight: 600; font-size: 1.05rem; }
 	.label .en { margin: 0.1rem 0 0; font-size: 0.8rem; opacity: 0.65; }
-	.spacer { flex: none; width: 40px; }
+
+	.counter {
+		flex: none;
+		display: flex;
+		align-items: baseline;
+		gap: 0.3rem;
+		margin: 0.1rem 0 0.2rem;
+		padding: 0.35rem 1.1rem;
+		border-radius: 999px;
+		color: inherit;
+		background: hsl(var(--hue) 70% 50% / 0.18);
+		border: 1px solid hsl(var(--hue) 70% 60% / 0.4);
+		cursor: pointer;
+		transition: background 0.15s, transform 0.1s;
+		-webkit-tap-highlight-color: transparent;
+	}
+	.counter:active { transform: scale(0.96); }
+	.counter .cn {
+		font-size: 1.6rem;
+		font-weight: 800;
+		line-height: 1;
+		color: hsl(var(--hue) 85% 75%);
+		font-variant-numeric: tabular-nums;
+	}
+	.counter .ct { font-size: 0.9rem; font-weight: 600; opacity: 0.6; }
 
 	.stage {
 		flex: 1;

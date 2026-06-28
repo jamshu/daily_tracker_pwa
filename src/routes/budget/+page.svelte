@@ -556,7 +556,8 @@
 		border: 1px solid var(--teal);
 		background: var(--bg-soft);
 		color: var(--text);
-		font-size: 0.88rem;
+		/* 16px min — smaller makes iOS Safari auto-zoom on focus and stay zoomed. */
+		font-size: 16px;
 		font-variant-numeric: tabular-nums;
 		text-align: right;
 		font-family: inherit;
@@ -617,7 +618,8 @@
 		border: 1px solid var(--border);
 		background: var(--bg-soft);
 		color: var(--text);
-		font-size: 0.88rem;
+		/* 16px min — smaller makes iOS Safari auto-zoom on focus and stay zoomed. */
+		font-size: 16px;
 		font-variant-numeric: tabular-nums;
 		text-align: right;
 		font-family: inherit;
@@ -688,7 +690,8 @@
 		background: var(--bg-soft);
 		color: var(--text);
 		font-family: inherit;
-		font-size: 0.88rem;
+		/* 16px min — smaller makes iOS Safari auto-zoom on focus and stay zoomed. */
+		font-size: 16px;
 	}
 	.cat-input:focus { outline: none; }
 	.confirm-btn {

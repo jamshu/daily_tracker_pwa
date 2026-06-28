@@ -300,7 +300,8 @@
 		border: 1px solid var(--border);
 		color: var(--text);
 		font-family: inherit;
-		font-size: 0.96rem;
+		/* 16px min — smaller makes iOS Safari auto-zoom on focus and stay zoomed. */
+		font-size: 16px;
 		transition: border-color 0.15s ease;
 	}
 	input:focus {

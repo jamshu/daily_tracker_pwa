@@ -761,7 +761,8 @@
 		background: var(--bg-soft);
 		color: var(--text);
 		font-family: inherit;
-		font-size: 0.88rem;
+		/* 16px min — smaller makes iOS Safari auto-zoom on focus and stay zoomed. */
+		font-size: 16px;
 	}
 	.cinput-sm { flex: 0 0 72px; }
 	.cinput-xs { flex: 0 0 54px; -moz-appearance: textfield; }

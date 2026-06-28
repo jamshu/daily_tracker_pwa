@@ -268,7 +268,8 @@
 		background: var(--bg-soft);
 		border: 1px solid var(--border);
 		color: var(--text);
-		font-size: 0.95rem;
+		/* 16px min — smaller makes iOS Safari auto-zoom on focus and stay zoomed. */
+		font-size: 16px;
 		margin-bottom: 8px;
 	}
 	.search:focus {

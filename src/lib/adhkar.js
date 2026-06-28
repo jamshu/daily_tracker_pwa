@@ -11,21 +11,21 @@ export const adhkarView = writable(null);
 export const openAdhkar = (key) => adhkarView.set(key);
 export const closeAdhkar = () => adhkarView.set(null);
 
-// The three protective surahs as standalone adhkār screens (full āyāt + bismillah),
-// reusing the verified mushaf text from recitations.js so there's one source.
-const QULS = ['al-ikhlas', 'al-falaq', 'an-nas'].map((id) => {
-	const r = RECITATIONS.find((x) => x.id === id);
-	return {
-		bismillah: r.bismillah,
-		verses: r.verses,
-		ar: r.verses.join(' '), // fallback for the list/modal view
-		tr: r.tr,
-		en: r.en,
-		count: `3×`,
-		reward: `Whoever recites them three times in the morning and evening, they will suffice him against everything.`,
-		source: `Abu Dawud · Tirmidhi`
-	};
-});
+// Full Qurʼanic adhkār screens (complete āyāt + bismillah) built from the verified
+// mushaf text in recitations.js, so there's a single source. `ar` is kept as a
+// joined fallback for the list/modal view; the immersive reader renders `verses`.
+const byId = (id) => RECITATIONS.find((x) => x.id === id);
+
+const qul = (id, count, reward, source) => {
+	const r = byId(id);
+	return { bismillah: r.bismillah, verses: r.verses, ar: r.verses.join(' '), tr: r.tr, en: r.en, count, reward, source };
+};
+const quls = (count, reward, source) => ['al-ikhlas', 'al-falaq', 'an-nas'].map((id) => qul(id, count, reward, source));
+
+const ayatulKursi = (count, reward, source) => {
+	const r = byId('ayatul-kursi');
+	return { verses: r.verses, ar: r.verses.join(' '), tr: 'Āyat al-Kursī', en: r.en, count, reward, source };
+};
 
 export const ADHKAR = {
 	morning: {
@@ -40,7 +40,7 @@ export const ADHKAR = {
 				reward: `Whoever recites it in the morning is protected by Allah from the jinn until evening.`,
 				source: `Al-Hakim · al-Nasaʼi`
 			},
-			...QULS,
+			...quls(`3×`, `Whoever recites them three times in the morning and evening, they will suffice him against everything.`, `Abu Dawud · Tirmidhi`),
 			{
 				ar: `اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ`,
 				tr: `Sayyid al-Istighfār`,
@@ -111,7 +111,7 @@ export const ADHKAR = {
 				reward: `Whoever recites it in the morning is protected by Allah from the jinn until evening.`,
 				source: `Al-Hakim · al-Nasaʼi`
 			},
-			...QULS,
+			...quls(`3×`, `Whoever recites them three times in the morning and evening, they will suffice him against everything.`, `Abu Dawud · Tirmidhi`),
 			{
 				ar: `أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ`,
 				tr: `Amsaynā wa amsal-mulku lillāh...`,
@@ -281,6 +281,14 @@ export const ADHKAR = {
 				source: `Bukhari · Muslim`
 			},
 			{
+				ar: `لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَلَا نَعْبُدُ إِلَّا إِيَّاهُ، لَهُ النِّعْمَةُ وَلَهُ الْفَضْلُ وَلَهُ الثَّنَاءُ الْحَسَنُ، لَا إِلَهَ إِلَّا اللَّهُ مُخْلِصِينَ لَهُ الدِّينَ وَلَوْ كَرِهَ الْكَافِرُونَ`,
+				tr: `Lā ilāha illallāhu wahdahu lā sharīka lah, lahul-mulku wa lahul-hamdu wa huwa ʻalā kulli shayʼin qadīr, lā hawla wa lā quwwata illā billāh, lā ilāha illallāhu wa lā naʻbudu illā iyyāh, lahun-niʻmatu wa lahul-fadlu wa lahuth-thanāʼul-hasan, lā ilāha illallāhu mukhlisīna lahud-dīna wa law karihal-kāfirūn`,
+				en: `None has the right to be worshipped except Allah, alone, without partner; to Him belongs all sovereignty and praise, and He is over all things omnipotent. There is no might nor power except with Allah. None has the right to be worshipped except Allah, and we worship none except Him. For Him is all favour, grace, and glorious praise. None has the right to be worshipped except Allah, and we are sincere in faith and devotion to Him, although the disbelievers detest it.`,
+				count: `1×`,
+				reward: `The Prophet ﷺ would declare this tahlīl after every obligatory prayer.`,
+				source: `Muslim`
+			},
+			{
 				ar: `سُبْحَانَ اللَّهِ (33) — الْحَمْدُ لِلَّهِ (33) — اللَّهُ أَكْبَرُ (33)، ثُمَّ: لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ`,
 				tr: `SubhānAllāh, Alhamdulillāh, Allāhu Akbar`,
 				en: `Glory be to Allah (33), praise be to Allah (33), Allah is the Greatest (33), then complete the hundred with the testification above.`,
@@ -288,22 +296,8 @@ export const ADHKAR = {
 				reward: `Whoever does this, his sins are forgiven even if they were like the foam of the sea.`,
 				source: `Muslim`
 			},
-			{
-				ar: `آيَةُ الْكُرْسِيِّ`,
-				tr: `Āyat al-Kursī`,
-				en: `Recite the Verse of the Throne after each obligatory prayer.`,
-				count: `1×`,
-				reward: `Nothing stands between him and entering Paradise except death.`,
-				source: `Al-Nasaʼi`
-			},
-			{
-				ar: `قُلْ هُوَ اللَّهُ أَحَدٌ — قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ — قُلْ أَعُوذُ بِرَبِّ النَّاسِ`,
-				tr: `Al-Ikhlās, Al-Falaq, An-Nās`,
-				en: `Recite the three protective surahs after each prayer (three times each after Fajr and Maghrib).`,
-				count: `1× (3× Fajr/Maghrib)`,
-				reward: `Protection that suffices against all harm.`,
-				source: `Abu Dawud · Tirmidhi`
-			},
+			ayatulKursi(`1×`, `Whoever recites it after each obligatory prayer, nothing stands between him and entering Paradise except death.`, `Al-Nasaʼi`),
+			...quls(`1× (3× Fajr/Maghrib)`, `Recited after each prayer (three times after Fajr and Maghrib) — protection that suffices against all harm.`, `Abu Dawud · Tirmidhi`),
 			{
 				ar: `لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، يُحْيِي وَيُمِيتُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ`,
 				tr: `...yuhyī wa yumītu...`,

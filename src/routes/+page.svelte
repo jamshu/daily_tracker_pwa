@@ -235,7 +235,7 @@
 
 	<div class="fade-in" style="--fade-delay:0.22s"><QuoteCard /></div>
 
-	<button class="dhikr-link fade-in" style="--fade-delay:0.22s" on:click={() => openAdhkar('afterSalah')}>
+	<button class="dhikr-link fade-in" style="--fade-delay:0.22s" on:click={() => goto(`${base}/adhkar/afterSalah`)}>
 		<span class="dl-icon">
 			<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 				<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 1 0 9.8 9.8z" />

@@ -328,7 +328,9 @@
 		background: var(--bg-soft);
 		color: var(--text);
 		font-family: inherit;
-		font-size: 0.88rem;
+		/* 16px min — anything smaller makes iOS Safari auto-zoom on focus and
+		   never zoom back out. */
+		font-size: 16px;
 	}
 	.tinput:focus {
 		outline: none;
@@ -354,7 +356,7 @@
 		max-width: 100%;
 		-webkit-appearance: none;
 		appearance: none;
-		font-size: 0.84rem;
+		font-size: 16px;
 		padding: 7px 9px;
 	}
 	.tw-presets {

@@ -127,7 +127,8 @@
 		padding: 0 4px;
 		text-align: center;
 		font-family: var(--font-display);
-		font-size: 0.95rem;
+		/* 16px min — smaller makes iOS Safari auto-zoom on focus and stay zoomed. */
+		font-size: 16px;
 		font-weight: 600;
 		color: var(--text);
 		background: var(--bg-soft);

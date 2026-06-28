@@ -13,7 +13,9 @@
 		ensureMonth,
 		isDefaultCategory,
 		calcRow,
-		DEFAULT_CATEGORIES
+		DEFAULT_CATEGORIES,
+		OPENING_ID,
+		getOpening
 	} from '$lib/budget.js';
 
 	const todayKey = monthKey();
@@ -26,11 +28,13 @@
 	let addingCat = false;
 	let newCatName = '';
 	let saveTimer = null;
+	let addExpenseFor = null;   // catId currently adding an expense to
+	let addExpenseVal = '';
 
 	// Sync rows from store whenever month or store changes
 	$: rows = ensureMonth($budgetData, month);
 
-	$: prevHasData = Object.values(ensureMonth($budgetData, prevMonth(month))).some(v => v.budget > 0);
+	$: prevHasData = hasCopyablePrev(ensureMonth($budgetData, prevMonth(month)));
 
 	// Derived stats
 	$: catList = buildCatList(rows);
@@ -38,7 +42,19 @@
 	$: totalActual = catList.reduce((s, r) => s + (r.actual || 0), 0);
 	$: totalDiff = totalActual - totalBudget;
 	$: totalOver = totalDiff > 0;
+	$: opening = getOpening(rows);
+	$: closing = opening - totalActual;
 
+
+	function hasCopyablePrev(prevRows) {
+		// Enable copy if prev has any budgeted category OR a non-zero closing balance
+		const prevActual = Object.entries(prevRows)
+			.filter(([id]) => id !== OPENING_ID)
+			.reduce((s, [, v]) => s + (v.actual ?? 0), 0);
+		const prevClosing = getOpening(prevRows) - prevActual;
+		if (prevClosing !== 0) return true;
+		return Object.entries(prevRows).some(([id, v]) => id !== OPENING_ID && v.budget > 0);
+	}
 
 	function buildCatList(r) {
 		// Default categories first, then custom
@@ -47,7 +63,7 @@
 			all.push({ id: c.id, label: c.label, ...r[c.id] ?? { budget: 0, actual: 0 } });
 		}
 		for (const [id, val] of Object.entries(r)) {
-			if (isDefaultCategory(id)) continue;
+			if (id === OPENING_ID || isDefaultCategory(id)) continue;
 			all.push({ id, ...val, label: val.label || id });
 		}
 		return all;
@@ -83,6 +99,29 @@
 		const v = Math.max(0, parseFloat(raw) || 0);
 		rows = { ...rows, [id]: { ...rows[id], [field]: v } };
 		scheduleAutoSave();
+	}
+
+	function setOpening(raw) {
+		const v = Math.max(0, parseFloat(raw) || 0);
+		rows = { ...rows, [OPENING_ID]: { budget: v, actual: 0 } };
+		scheduleAutoSave();
+	}
+
+	function startAddExpense(id) {
+		addExpenseFor = id;
+		addExpenseVal = '';
+	}
+
+	function confirmAddExpense(id) {
+		const amt = Math.max(0, parseFloat(addExpenseVal) || 0);
+		if (amt > 0) setVal(id, 'actual', (rows[id]?.actual ?? 0) + amt);
+		addExpenseFor = null;
+		addExpenseVal = '';
+	}
+
+	function cancelAddExpense() {
+		addExpenseFor = null;
+		addExpenseVal = '';
 	}
 
 	function goPrev() {
@@ -133,9 +172,18 @@
 		const prevRows = ensureMonth($budgetData, prevKey);
 		const merged = { ...rows };
 		for (const [id, val] of Object.entries(prevRows)) {
+			if (id === OPENING_ID) continue;
 			if (val.budget > 0) {
 				merged[id] = { actual: merged[id]?.actual ?? 0, budget: val.budget, label: merged[id]?.label || val.label };
 			}
+		}
+		// Carry prev month's closing balance (opening − spent) into this month's opening
+		const prevActual = Object.entries(prevRows)
+			.filter(([id]) => id !== OPENING_ID)
+			.reduce((s, [, v]) => s + (v.actual ?? 0), 0);
+		const prevClosing = getOpening(prevRows) - prevActual;
+		if (prevClosing !== 0) {
+			merged[OPENING_ID] = { budget: getOpening(merged) + prevClosing, actual: 0 };
 		}
 		rows = merged;
 		scheduleAutoSave();
@@ -169,6 +217,28 @@
 		<span class="mlabel">{monthLabel(month)}</span>
 		<button class="mnav" on:click={goNext} disabled={month >= todayKey} aria-label="next month">›</button>
 		<button class="copy-btn" on:click={copyFromPrev} disabled={!prevHasData} title="Copy budgets from previous month">↑ Copy prev</button>
+	</div>
+
+	<!-- Opening / Closing balance -->
+	<div class="balance card">
+		<div class="bal-stat">
+			<span class="lbl">Opening</span>
+			<input
+				class="opening-input"
+				type="number"
+				min="0"
+				step="0.01"
+				value={opening}
+				inputmode="decimal"
+				on:change={(e) => setOpening(e.target.value)}
+				aria-label="opening balance"
+			/>
+		</div>
+		<div class="divider" />
+		<div class="bal-stat">
+			<span class="lbl">Closing</span>
+			<span class="big" class:over={closing < 0}>{fmt(closing)}</span>
+		</div>
 	</div>
 
 	<!-- Summary bar -->
@@ -221,15 +291,38 @@
 								/>
 							</td>
 							<td>
-								<input
-									type="number"
-									min="0"
-									step="0.01"
-									value={cat.actual}
-									inputmode="decimal"
-									on:change={(e) => setVal(cat.id, 'actual', e.target.value)}
-									aria-label="{cat.label} actual"
-								/>
+								<div class="actual-cell">
+									{#if addExpenseFor === cat.id}
+										<input
+											class="add-exp-input"
+											type="number"
+											min="0"
+											step="0.01"
+											inputmode="decimal"
+											placeholder="+ amt"
+											bind:value={addExpenseVal}
+											on:keydown={(e) => { if (e.key === 'Enter') confirmAddExpense(cat.id); if (e.key === 'Escape') cancelAddExpense(); }}
+											on:blur={() => confirmAddExpense(cat.id)}
+											autofocus
+											aria-label="add expense to {cat.label}"
+										/>
+									{:else}
+										<input
+											type="number"
+											min="0"
+											step="0.01"
+											value={cat.actual}
+											inputmode="decimal"
+											on:change={(e) => setVal(cat.id, 'actual', e.target.value)}
+											aria-label="{cat.label} actual"
+										/>
+										<button class="add-exp" on:click={() => startAddExpense(cat.id)} aria-label="add expense to {cat.label}" title="Add to actual">
+											<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M12 5v14M5 12h14" />
+											</svg>
+										</button>
+									{/if}
+								</div>
 							</td>
 							<td class="num" class:red={calc.over} class:green={!calc.over && calc.diff < 0}>{fmtDiff(calc.diff)}</td>
 							<td class="num" class:red={calc.over} class:green={calc.pct !== null && calc.pct <= 100}>{fmtPct(calc.pct)}</td>
@@ -401,6 +494,77 @@
 		height: 36px;
 		background: var(--border);
 	}
+
+	/* Opening / Closing balance */
+	.balance {
+		display: flex;
+		align-items: center;
+		padding: 16px 20px;
+		gap: 0;
+		margin-bottom: 4px;
+	}
+	.bal-stat {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 6px;
+	}
+	.opening-input {
+		width: 120px;
+		padding: 6px 8px;
+		border-radius: 8px;
+		border: 1px solid var(--border);
+		background: var(--bg-soft);
+		color: var(--text);
+		font-family: var(--font-display);
+		font-size: 1.3rem;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+		letter-spacing: -0.02em;
+		text-align: center;
+		-moz-appearance: textfield;
+	}
+	.opening-input::-webkit-outer-spin-button,
+	.opening-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+	.opening-input:focus { outline: none; border-color: var(--teal); }
+
+	/* Per-row add expense */
+	.actual-cell {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 5px;
+	}
+	.add-exp {
+		width: 22px;
+		height: 22px;
+		flex-shrink: 0;
+		border-radius: 6px;
+		display: grid;
+		place-items: center;
+		color: var(--text-faint);
+		background: var(--surface-2);
+		border: 1px solid var(--border);
+		transition: all 0.15s ease;
+	}
+	.add-exp:hover { color: var(--teal); border-color: var(--teal); }
+	.add-exp-input {
+		width: 86px;
+		padding: 5px 6px;
+		border-radius: 8px;
+		border: 1px solid var(--teal);
+		background: var(--bg-soft);
+		color: var(--text);
+		font-size: 0.88rem;
+		font-variant-numeric: tabular-nums;
+		text-align: right;
+		font-family: inherit;
+		-moz-appearance: textfield;
+	}
+	.add-exp-input::-webkit-outer-spin-button,
+	.add-exp-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+	.add-exp-input:focus { outline: none; }
 
 	/* Table */
 	.table-card {

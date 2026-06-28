@@ -22,6 +22,14 @@ export const DEFAULT_CATEGORIES = [
 
 const DEFAULT_IDS = new Set(DEFAULT_CATEGORIES.map((c) => c.id));
 
+/** Reserved pseudo-category storing the month's opening balance in its `.budget`. */
+export const OPENING_ID = '$opening';
+
+/** Read the opening balance amount from a month's rows. */
+export function getOpening(rows) {
+	return rows?.[OPENING_ID]?.budget ?? 0;
+}
+
 /** Full months map: { "YYYY-MM": { catId: { budget, actual }, ... } } */
 export const budgetData = writable({});
 

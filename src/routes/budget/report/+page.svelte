@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	import { budgetData, loadBudget, monthLabel } from '$lib/budget.js';
+	import { budgetData, loadBudget, monthLabel, OPENING_ID } from '$lib/budget.js';
 
 	function fmt(n) {
 		return Number.isFinite(n) ? n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }) : '—';
@@ -15,7 +15,9 @@
 
 	$: rows = Object.entries($budgetData)
 		.map(([key, cats]) => {
-			const values = Object.values(cats);
+			const values = Object.entries(cats)
+				.filter(([id]) => id !== OPENING_ID)
+				.map(([, c]) => c);
 			const total = values.reduce((s, c) => s + (c.actual ?? 0), 0);
 			const budget = values.reduce((s, c) => s + (c.budget ?? 0), 0);
 			return { key, total, budget, diff: total - budget };

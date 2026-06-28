@@ -212,6 +212,10 @@
 	.todo-widget {
 		display: flex;
 		flex-direction: column;
+		/* Clip full-width rows' square corners to the card radius so nothing
+		   pokes past the rounded border on any phone. */
+		overflow: hidden;
+		border-radius: var(--radius);
 	}
 	.widget-header {
 		padding: 14px 14px 6px;
@@ -341,8 +345,9 @@
 	/* Native date control has a min intrinsic width and ignores width:100% on
 	   iOS — size it to content and cap so it never overflows the row. */
 	.tdate {
-		flex: 0 0 auto;
+		flex: 0 1 auto;
 		width: auto;
+		min-width: 0;
 		max-width: 45%;
 		-webkit-appearance: none;
 		appearance: none;
@@ -375,6 +380,7 @@
 	}
 	.tw-actions {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 8px;
 	}
 	.tw-add-btn {
@@ -384,7 +390,7 @@
 		font-size: 0.84rem;
 		color: #042f2a;
 		background: var(--teal);
-		flex: 0 0 auto;
+		flex: 1 1 auto;
 	}
 	.tw-add-btn:disabled {
 		opacity: 0.5;
@@ -397,6 +403,7 @@
 		color: var(--text-dim);
 		background: var(--surface-2);
 		border: 1px solid var(--border);
+		flex: 0 1 auto;
 	}
 	.tw-new {
 		display: flex;

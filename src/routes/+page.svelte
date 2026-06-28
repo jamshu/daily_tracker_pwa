@@ -46,9 +46,13 @@
 		load();
 		loadSettings();
 		loadGroups(); // for the leaderboard invite badge
-		loadFifa();
-		loadNews();
 	});
+
+	// Only fetch widget data when the user has the widget enabled. Settings load
+	// async, so trigger reactively once they resolve; loadFifa/loadNews each guard
+	// against refetching internally.
+	$: if ($settings.showFifa) loadFifa();
+	$: if ($settings.showNews) loadNews();
 
 	async function doLogout() {
 		await logout();
@@ -223,15 +227,19 @@
 		</div>
 	</section>
 
-	<h2 class="section-title fade-in" style="--fade-delay:0.10s">FIFA World Cup 2026</h2>
-	<div class="fade-in" style="--fade-delay:0.12s">
-		<FifaCard />
-	</div>
+	{#if $settings.showFifa}
+		<h2 class="section-title fade-in" style="--fade-delay:0.10s">FIFA World Cup 2026</h2>
+		<div class="fade-in" style="--fade-delay:0.12s">
+			<FifaCard />
+		</div>
+	{/if}
 
-	<h2 class="section-title fade-in" style="--fade-delay:0.16s">World News</h2>
-	<div class="fade-in" style="--fade-delay:0.18s">
-		<NewsCard />
-	</div>
+	{#if $settings.showNews}
+		<h2 class="section-title fade-in" style="--fade-delay:0.16s">World News</h2>
+		<div class="fade-in" style="--fade-delay:0.18s">
+			<NewsCard />
+		</div>
+	{/if}
 
 	<div class="fade-in" style="--fade-delay:0.22s"><QuoteCard /></div>
 
@@ -340,10 +348,12 @@
 		</div>
 	{/if}
 
-	<h2 class="section-title fade-in" style="--fade-delay:0.52s">Notes</h2>
-	<div class="fade-in" style="--fade-delay:0.54s">
-		<NotesCard date={$selectedDate} notes={$currentNotes} />
-	</div>
+	{#if $settings.showNotes}
+		<h2 class="section-title fade-in" style="--fade-delay:0.52s">Notes</h2>
+		<div class="fade-in" style="--fade-delay:0.54s">
+			<NotesCard date={$selectedDate} notes={$currentNotes} />
+		</div>
+	{/if}
 
 	<h2 class="section-title fade-in" style="--fade-delay:0.56s">Todo</h2>
 	<div class="card fade-in" style="--fade-delay:0.58s">
@@ -364,6 +374,8 @@
 		display: flex;
 		align-items: center;
 		gap: 12px;
+		flex-wrap: wrap;
+		row-gap: 10px;
 	}
 	.logo {
 		width: 44px;
@@ -378,17 +390,25 @@
 	.brand-txt {
 		display: flex;
 		flex-direction: column;
+		flex: 1 1 auto;
+		min-width: 0;
 	}
 	h1 {
 		font-size: 1.5rem;
 		font-variation-settings: 'SOFT' 50, 'WONK' 0;
 		letter-spacing: -0.02em;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 	.greet {
 		font-family: var(--font-display);
 		font-style: italic;
 		font-size: 0.92rem;
 		color: var(--text-dim);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 	.head-right {
 		margin-left: auto;
@@ -604,6 +624,13 @@
 		}
 		.stats {
 			justify-content: center;
+		}
+		/* On phones the 5 nav buttons don't fit beside the title — drop them to
+		   their own right-aligned line so the header never overflows. */
+		.head-right {
+			width: 100%;
+			margin-left: 0;
+			justify-content: flex-end;
 		}
 	}
 </style>

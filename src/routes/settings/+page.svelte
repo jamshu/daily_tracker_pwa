@@ -12,6 +12,9 @@
 	let theme = DEFAULT_THEME;
 	let shareGlobal = false;
 	let sex = 'male';
+	let showFifa = true;
+	let showNews = true;
+	let showNotes = true;
 	let busy = false;
 	let status = ''; // '' | 'saving' | 'saved' | 'error'
 	let error = '';
@@ -45,6 +48,9 @@
 		shareGlobal = $settings.shareGlobal === true;
 		sex = $settings.sex === 'female' ? 'female' : 'male';
 		customActivities = [...($settings.customActivities ?? [])];
+		showFifa = $settings.showFifa !== false;
+		showNews = $settings.showNews !== false;
+		showNotes = $settings.showNotes !== false;
 		isAdmin = $settings.is_admin === true;
 		mounted = true;
 
@@ -70,7 +76,7 @@
 		status = 'saving';
 		error = '';
 		try {
-			await saveSettings({ activities: form, theme, shareGlobal, sex, customActivities });
+			await saveSettings({ activities: form, theme, shareGlobal, sex, customActivities, showFifa, showNews, showNotes });
 			status = 'saved';
 			setTimeout(() => { if (status === 'saved') status = ''; }, 2200);
 		} catch (e) {
@@ -288,6 +294,49 @@
 				{/if}
 			</button>
 		{/each}
+	</div>
+
+	<h2 class="section-title">Widgets</h2>
+	<div class="card">
+		<button
+			type="button"
+			class="toggle-row"
+			role="switch"
+			aria-checked={showFifa}
+			on:click={() => { showFifa = !showFifa; scheduleAutoSave(); }}
+		>
+			<span class="meta">
+				<span class="name">FIFA World Cup card</span>
+				<span class="unit">Show upcoming fixtures, results and standings on the home screen.</span>
+			</span>
+			<span class="switch" class:on={showFifa} aria-hidden="true"><span class="knob" /></span>
+		</button>
+		<button
+			type="button"
+			class="toggle-row"
+			role="switch"
+			aria-checked={showNews}
+			on:click={() => { showNews = !showNews; scheduleAutoSave(); }}
+		>
+			<span class="meta">
+				<span class="name">World News</span>
+				<span class="unit">Show the latest world headlines on the home screen.</span>
+			</span>
+			<span class="switch" class:on={showNews} aria-hidden="true"><span class="knob" /></span>
+		</button>
+		<button
+			type="button"
+			class="toggle-row"
+			role="switch"
+			aria-checked={showNotes}
+			on:click={() => { showNotes = !showNotes; scheduleAutoSave(); }}
+		>
+			<span class="meta">
+				<span class="name">Notes</span>
+				<span class="unit">Show the daily notes field on the home screen.</span>
+			</span>
+			<span class="switch" class:on={showNotes} aria-hidden="true"><span class="knob" /></span>
+		</button>
 	</div>
 
 	<h2 class="section-title">Privacy &amp; sharing</h2>

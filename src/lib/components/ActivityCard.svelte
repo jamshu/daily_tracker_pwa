@@ -12,12 +12,26 @@
 	function set(v) {
 		dispatch('set', { value: Math.max(0, v) });
 	}
+
+	// Manual entry: edit a local draft, only mirror the incoming value when not
+	// focused (so the store's round-trip can't reset the field mid-type), and
+	// commit on blur/Enter.
+	let editing = false;
+	let draft = String(value);
+	$: if (!editing) draft = String(value);
+
+	function commit() {
+		editing = false;
+		const n = Math.max(0, Math.round(Number(draft)));
+		if (Number.isFinite(n)) set(n);
+		else draft = String(value);
+	}
 </script>
 
 <div class="activity card" class:met>
 	<div class="head">
 		<span class="name">{activity.name}</span>
-		<span class="goal" class:met>{value} / {tgt} {activity.unit}</span>
+		<span class="goal" class:met>/ {tgt} {activity.unit}</span>
 	</div>
 	<div class="controls">
 		<div class="bar" style="--fill:{fill}%"><span class="fill"></span></div>
@@ -28,6 +42,17 @@
 				disabled={value <= 0}
 				aria-label={`decrease ${activity.name}`}>−</button
 			>
+			<input
+				class="num"
+				class:met
+				type="text"
+				inputmode="numeric"
+				bind:value={draft}
+				on:focus={() => (editing = true)}
+				on:blur={commit}
+				on:keydown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+				aria-label={`${activity.name} amount`}
+			/>
 			<button
 				type="button"
 				on:click={() => set(value + activity.step)}
@@ -57,6 +82,11 @@
 		font-variation-settings: 'SOFT' 40;
 		font-size: 1.12rem;
 		letter-spacing: -0.01em;
+		flex: 1;
+		min-width: 0;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 	.goal {
 		font-family: var(--font-display);
@@ -64,6 +94,8 @@
 		font-weight: 500;
 		color: var(--text-dim);
 		font-variant-numeric: tabular-nums;
+		flex: 0 0 auto;
+		white-space: nowrap;
 	}
 	.goal.met {
 		color: var(--green);
@@ -98,6 +130,35 @@
 		align-items: center;
 		gap: 6px;
 		flex: 0 0 auto;
+	}
+	.num {
+		width: 46px;
+		flex: 0 0 auto;
+		height: 30px;
+		padding: 0 4px;
+		text-align: center;
+		font-family: var(--font-display);
+		font-size: 0.95rem;
+		font-weight: 600;
+		color: var(--text);
+		background: var(--bg-soft);
+		border: 1px solid var(--border);
+		border-radius: 8px;
+		font-variant-numeric: tabular-nums;
+		-webkit-appearance: none;
+		appearance: none;
+	}
+	.num::-webkit-outer-spin-button,
+	.num::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+	.num:focus {
+		outline: none;
+		border-color: var(--teal);
+	}
+	.num.met {
+		color: var(--green);
 	}
 	.stepper button {
 		width: 30px;

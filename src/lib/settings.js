@@ -30,14 +30,17 @@ function initialTheme() {
 	return DEFAULT_THEME;
 }
 
-// { activities, theme, shareGlobal, sex, customActivities, is_admin } — effective settings.
+// { activities, theme, shareGlobal, sex, customActivities, is_admin, showFifa, showNews, showNotes } — effective settings.
 export const settings = writable({
 	activities: defaultTargets(),
 	theme: initialTheme(),
 	shareGlobal: false,
 	sex: 'male',
 	customActivities: [],
-	is_admin: false
+	is_admin: false,
+	showFifa: true,
+	showNews: true,
+	showNotes: true
 });
 
 // Apply a theme to <html> immediately and cache it for pre-paint (app.html).
@@ -71,7 +74,10 @@ export function resetSettings() {
 		shareGlobal: false,
 		sex: 'male',
 		customActivities: [],
-		is_admin: false
+		is_admin: false,
+		showFifa: true,
+		showNews: true,
+		showNotes: true
 	});
 }
 
@@ -88,7 +94,10 @@ export async function loadSettings() {
 			shareGlobal: d?.settings?.shareGlobal === true,
 			sex: coerceSex(d?.settings?.sex),
 			customActivities: Array.isArray(d?.settings?.customActivities) ? d.settings.customActivities : [],
-			is_admin: d?.settings?.is_admin === true
+			is_admin: d?.settings?.is_admin === true,
+			showFifa: d?.settings?.showFifa !== false,
+			showNews: d?.settings?.showNews !== false,
+			showNotes: d?.settings?.showNotes !== false
 		});
 		applyTheme(theme);
 	} catch {
@@ -96,11 +105,20 @@ export async function loadSettings() {
 	}
 }
 
-export async function saveSettings({ activities, theme, shareGlobal, sex, customActivities }) {
+export async function saveSettings({ activities, theme, shareGlobal, sex, customActivities, showFifa, showNews, showNotes }) {
 	const res = await fetch(`${base}/api/settings`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ activities, theme, shareGlobal: shareGlobal === true, sex: coerceSex(sex), customActivities: customActivities ?? [] })
+		body: JSON.stringify({
+			activities,
+			theme,
+			shareGlobal: shareGlobal === true,
+			sex: coerceSex(sex),
+			customActivities: customActivities ?? [],
+			showFifa: showFifa !== false,
+			showNews: showNews !== false,
+			showNotes: showNotes !== false
+		})
 	});
 	const d = await res.json().catch(() => ({}));
 	if (!res.ok || !d.ok) throw new Error(d.error || 'Could not save settings');
@@ -110,7 +128,11 @@ export async function saveSettings({ activities, theme, shareGlobal, sex, custom
 		theme: savedTheme,
 		shareGlobal: d?.settings?.shareGlobal === true,
 		sex: coerceSex(d?.settings?.sex ?? sex),
-		customActivities: Array.isArray(d?.settings?.customActivities) ? d.settings.customActivities : []
+		customActivities: Array.isArray(d?.settings?.customActivities) ? d.settings.customActivities : [],
+		is_admin: d?.settings?.is_admin === true,
+		showFifa: d?.settings?.showFifa !== false,
+		showNews: d?.settings?.showNews !== false,
+		showNotes: d?.settings?.showNotes !== false
 	});
 	applyTheme(savedTheme);
 }

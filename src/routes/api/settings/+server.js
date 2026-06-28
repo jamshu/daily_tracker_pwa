@@ -99,8 +99,12 @@ export async function POST({ request, cookies }) {
 		);
 		const sex = coerceSex(body?.sex ?? current.sex);
 		const customActivities = sanitizeCustomActivities(body?.customActivities);
+		// Widget visibility toggles — default ON (only false when explicitly turned off).
+		const showFifa = body?.showFifa !== false;
+		const showNews = body?.showNews !== false;
+		const showNotes = body?.showNotes !== false;
 		// Spread `current` first so unknown keys (e.g. is_admin, push state) survive the save.
-		const settings = { ...current, activities, theme, shareGlobal, sex, customActivities };
+		const settings = { ...current, activities, theme, shareGlobal, sex, customActivities, showFifa, showNews, showNotes };
 
 		await adminExecute('res.users', 'write', [[uid], { [SETTINGS_FIELD]: JSON.stringify(settings) }]);
 		return json({ ok: true, settings });

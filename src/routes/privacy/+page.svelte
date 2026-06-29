@@ -34,12 +34,12 @@
 
 		<section>
 			<h2>Data Retention &amp; Deletion</h2>
-			<p>Your data is retained for as long as your account is active. To request deletion of your account and all associated data, email us at <a href="mailto:devops@siafadates.com">devops@siafadates.com</a>.</p>
+			<p>Your data is retained for as long as your account is active. To request deletion of your account and all associated data, email us at <a href="mailto:support@dailytracker.odoo.com">support@dailytracker.odoo.com</a>.</p>
 		</section>
 
 		<section>
 			<h2>Contact</h2>
-			<p>Questions? <a href="mailto:devops@siafadates.com">devops@siafadates.com</a></p>
+			<p>Questions? <a href="mailto:support@dailytracker.odoo.com">support@dailytracker.odoo.com</a></p>
 		</section>
 	</article>
 </div>

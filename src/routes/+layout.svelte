@@ -62,33 +62,25 @@
 		// BEFORE any await, or iOS drops the user-activation and suppresses the prompt.
 		const handler = () => {
 			window.removeEventListener('pointerdown', handler);
-			console.log('[push] tap received — requesting permission');
 			let req;
 			try {
 				req = Notification.requestPermission();
 			} catch (e) {
-				console.error('[push] requestPermission threw:', e?.message);
 				return;
 			}
 			Promise.resolve(req).then((perm) => {
-				console.log('[push] permission result:', perm);
 				if (perm === 'granted') runPushSubscribe();
-				else console.warn('[push] not granted:', perm);
 			});
 		};
-		console.log('[push] permission default — waiting for first tap to prompt');
 		window.addEventListener('pointerdown', handler, { once: true });
 	}
 
 	function tryPushSubscribe() {
 		// On native (Capacitor), FCM handles push — VAPID/SW path is skipped entirely
 		if (isNative) return;
-		console.log('[push] tryPushSubscribe | attempted=', pushAttempted, 'supported=', pushSupported(), 'permission=', typeof Notification !== 'undefined' ? Notification.permission : 'N/A');
 		if (pushAttempted) return;
-		if (!pushSupported()) { console.warn('[push] push not supported in this browser'); return; }
-		if (Notification.permission === 'denied') { console.warn('[push] permission denied by user'); return; }
-		// Already granted → subscribe immediately (no gesture needed). Otherwise wait
-		// for a user gesture so Chrome actually shows the permission prompt.
+		if (!pushSupported()) return;
+		if (Notification.permission === 'denied') return;
 		if (Notification.permission === 'granted') runPushSubscribe();
 		else armGestureSubscribe();
 	}
@@ -97,17 +89,13 @@
 		if (pushAttempted) return;
 		pushAttempted = true;
 		try {
-			console.log('[push] registering SW…');
 			await registerSW();
 			// Always (re)subscribe + save to backend. pushManager.subscribe is idempotent
 			// when the VAPID key matches (returns the existing browser sub, no new prompt),
 			// and the subscribe endpoint upserts by deviceId — so this re-creates the Odoo
 			// row even if it was deleted server-side while the browser sub still exists.
-			console.log('[push] subscribePush — syncing subscription to backend');
 			await subscribePush();
-			console.log('[push] subscribePush done');
 		} catch (e) {
-			console.error('[push] subscribe failed:', e?.message, e);
 			pushAttempted = false;
 		}
 	}
@@ -137,7 +125,6 @@
 
 	// Subscribe to user store to catch login event (fires when $user goes undefined → object)
 	user.subscribe((u) => {
-		console.log('[push] user store changed — browser=', browser, 'user=', !!u, 'native=', isNative);
 		if (browser && u) {
 			if (isNative) initNativePush();
 			else tryPushSubscribe();

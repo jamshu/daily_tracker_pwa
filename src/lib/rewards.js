@@ -82,19 +82,19 @@ export const REWARDS = {
 	],
 	books: [
 		{
-			title: 'Spread peace among you',
-			quote: 'You will not enter Paradise until you believe, and you will not believe until you love one another. Spread salam among yourselves.',
+			title: 'Read — the first word revealed',
+			quote: 'Read! In the name of your Lord who created.',
+			source: 'Qurʼan 96:1'
+		},
+		{
+			title: 'A path to Paradise',
+			quote: 'Whoever treads a path seeking knowledge, Allah will ease for him a path to Paradise.',
 			source: 'Muslim'
 		},
 		{
-			title: 'The best of Islam',
-			quote: 'Feed the hungry and give the greeting of salam to those you know and those you do not know.',
-			source: 'Bukhari & Muslim'
-		},
-		{
-			title: 'Ten good deeds',
-			quote: 'When someone greets with "As-salamu ʻalaykum," ten good deeds are recorded for him.',
-			source: 'Abu Dawud'
+			title: 'Inheritors of the Prophets',
+			quote: 'The scholars are the inheritors of the Prophets, and the Prophets leave behind knowledge as their inheritance.',
+			source: 'Abu Dawud & Tirmidhi'
 		}
 	],
 	quran: [
@@ -116,19 +116,19 @@ export const REWARDS = {
 	],
 	sleep: [
 		{
-			title: 'Your smile is charity',
-			quote: 'Your smiling in the face of your brother is charity.',
-			source: 'Tirmidhi'
+			title: 'Sleep is a mercy',
+			quote: 'And among His signs is your sleep by night and by day, and your seeking of His bounty.',
+			source: 'Qurʼan 30:23'
 		},
 		{
-			title: 'Do not belittle any good',
-			quote: 'Do not belittle any good deed, even meeting your brother with a cheerful face.',
-			source: 'Muslim'
+			title: 'Sleep in a state of purity',
+			quote: 'Whoever sleeps in a state of purity, an angel stays with him through the night and says: O Allah, forgive Your servant, for he slept in a state of purity.',
+			source: 'Ibn Hibban'
 		},
 		{
-			title: 'A cheerful face',
-			quote: 'The Prophet ﷺ was the one who smiled the most and was the most cheerful of people.',
-			source: 'Tirmidhi'
+			title: 'Rest the body, ready the soul',
+			quote: 'Your body has a right over you — so give every deserving one their right.',
+			source: 'Bukhari'
 		}
 	],
 	hydration: [

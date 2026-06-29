@@ -144,7 +144,6 @@
 					{#if target > 1}
 						<span class="bigcount">
 							<span class="cn">{displayN}</span>
-							<span class="ct">/ {target}</span>
 						</span>
 					{/if}
 

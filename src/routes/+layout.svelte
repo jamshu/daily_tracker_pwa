@@ -145,16 +145,16 @@
 	});
 
 	$: path = $page.url.pathname.replace(base, '') || '/';
-	$: isLogin = path === '/login';
+	$: isPublic = path === '/login' || path === '/privacy';
 
 	// Redirect rules once the session check has resolved.
-	$: if (ready && $user === null && !isLogin) goto(`${base}/login`);
-	$: if (ready && $user && isLogin) goto(`${base}/`);
+	$: if (ready && $user === null && !isPublic) goto(`${base}/login`);
+	$: if (ready && $user && path === '/login') goto(`${base}/`);
 </script>
 
 {#if !ready}
 	<div class="boot"><span class="spinner" /></div>
-{:else if isLogin || $user}
+{:else if isPublic || $user}
 	<slot />
 {:else}
 	<div class="boot"><span class="spinner" /></div>

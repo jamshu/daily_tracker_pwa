@@ -1,7 +1,7 @@
 import { goto } from '$app/navigation';
 import { base } from '$app/paths';
 
-let initialized = false;
+let initPromise = null;
 
 function getDeviceId() {
 	let id = localStorage.getItem('push_device_id');
@@ -17,13 +17,15 @@ function getDeviceId() {
  * Guards against double-init. No-op on web. Must be called after user is authenticated
  * (the token registration POST to /api/push/native-register requires a valid cookie session).
  */
-export async function initNativePush() {
-	if (initialized) return;
+export function initNativePush() {
+	if (initPromise) return initPromise;
+	initPromise = _doInitNativePush();
+	return initPromise;
+}
 
+async function _doInitNativePush() {
 	const { Capacitor } = await import('@capacitor/core');
 	if (!Capacitor.isNativePlatform()) return;
-
-	initialized = true;
 
 	const { PushNotifications } = await import('@capacitor/push-notifications');
 	const platform = Capacitor.getPlatform();

@@ -321,7 +321,7 @@ export const ADHKAR = {
 				source: `Muslim`
 			},
 			ayatulKursi(`1×`, `Whoever recites it after each obligatory prayer, nothing stands between him and entering Paradise except death.`, `Al-Nasaʼi`),
-			...quls(`1× (3× Fajr/Maghrib)`, `Recited after each prayer (three times after Fajr and Maghrib) — protection that suffices against all harm.`, `Abu Dawud · Tirmidhi`),
+			...quls(`3×`, `Recited after each prayer (three times after Fajr and Maghrib) — protection that suffices against all harm.`, `Abu Dawud · Tirmidhi`),
 			{
 				ar: `لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، يُحْيِي وَيُمِيتُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ`,
 				tr: `...yuhyī wa yumītu...`,

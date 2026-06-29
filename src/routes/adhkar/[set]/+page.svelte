@@ -14,6 +14,7 @@
 
 	let active = 0;
 	let showDetails = false;
+	let pulse = false; // brief scale-pop on each tap, like the tasbeeh counter
 
 	// tap counter — only for dhikr repeated more than once (e.g. "33× each").
 	// In-memory per screen; first integer in the count string is the target.
@@ -26,6 +27,9 @@
 		const next = n + 1;
 		counts = { ...counts, [active]: next };
 		if (next % target === 0) celebrate('dhikr');
+		pulse = false;
+		// retrigger the pop animation
+		requestAnimationFrame(() => (pulse = true));
 	}
 
 	function onCard() {
@@ -114,13 +118,6 @@
 			</button>
 		</header>
 
-		{#if target > 1}
-			<button class="counter" on:click={tap} aria-label="tap counter">
-				<span class="cn">{displayN}</span>
-				<span class="ct">/ {target}</span>
-			</button>
-		{/if}
-
 		<div class="stage">
 			<button class="arrow left" on:click={() => go(-1)} aria-label="previous">‹</button>
 
@@ -128,7 +125,7 @@
 				<ImmersiveBg {variant} />
 
 				<!-- one dhikr per screen — Arabic + count, tap to reveal details -->
-				<article class="recite" on:click={onCard} role="button" tabindex="0" on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && onCard()}>
+				<article class="recite" class:pulse on:click={onCard} on:animationend={() => (pulse = false)} role="button" tabindex="0" on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && onCard()}>
 					<span class="count">{item.count}</span>
 					{#if item.bismillah}<p class="bismillah" dir="rtl" lang="ar">{item.bismillah}</p>{/if}
 					{#if item.verses}
@@ -142,6 +139,13 @@
 						</div>
 					{:else}
 						<p class="ayah" dir="rtl" lang="ar">{item.ar}</p>
+					{/if}
+
+					{#if target > 1}
+						<span class="bigcount">
+							<span class="cn">{displayN}</span>
+							<span class="ct">/ {target}</span>
+						</span>
 					{/if}
 
 					{#if showDetails}
@@ -227,30 +231,28 @@
 	.label .tr { margin: 0; font-weight: 600; font-size: 1.05rem; }
 	.label .en { margin: 0.1rem 0 0; font-size: 0.8rem; opacity: 0.65; }
 
-	.counter {
-		flex: none;
-		display: flex;
+	.bigcount {
+		display: inline-flex;
 		align-items: baseline;
-		gap: 0.3rem;
-		margin: 0.1rem 0 0.2rem;
-		padding: 0.35rem 1.1rem;
-		border-radius: 999px;
-		color: inherit;
-		background: hsl(var(--hue) 70% 50% / 0.18);
-		border: 1px solid hsl(var(--hue) 70% 60% / 0.4);
-		cursor: pointer;
-		transition: background 0.15s, transform 0.1s;
-		-webkit-tap-highlight-color: transparent;
+		gap: 0.4rem;
+		margin-top: 0.2rem;
+		transform-origin: center;
 	}
-	.counter:active { transform: scale(0.96); }
-	.counter .cn {
-		font-size: 1.6rem;
+	.recite.pulse { animation: pop 0.25s ease; }
+	@keyframes pop {
+		0% { transform: scale(1); }
+		40% { transform: scale(1.12); }
+		100% { transform: scale(1); }
+	}
+	.bigcount .cn {
+		font-size: clamp(3rem, 13vw, 4.4rem);
 		font-weight: 800;
 		line-height: 1;
 		color: hsl(var(--hue) 85% 75%);
 		font-variant-numeric: tabular-nums;
+		text-shadow: 0 1px 14px rgba(0, 0, 0, 0.5);
 	}
-	.counter .ct { font-size: 0.9rem; font-weight: 600; opacity: 0.6; }
+	.bigcount .ct { font-size: 1.1rem; font-weight: 600; opacity: 0.55; }
 
 	.stage {
 		flex: 1;
@@ -422,5 +424,6 @@
 	@media (prefers-reduced-motion: reduce) {
 		.screen { transition: none; }
 		.details { animation: none; }
+		.recite.pulse { animation: none; }
 	}
 </style>

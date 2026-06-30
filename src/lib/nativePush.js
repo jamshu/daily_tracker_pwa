@@ -50,12 +50,14 @@ async function _doInitNativePush() {
 
 	// Token received from APNs (iOS) or FCM (Android)
 	await PushNotifications.addListener('registration', async ({ value: token }) => {
+		console.log('[nativePush] token:', token.slice(0, 30));
 		try {
 			const res = await fetch(`${base}/api/push/native-register`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ token, platform, deviceId: getDeviceId() })
 			});
+			console.log('[nativePush] register POST:', res.status);
 			if (!res.ok) console.error('[nativePush] token registration failed:', res.status);
 		} catch (e) {
 			console.error('[nativePush] token registration error:', e?.message);

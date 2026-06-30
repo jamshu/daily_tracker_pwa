@@ -277,8 +277,8 @@
 		font-weight: 900;
 		letter-spacing: -0.03em;
 		line-height: 1;
-		color: #60a5fa;
-		text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+		color: #f59e0b;
+		text-shadow: 0 0 12px rgba(245, 158, 11, 0.45), 0 2px 8px rgba(0, 0, 0, 0.55);
 		animation: numPop 0.34s cubic-bezier(0.16, 1.8, 0.3, 1) both;
 	}
 

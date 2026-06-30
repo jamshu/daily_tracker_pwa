@@ -423,11 +423,11 @@
 		margin-left: auto;
 		display: flex;
 		align-items: center;
-		gap: 12px;
+		gap: 16px;
 	}
 	.logout {
-		width: 40px;
-		height: 40px;
+		width: 44px;
+		height: 44px;
 		border-radius: 11px;
 		display: grid;
 		place-items: center;
@@ -441,8 +441,8 @@
 		border-color: var(--red);
 	}
 	.gear {
-		width: 40px;
-		height: 40px;
+		width: 44px;
+		height: 44px;
 		border-radius: 11px;
 		display: grid;
 		place-items: center;

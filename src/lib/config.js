@@ -16,6 +16,22 @@ export const PRAYERS = [
 /** Marks available across all prayers: Jamāʻah + Dhikr each, + Sunnah where it applies. */
 export const PRAYER_MARKS = PRAYERS.reduce((n, p) => n + 2 + (p.hasSunnah ? 1 : 0), 0);
 
+/**
+ * Point weights — each act's contribution to the daily score. Jamāʻah is the
+ * heaviest act; home (praying alone) is a fraction of it for men and equal for
+ * women. Activities earn their weight proportionally up to target.
+ */
+export const WEIGHTS = {
+	jamath: 8,
+	homeMale: 2,
+	homeFemale: 8,
+	sunnah: 2,
+	dhikr: 2,
+	deed: 4,
+	nafl: 4,
+	activity: 2
+};
+
 /** Target-based activities. value counts toward `target` in `unit`. */
 export const ACTIVITIES = [
 	{ id: 'exercise', name: 'Exercise', unit: 'min', target: 30, step: 5 },
@@ -40,11 +56,19 @@ export const NAWAFIL = [
 ];
 
 /**
- * Total weight of a perfect day, used to scale the progress bar.
- * Prayers: Jamāʻah + Dhikr each, plus Sunnah where it applies (PRAYER_MARKS).
- * Activities: 1 each (fraction of target). Deeds + Nawafil: 1 boolean each.
+ * Total points for a perfect day, used to scale the progress bar.
+ * Sum of every act's WEIGHT: prayers (jamath + dhikr each, + sunnah where it
+ * applies), activities, deeds, and nawafil.
  */
-export const MAX_SCORE = PRAYER_MARKS + ACTIVITIES.length + DEEDS.length + NAWAFIL.length;
+const PRAYER_POINTS = PRAYERS.reduce(
+	(n, p) => n + WEIGHTS.jamath + WEIGHTS.dhikr + (p.hasSunnah ? WEIGHTS.sunnah : 0),
+	0
+);
+export const MAX_SCORE =
+	PRAYER_POINTS +
+	ACTIVITIES.length * WEIGHTS.activity +
+	DEEDS.length * WEIGHTS.deed +
+	NAWAFIL.length * WEIGHTS.nafl;
 
 /** A fresh, empty record for one day. */
 export function emptyDay() {
@@ -98,30 +122,30 @@ export function parseDay(jsonStr) {
  * Score a single day in [0, 1]. `targets` optionally overrides per-activity
  * goals (per-user settings); falls back to each activity's default target.
  * `sex` ('male' | 'female') scales the "prayed at home" attendance mark: a male
- * praying at home earns 1/5 of the Jamāʻah mark, a female earns the full mark
+ * praying at home earns WEIGHTS.homeMale, a female earns the full Jamāʻah weight
  * (praying at home is religiously equivalent for women). Defaults to male.
  */
 export function dayProgress(day, targets, sex) {
 	if (!day) return 0;
-	const homeMark = sex === 'female' ? 1 : 0.2;
+	const homeMark = sex === 'female' ? WEIGHTS.homeFemale : WEIGHTS.homeMale;
 	let score = 0;
 	for (const p of PRAYERS) {
 		const rec = day.prayers?.[p.id];
-		if (rec?.jamath) score += 1;
+		if (rec?.jamath) score += WEIGHTS.jamath;
 		else if (rec?.home) score += homeMark;
-		if (p.hasSunnah && rec?.sunnah) score += 1;
-		if (rec?.dhikr) score += 1;
+		if (p.hasSunnah && rec?.sunnah) score += WEIGHTS.sunnah;
+		if (rec?.dhikr) score += WEIGHTS.dhikr;
 	}
 	for (const a of ACTIVITIES) {
 		const target = (targets && targets[a.id]) || a.target;
 		const v = Number(day.activities?.[a.id] || 0);
-		score += Math.min(v / target, 1);
+		score += Math.min(v / target, 1) * WEIGHTS.activity;
 	}
 	for (const d of DEEDS) {
-		if (day.deeds?.[d.id]) score += 1;
+		if (day.deeds?.[d.id]) score += WEIGHTS.deed;
 	}
 	for (const n of NAWAFIL) {
-		if (day.nawafil?.[n.id]) score += 1;
+		if (day.nawafil?.[n.id]) score += WEIGHTS.nafl;
 	}
 	return Math.max(0, Math.min(score / MAX_SCORE, 1));
 }

@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import { PRAYERS, ACTIVITIES, DEEDS, NAWAFIL, PRAYER_MARKS } from '$lib/config.js';
+	import { PRAYERS, ACTIVITIES, DEEDS, NAWAFIL, PRAYER_MARKS, WEIGHTS } from '$lib/config.js';
 	import {
 		currentDay,
 		currentProgress,
@@ -108,33 +108,37 @@
 		selectedDate.set(e.detail.key);
 	}
 
-	// Toggle a prayer act; celebrate only when it's switched ON.
+	// Points a prayer act earns — drives the +N tap popup.
+	function prayerPoints(field) {
+		if (field === 'jamath') return WEIGHTS.jamath;
+		if (field === 'home') return $settings.sex === 'female' ? WEIGHTS.homeFemale : WEIGHTS.homeMale;
+		if (field === 'sunnah') return WEIGHTS.sunnah;
+		return WEIGHTS.dhikr;
+	}
+
 	function onPrayerToggle(prayer, field) {
 		const wasOn = $currentDay.prayers[prayer.id]?.[field];
 		togglePrayer($selectedDate, prayer.id, field);
-		if (!wasOn) celebrate(field);
+		if (!wasOn) celebrate(field, prayerPoints(field));
 	}
 
-	// Toggle a daily deed; celebrate when marked done.
 	function onDeedToggle(deed) {
 		const wasOn = $currentDay.deeds?.[deed.id];
 		toggleDeed($selectedDate, deed.id);
-		if (!wasOn) celebrate(deed.id);
+		if (!wasOn) celebrate(deed.id, WEIGHTS.deed);
 	}
 
-	// Toggle a voluntary prayer (Tahajjud / Duha); celebrate when marked done.
 	function onNaflToggle(nafl) {
 		const wasOn = $currentDay.nawafil?.[nafl.id];
 		toggleNafl($selectedDate, nafl.id);
-		if (!wasOn) celebrate(nafl.id);
+		if (!wasOn) celebrate(nafl.id, WEIGHTS.nafl);
 	}
 
-	// Set an activity value; celebrate the moment it reaches its target.
 	function onActivitySet(activity, value) {
 		const target = $settings.activities[activity.id] ?? activity.target;
 		const prev = $currentDay.activities[activity.id] || 0;
 		setActivity($selectedDate, activity.id, value);
-		if (prev < target && value >= target) celebrate(activity.id);
+		if (prev < target && value >= target) celebrate(activity.id, WEIGHTS.activity);
 	}
 </script>
 
@@ -232,23 +236,18 @@
 		</div>
 	</section>
 
-	{#if $settings.showFifa}
-		<h2 class="section-title fade-in" style="--fade-delay:0.10s">FIFA World Cup 2026</h2>
-		<div class="fade-in" style="--fade-delay:0.12s">
-			<FifaCard />
-		</div>
-	{/if}
+	<h2 class="section-title fade-in" style="--fade-delay:0.10s">Prayers · Jamāʻah, Sunnah &amp; Dhikr</h2>
+	<div class="card fade-in" style="--fade-delay:0.12s">
+		{#each PRAYERS as p (p.id)}
+			<PrayerCard
+				prayer={p}
+				record={$currentDay.prayers[p.id]}
+				on:toggle={(e) => onPrayerToggle(p, e.detail.field)}
+			/>
+		{/each}
+	</div>
 
-	{#if $settings.showNews}
-		<h2 class="section-title fade-in" style="--fade-delay:0.16s">World News</h2>
-		<div class="fade-in" style="--fade-delay:0.18s">
-			<NewsCard />
-		</div>
-	{/if}
-
-	<div class="fade-in" style="--fade-delay:0.22s"><QuoteCard /></div>
-
-	<button class="dhikr-link fade-in" style="--fade-delay:0.22s" on:click={() => goto(`${base}/adhkar/afterSalah`)}>
+	<button class="dhikr-link fade-in" style="--fade-delay:0.16s" on:click={() => goto(`${base}/adhkar/afterSalah`)}>
 		<span class="dl-icon">
 			<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 				<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 1 0 9.8 9.8z" />
@@ -263,7 +262,7 @@
 		</svg>
 	</button>
 
-	<button class="dhikr-link fade-in" style="--fade-delay:0.23s" on:click={() => openAdhkar('janaza')}>
+	<button class="dhikr-link fade-in" style="--fade-delay:0.17s" on:click={() => openAdhkar('janaza')}>
 		<span class="dl-icon">
 			<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 				<path d="M12 2L8 7H4l2 5-4 5h5l5 5 5-5h5l-4-5 2-5h-4L12 2z" />
@@ -278,7 +277,7 @@
 		</svg>
 	</button>
 
-	<button class="dhikr-link fade-in" style="--fade-delay:0.235s" on:click={() => goto(`${base}/recitations`)}>
+	<button class="dhikr-link fade-in" style="--fade-delay:0.18s" on:click={() => goto(`${base}/recitations`)}>
 		<span class="dl-icon">
 			<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 				<path d="M12 22s-8-4.5-8-11.5V5l8-3 8 3v5.5C20 17.5 12 22 12 22z" />
@@ -294,19 +293,8 @@
 		</svg>
 	</button>
 
-	<h2 class="section-title fade-in" style="--fade-delay:0.24s">Prayers · Jamāʻah, Sunnah &amp; Dhikr</h2>
-	<div class="card fade-in" style="--fade-delay:0.28s">
-		{#each PRAYERS as p (p.id)}
-			<PrayerCard
-				prayer={p}
-				record={$currentDay.prayers[p.id]}
-				on:toggle={(e) => onPrayerToggle(p, e.detail.field)}
-			/>
-		{/each}
-	</div>
-
-	<h2 class="section-title fade-in" style="--fade-delay:0.32s">Voluntary Prayers</h2>
-	<div class="card fade-in" style="--fade-delay:0.34s">
+	<h2 class="section-title fade-in" style="--fade-delay:0.22s">Voluntary Prayers</h2>
+	<div class="card fade-in" style="--fade-delay:0.24s">
 		{#each NAWAFIL as n (n.id)}
 			<DeedToggle
 				deed={n}
@@ -316,8 +304,8 @@
 		{/each}
 	</div>
 
-	<h2 class="section-title fade-in" style="--fade-delay:0.38s">Daily Deeds</h2>
-	<div class="card fade-in" style="--fade-delay:0.40s">
+	<h2 class="section-title fade-in" style="--fade-delay:0.28s">Daily Deeds</h2>
+	<div class="card fade-in" style="--fade-delay:0.30s">
 		{#each DEEDS as d (d.id)}
 			<DeedToggle
 				deed={d}
@@ -328,8 +316,8 @@
 		{/each}
 	</div>
 
-	<h2 class="section-title fade-in" style="--fade-delay:0.44s">Activities</h2>
-	<div class="activities fade-in" style="--fade-delay:0.46s">
+	<h2 class="section-title fade-in" style="--fade-delay:0.34s">Activities</h2>
+	<div class="activities fade-in" style="--fade-delay:0.36s">
 		{#each ACTIVITIES as a (a.id)}
 			<ActivityCard
 				activity={a}
@@ -341,8 +329,8 @@
 	</div>
 
 	{#if $settings.customActivities?.length}
-		<h2 class="section-title fade-in" style="--fade-delay:0.48s">Additional Activities</h2>
-		<div class="activities fade-in" style="--fade-delay:0.50s">
+		<h2 class="section-title fade-in" style="--fade-delay:0.40s">Additional Activities</h2>
+		<div class="activities fade-in" style="--fade-delay:0.42s">
 			{#each $settings.customActivities as a (a.id)}
 				<CustomActivityCard
 					activity={a}
@@ -354,16 +342,32 @@
 	{/if}
 
 	{#if $settings.showNotes}
-		<h2 class="section-title fade-in" style="--fade-delay:0.52s">Notes</h2>
-		<div class="fade-in" style="--fade-delay:0.54s">
+		<h2 class="section-title fade-in" style="--fade-delay:0.46s">Notes</h2>
+		<div class="fade-in" style="--fade-delay:0.48s">
 			<NotesCard date={$selectedDate} notes={$currentNotes} />
 		</div>
 	{/if}
 
-	<h2 class="section-title fade-in" style="--fade-delay:0.56s">Todo</h2>
-	<div class="card fade-in" style="--fade-delay:0.58s">
+	<h2 class="section-title fade-in" style="--fade-delay:0.52s">Todo</h2>
+	<div class="card fade-in" style="--fade-delay:0.54s">
 		<TodoWidget />
 	</div>
+
+	{#if $settings.showFifa}
+		<h2 class="section-title fade-in" style="--fade-delay:0.58s">FIFA World Cup 2026</h2>
+		<div class="fade-in" style="--fade-delay:0.60s">
+			<FifaCard />
+		</div>
+	{/if}
+
+	{#if $settings.showNews}
+		<h2 class="section-title fade-in" style="--fade-delay:0.62s">World News</h2>
+		<div class="fade-in" style="--fade-delay:0.64s">
+			<NewsCard />
+		</div>
+	{/if}
+
+	<div class="fade-in" style="--fade-delay:0.66s"><QuoteCard /></div>
 
 	<p class="foot">Synced to Backend · {$selectedDate}</p>
 </div>

@@ -1,72 +1,93 @@
 <script>
 	import { toast, dismissToast } from '$lib/toast.js';
 
-	const COLORS = ['#14b8a6', '#d6a64a', '#34d399', '#f59e0b', '#22d3ee', '#a78bfa', '#fb7185'];
+	const COLORS = ['#14b8a6', '#d6a64a', '#34d399', '#f59e0b', '#22d3ee', '#a78bfa', '#fb7185', '#fcd34d'];
 
-	let confetti = [];
-	let balloons = [];
+	let particles = [];
+	let sparkles = [];
 	let lastId = null;
 
-	// Regenerate the particles whenever a new toast appears.
 	$: if ($toast && $toast.id !== lastId) {
 		lastId = $toast.id;
-		confetti = Array.from({ length: 70 }, (_, i) => ({
+		// Round confetti dots that burst radially outward.
+		particles = Array.from({ length: 28 }, (_, i) => ({
 			id: i,
-			left: Math.random() * 100,
-			delay: Math.random() * 0.35,
-			dur: 1.8 + Math.random() * 1.6,
+			a: (i / 28) * 360 + (Math.random() * 16 - 8),
+			r0: 84 + Math.random() * 10,
+			r1: 175 + Math.random() * 110,
+			size: 5 + Math.random() * 9,
 			color: COLORS[Math.floor(Math.random() * COLORS.length)],
-			rot: (Math.random() * 6 - 3) * 360,
-			drift: (Math.random() - 0.5) * 320,
-			size: 6 + Math.random() * 8,
-			round: Math.random() > 0.6
+			dur: 0.4 + Math.random() * 0.25,
+			delay: Math.random() * 0.05,
+			round: Math.random() > 0.4
 		}));
-		balloons = Array.from({ length: 6 }, (_, i) => ({
+		// A few twinkling stars that pop near the circle edge.
+		sparkles = Array.from({ length: 7 }, (_, i) => ({
 			id: i,
-			left: 6 + Math.random() * 88,
-			delay: Math.random() * 0.4,
-			dur: 3 + Math.random() * 1.8,
-			color: COLORS[Math.floor(Math.random() * COLORS.length)],
-			sway: (Math.random() - 0.5) * 80
+			a: Math.random() * 360,
+			r: 70 + Math.random() * 70,
+			size: 12 + Math.random() * 10,
+			delay: Math.random() * 0.12,
+			color: COLORS[Math.floor(Math.random() * COLORS.length)]
 		}));
 	}
 </script>
 
 {#if $toast}
 	{#key $toast.id}
-		<div class="layer">
-			<div class="field" aria-hidden="true">
-				{#each confetti as c (c.id)}
-					<span
-						class="piece"
-						class:round={c.round}
-						style="left:{c.left}%; width:{c.size}px; height:{c.size}px; background:{c.color}; --delay:{c.delay}s; --dur:{c.dur}s; --rot:{c.rot}deg; --drift:{c.drift}px"
-					/>
-				{/each}
-				{#each balloons as b (b.id)}
-					<span
-						class="balloon"
-						style="left:{b.left}%; background:{b.color}; --delay:{b.delay}s; --dur:{b.dur}s; --sway:{b.sway}px"
-					/>
-				{/each}
-			</div>
+		<div class="layer" on:click={dismissToast}>
+			<div class="backdrop" />
 
-			<div
-				class="toast card"
-				role="status"
-				tabindex="0"
-				on:click={dismissToast}
-				on:keydown={(e) => (e.key === 'Enter' || e.key === 'Escape') && dismissToast()}
-			>
-				<span class="badge">
-					<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M12 2l2.6 5.6L20.5 8.4l-4.3 4 1 6L12 15.8 6.8 18.4l1-6-4.3-4 5.9-.8L12 2z" />
+			<div class="stage">
+				<!-- expanding pulse rings behind the badge -->
+				<span class="pulse" />
+				<span class="pulse pulse2" />
+
+				<!-- radial confetti dots -->
+				{#each particles as p (p.id)}
+					<span
+						class="particle"
+						class:round={p.round}
+						style="
+							--a: {p.a}deg;
+							--r0: {p.r0}px;
+							--r1: {p.r1}px;
+							--dur: {p.dur}s;
+							--delay: {p.delay}s;
+							width: {p.size}px;
+							height: {p.size}px;
+							background: {p.color};
+							box-shadow: 0 0 8px {p.color};
+						"
+					/>
+				{/each}
+
+				<!-- twinkling stars -->
+				{#each sparkles as s (s.id)}
+					<svg
+						class="sparkle"
+						viewBox="0 0 24 24"
+						style="
+							--a: {s.a}deg;
+							--r: {s.r}px;
+							--delay: {s.delay}s;
+							width: {s.size}px;
+							height: {s.size}px;
+							color: {s.color};
+							filter: drop-shadow(0 0 4px {s.color});
+						"
+					>
+						<path
+							fill="currentColor"
+							d="M12 0l2.4 7.2L22 9.6l-6 4.8 2.4 7.6L12 17.6 5.6 22l2.4-7.6-6-4.8 7.6-2.4z"
+						/>
 					</svg>
-				</span>
-				<div class="body">
-					<p class="title">{$toast.title}</p>
-					<p class="quote">{$toast.quote}</p>
-					<p class="source">— {$toast.source}</p>
+				{/each}
+
+				<!-- score badge -->
+				<div class="badge">
+					<span class="ring" />
+					<span class="score">+{$toast.points}</span>
 				</div>
 			</div>
 		</div>
@@ -78,179 +99,209 @@
 		position: fixed;
 		inset: 0;
 		z-index: 70;
-		pointer-events: none;
-		/* Clip confetti/balloons to the viewport so the toast can never add
-		   page scroll or shift content. */
-		overflow: hidden;
-		display: flex;
-		justify-content: center;
-		align-items: flex-start;
-		/* keep the toast clear of the iOS notch / status bar */
-		padding: calc(18px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-right, 0px))
-			18px calc(16px + env(safe-area-inset-left, 0px));
-	}
-	.field {
-		position: absolute;
-		inset: 0;
-		overflow: hidden;
-	}
-	.piece {
-		position: absolute;
-		top: -24px;
-		border-radius: 2px;
-		opacity: 0;
-		animation: fall var(--dur) var(--delay) cubic-bezier(0.3, 0.5, 0.6, 1) forwards;
-	}
-	.piece.round {
-		border-radius: 50%;
-	}
-	@keyframes fall {
-		0% {
-			transform: translate3d(0, -24px, 0) rotate(0deg);
-			opacity: 0;
-		}
-		10% {
-			opacity: 1;
-		}
-		100% {
-			transform: translate3d(var(--drift), 105vh, 0) rotate(var(--rot));
-			opacity: 0;
-		}
-	}
-	.balloon {
-		position: absolute;
-		bottom: -130px;
-		width: 30px;
-		height: 38px;
-		border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
-		opacity: 0;
-		box-shadow: inset -4px -5px 0 rgba(0, 0, 0, 0.12);
-		animation: rise var(--dur) var(--delay) ease-in forwards;
-	}
-	.balloon::after {
-		content: '';
-		position: absolute;
-		bottom: -9px;
-		left: 50%;
-		width: 1px;
-		height: 11px;
-		background: rgba(255, 255, 255, 0.45);
-	}
-	@keyframes rise {
-		0% {
-			transform: translate(0, 0);
-			opacity: 0;
-		}
-		15% {
-			opacity: 0.92;
-		}
-		90% {
-			opacity: 0.92;
-		}
-		100% {
-			transform: translate(var(--sway), -118vh);
-			opacity: 0;
-		}
-	}
-	.toast {
 		pointer-events: auto;
-		cursor: pointer;
-		margin-top: 10px;
-		max-width: 460px;
-		width: 100%;
-		display: flex;
-		gap: 14px;
-		padding: 16px 18px;
-		border-radius: var(--radius);
-		/* Frosted glass — translucent surface + heavy blur, adapts to theme. */
-		border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
-		background: color-mix(in srgb, var(--surface) 55%, transparent);
-		backdrop-filter: blur(18px) saturate(1.4);
-		-webkit-backdrop-filter: blur(18px) saturate(1.4);
-		box-shadow:
-			0 10px 40px rgba(0, 0, 0, 0.32),
-			inset 0 1px 0 color-mix(in srgb, var(--text) 10%, transparent);
-		animation: pop 0.5s cubic-bezier(0.18, 1.3, 0.5, 1) both;
-	}
-	@keyframes pop {
-		0% {
-			transform: translateY(-18px) scale(0.92);
-			opacity: 0;
-		}
-		60% {
-			transform: translateY(0) scale(1.02);
-		}
-		100% {
-			transform: translateY(0) scale(1);
-			opacity: 1;
-		}
-	}
-	.badge {
-		flex-shrink: 0;
-		width: 42px;
-		height: 42px;
-		border-radius: 12px;
+		overflow: hidden;
 		display: grid;
 		place-items: center;
-		color: var(--gold);
-		border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
-		background: color-mix(in srgb, var(--gold) 16%, transparent);
-		box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text) 12%, transparent);
-		animation: badge 0.9s ease-in-out;
 	}
-	@keyframes badge {
-		0%,
-		100% {
-			transform: rotate(0);
+
+	/* Soft radial darkening so the number reads on any background. */
+	.backdrop {
+		position: absolute;
+		inset: 0;
+		background: radial-gradient(
+			circle at center,
+			color-mix(in srgb, var(--gold, #d6a64a) 10%, transparent) 0%,
+			rgba(0, 0, 0, 0.28) 40%,
+			rgba(0, 0, 0, 0.12) 100%
+		);
+		backdrop-filter: blur(2px);
+		-webkit-backdrop-filter: blur(2px);
+		animation: dim 1s ease-out forwards;
+	}
+	@keyframes dim {
+		0% { opacity: 0; }
+		18% { opacity: 1; }
+		65% { opacity: 1; }
+		100% { opacity: 0; }
+	}
+
+	.stage {
+		position: relative;
+		width: 0;
+		height: 0;
+	}
+
+	/* expanding glow rings */
+	.pulse {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 150px;
+		height: 150px;
+		border-radius: 50%;
+		border: 2px solid color-mix(in srgb, var(--gold, #d6a64a) 55%, transparent);
+		transform: translate(-50%, -50%) scale(0.4);
+		opacity: 0;
+		animation: pulse 0.7s 0.02s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+	}
+	.pulse2 {
+		border-color: color-mix(in srgb, var(--green, #34d399) 50%, transparent);
+		animation-delay: 0.1s;
+	}
+	@keyframes pulse {
+		0% {
+			transform: translate(-50%, -50%) scale(0.4);
+			opacity: 0.9;
 		}
-		30% {
-			transform: rotate(-12deg) scale(1.08);
+		100% {
+			transform: translate(-50%, -50%) scale(2.4);
+			opacity: 0;
+		}
+	}
+
+	.particle {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		border-radius: 2px;
+		transform: translate(-50%, -50%) rotate(var(--a)) translateX(var(--r0)) scale(1);
+		opacity: 0;
+		animation: burst var(--dur) var(--delay) cubic-bezier(0.18, 0.9, 0.3, 1) forwards;
+	}
+	.particle.round {
+		border-radius: 50%;
+	}
+	@keyframes burst {
+		0% {
+			transform: translate(-50%, -50%) rotate(var(--a)) translateX(var(--r0)) scale(0.6);
+			opacity: 1;
+		}
+		70% {
+			opacity: 1;
+		}
+		100% {
+			transform: translate(-50%, -50%) rotate(var(--a)) translateX(var(--r1)) scale(0.3);
+			opacity: 0;
+		}
+	}
+
+	.sparkle {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%) rotate(var(--a)) translateX(var(--r)) rotate(calc(-1 * var(--a)));
+		opacity: 0;
+		animation: twinkle 0.55s var(--delay) ease-out forwards;
+	}
+	@keyframes twinkle {
+		0% {
+			opacity: 0;
+			transform: translate(-50%, -50%) rotate(var(--a)) translateX(var(--r)) rotate(calc(-1 * var(--a))) scale(0.2);
+		}
+		40% {
+			opacity: 1;
+			transform: translate(-50%, -50%) rotate(var(--a)) translateX(var(--r)) rotate(calc(-1 * var(--a))) scale(1.15);
+		}
+		100% {
+			opacity: 0;
+			transform: translate(-50%, -50%) rotate(var(--a)) translateX(var(--r)) rotate(calc(-1 * var(--a))) scale(0.6);
+		}
+	}
+
+	.badge {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 150px;
+		height: 150px;
+		transform: translate(-50%, -50%);
+		display: grid;
+		place-items: center;
+		animation: popIn 0.32s cubic-bezier(0.16, 1.6, 0.3, 1) both;
+	}
+
+	/* gradient glowing ring */
+	.ring {
+		position: absolute;
+		inset: 0;
+		border-radius: 50%;
+		padding: 2.5px;
+		background: conic-gradient(
+			from 0deg,
+			var(--gold, #d6a64a),
+			var(--green, #34d399),
+			#22d3ee,
+			var(--gold, #d6a64a)
+		);
+		-webkit-mask:
+			linear-gradient(#000 0 0) content-box,
+			linear-gradient(#000 0 0);
+		-webkit-mask-composite: xor;
+		mask:
+			linear-gradient(#000 0 0) content-box,
+			linear-gradient(#000 0 0);
+		mask-composite: exclude;
+		box-shadow:
+			0 0 28px color-mix(in srgb, var(--gold, #d6a64a) 50%, transparent),
+			inset 0 0 28px color-mix(in srgb, var(--gold, #d6a64a) 18%, transparent);
+		animation: spin 3s linear infinite;
+	}
+	@keyframes spin {
+		to { transform: rotate(360deg); }
+	}
+
+	.score {
+		font-size: 4.2rem;
+		font-weight: 900;
+		letter-spacing: -0.03em;
+		line-height: 1;
+		background: linear-gradient(135deg, #fff7d6 0%, #fcd34d 35%, #f59e0b 65%, #34d399 100%);
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+		filter: drop-shadow(0 0 22px color-mix(in srgb, #fcd34d 75%, transparent))
+			drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+		animation: numPop 0.34s cubic-bezier(0.16, 1.8, 0.3, 1) both;
+	}
+
+	@keyframes popIn {
+		0% {
+			transform: translate(-50%, -50%) scale(0.6);
+			opacity: 0;
 		}
 		60% {
-			transform: rotate(10deg) scale(1.08);
+			transform: translate(-50%, -50%) scale(1.08);
+		}
+		100% {
+			transform: translate(-50%, -50%) scale(1);
+			opacity: 1;
 		}
 	}
-	.body {
-		min-width: 0;
+	@keyframes numPop {
+		0% { transform: scale(0.4); opacity: 0; }
+		60% { transform: scale(1.15); }
+		100% { transform: scale(1); opacity: 1; }
 	}
-	.title {
-		margin: 0 0 4px;
-		font-size: 1rem;
-		font-weight: 800;
-		letter-spacing: -0.01em;
-		color: var(--text);
-	}
-	.quote {
-		margin: 0;
-		font-size: 0.95rem;
-		font-style: italic;
-		font-weight: 500;
-		line-height: 1.55;
-		color: var(--text-dim);
-	}
-	.source {
-		margin: 7px 0 0;
-		font-size: 0.8rem;
-		font-weight: 700;
-		color: var(--green);
-	}
+
 	@media (prefers-reduced-motion: reduce) {
-		.field {
+		.particle,
+		.sparkle,
+		.pulse {
 			display: none;
 		}
-		.toast {
-			animation: fadein 0.25s ease both;
-		}
-		.badge {
+		.ring {
 			animation: none;
 		}
+		.badge {
+			animation: fadein 0.25s ease both;
+		}
+		.score {
+			animation: fadein 0.25s ease both;
+		}
 		@keyframes fadein {
-			from {
-				opacity: 0;
-			}
-			to {
-				opacity: 1;
-			}
+			from { opacity: 0; }
+			to { opacity: 1; }
 		}
 	}
 </style>

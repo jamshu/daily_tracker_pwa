@@ -84,11 +84,16 @@
 					</svg>
 				{/each}
 
-				<!-- score badge -->
-				<div class="badge">
-					<span class="ring" />
-					<span class="score">+{$toast.points}</span>
-				</div>
+				{#if $toast.message}
+					<!-- motivation message (tasbeeh / dhikr set complete) -->
+					<div class="cheer">{$toast.message}</div>
+				{:else}
+					<!-- score badge -->
+					<div class="badge">
+						<span class="ring" />
+						<span class="score">+{$toast.points}</span>
+					</div>
+				{/if}
 			</div>
 		</div>
 	{/key}
@@ -221,6 +226,26 @@
 		animation: popIn 0.32s cubic-bezier(0.16, 1.6, 0.3, 1) both;
 	}
 
+	.cheer {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		max-width: min(82vw, 320px);
+		text-align: center;
+		font-size: 1.5rem;
+		font-weight: 900;
+		line-height: 1.35;
+		letter-spacing: -0.01em;
+		background: linear-gradient(135deg, #fff7d6 0%, #fcd34d 45%, #34d399 100%);
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+		filter: drop-shadow(0 0 20px color-mix(in srgb, #fcd34d 65%, transparent))
+			drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+		animation: popIn 0.34s cubic-bezier(0.16, 1.6, 0.3, 1) both;
+	}
+
 	/* gradient glowing ring */
 	.ring {
 		position: absolute;
@@ -293,10 +318,9 @@
 		.ring {
 			animation: none;
 		}
-		.badge {
-			animation: fadein 0.25s ease both;
-		}
-		.score {
+		.badge,
+		.score,
+		.cheer {
 			animation: fadein 0.25s ease both;
 		}
 		@keyframes fadein {

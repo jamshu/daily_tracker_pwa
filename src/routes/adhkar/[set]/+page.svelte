@@ -4,7 +4,7 @@
 	import { base } from '$app/paths';
 	import { page } from '$app/stores';
 	import { ADHKAR } from '$lib/adhkar.js';
-	import { celebrate } from '$lib/toast.js';
+	import { congratulate } from '$lib/toast.js';
 	import ImmersiveBg from '$lib/components/ImmersiveBg.svelte';
 	import CelebrationToast from '$lib/components/CelebrationToast.svelte';
 
@@ -26,7 +26,7 @@
 	function tap() {
 		const next = n + 1;
 		counts = { ...counts, [active]: next };
-		if (next % target === 0) celebrate('dhikr');
+		if (next % target === 0) congratulate();
 		pulse = false;
 		// retrigger the pop animation
 		requestAnimationFrame(() => (pulse = true));

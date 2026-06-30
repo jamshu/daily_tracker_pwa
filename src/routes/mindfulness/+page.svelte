@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { DHIKR, counts, loadCounts, increment, reset } from '$lib/mindfulness.js';
-	import { celebrate } from '$lib/toast.js';
+	import { congratulate } from '$lib/toast.js';
 	import CelebrationToast from '$lib/components/CelebrationToast.svelte';
 
 	let active = 0; // index into DHIKR
@@ -37,8 +37,8 @@
 	function tap() {
 		const next = count + 1;
 		increment(dhikr.id);
-		// celebrate each completed tasbih set (every multiple of the target)
-		if (dhikr.target && next % dhikr.target === 0) celebrate('dhikr');
+		// motivate on each completed tasbih set (every multiple of the target)
+		if (dhikr.target && next % dhikr.target === 0) congratulate();
 		pulse = false;
 		// retrigger the pulse animation
 		requestAnimationFrame(() => (pulse = true));

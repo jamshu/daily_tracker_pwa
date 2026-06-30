@@ -237,12 +237,8 @@
 		font-weight: 900;
 		line-height: 1.35;
 		letter-spacing: -0.01em;
-		background: linear-gradient(135deg, #fff7d6 0%, #fcd34d 45%, #34d399 100%);
-		-webkit-background-clip: text;
-		background-clip: text;
-		color: transparent;
-		filter: drop-shadow(0 0 20px color-mix(in srgb, #fcd34d 65%, transparent))
-			drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+		color: #f8fafc;
+		text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
 		animation: popIn 0.34s cubic-bezier(0.16, 1.6, 0.3, 1) both;
 	}
 
@@ -281,12 +277,8 @@
 		font-weight: 900;
 		letter-spacing: -0.03em;
 		line-height: 1;
-		background: linear-gradient(135deg, #fff7d6 0%, #fcd34d 35%, #f59e0b 65%, #34d399 100%);
-		-webkit-background-clip: text;
-		background-clip: text;
-		color: transparent;
-		filter: drop-shadow(0 0 22px color-mix(in srgb, #fcd34d 75%, transparent))
-			drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+		color: #60a5fa;
+		text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
 		animation: numPop 0.34s cubic-bezier(0.16, 1.8, 0.3, 1) both;
 	}
 

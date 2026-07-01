@@ -29,7 +29,7 @@ export function congratulate(message) {
 	const text = message || CHEERS[Math.floor(Math.random() * CHEERS.length)];
 	toast.set({ id: Date.now() + Math.random(), message: text });
 	clearTimeout(timer);
-	timer = setTimeout(() => toast.set(null), 1400);
+	timer = setTimeout(() => toast.set(null), 1100);
 }
 
 export function dismissToast() {

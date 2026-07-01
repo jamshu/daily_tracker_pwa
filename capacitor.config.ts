@@ -9,7 +9,7 @@ const config: CapacitorConfig = {
 		cleartext: false,
 		allowNavigation: ['deedapp.net', '*.deedapp.net']
 	},
-	ios: { contentInset: 'always', backgroundColor: '#0b1120' },
+	ios: { contentInset: 'never', backgroundColor: '#0b1120' },
 	android: { backgroundColor: '#0b1120' },
 	plugins: {
 		SplashScreen: {

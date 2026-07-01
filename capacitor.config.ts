@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-	appId: 'com.jamshid.dailytracker',
+	appId: 'com.dailytracker.dailydeedtracker',
 	appName: 'Daily Deed Tracker',
 	webDir: 'capacitor-shell',
 	server: {

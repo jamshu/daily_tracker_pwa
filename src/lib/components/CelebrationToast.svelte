@@ -237,8 +237,9 @@
 		font-weight: 900;
 		line-height: 1.35;
 		letter-spacing: -0.01em;
-		color: #f8fafc;
-		text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+		color: #fcd34d;
+		text-shadow: 0 0 16px rgba(252, 211, 77, 0.55), 0 0 32px rgba(245, 158, 11, 0.35),
+			0 2px 8px rgba(0, 0, 0, 0.55);
 		animation: popIn 0.34s cubic-bezier(0.16, 1.6, 0.3, 1) both;
 	}
 

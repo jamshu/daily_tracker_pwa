@@ -6,11 +6,10 @@ export const prerender = false;
 
 const SUB_MODEL = 'x_push_subscription';
 
-// Store a native FCM/APNs registration token in the same x_push_subscription model.
-// We reuse the VAPID subscription fields with a type marker:
-//   x_studio_endpoint     = FCM registration token
+// Store a native APNs/FCM token in x_push_subscription.
+//   x_studio_endpoint     = device token
 //   x_studio_keys_p256dh  = platform ('android' | 'ios')
-//   x_studio_keys_auth    = 'fcm'  ← type discriminator (server/push.js routes on this)
+//   x_studio_keys_auth    = platform  ← routing key: 'ios' → APNs, 'android' → FCM
 export async function POST({ request, cookies }) {
 	try {
 		const uid = await requireUid(cookies);
@@ -18,7 +17,6 @@ export async function POST({ request, cookies }) {
 		if (!token || !platform || !deviceId) {
 			return json({ ok: false, error: 'token, platform, deviceId required' }, { status: 400 });
 		}
-		// Upsert: remove any existing record for this device, then create fresh
 		const existing = await adminExecute(SUB_MODEL, 'search', [
 			[
 				['x_studio_user_id', '=', uid],
@@ -28,11 +26,11 @@ export async function POST({ request, cookies }) {
 		if (existing.length) await adminExecute(SUB_MODEL, 'unlink', [existing]);
 		await adminExecute(SUB_MODEL, 'create', [
 			{
-				x_name: `fcm_${deviceId.slice(0, 8)}`,
+				x_name: `native_${deviceId.slice(0, 8)}`,
 				x_studio_user_id: uid,
 				x_studio_endpoint: token,
 				x_studio_keys_p256dh: platform,
-				x_studio_keys_auth: 'fcm',
+				x_studio_keys_auth: platform,
 				x_studio_device_id: deviceId
 			}
 		]);

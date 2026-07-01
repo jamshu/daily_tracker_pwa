@@ -28,7 +28,7 @@ export async function POST({ request, cookies }) {
 			{
 				x_name: `native_${deviceId.slice(0, 8)}`,
 				x_studio_user_id: uid,
-				x_studio_endpoint: token,
+				x_studio_endpoint: platform === 'ios' ? token.toLowerCase() : token,
 				x_studio_keys_p256dh: platform,
 				x_studio_keys_auth: platform,
 				x_studio_device_id: deviceId

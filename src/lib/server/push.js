@@ -187,7 +187,7 @@ function sendAPNs(deviceToken, payload) {
 
 		const req = client.request({
 			':method': 'POST',
-			':path': `/3/device/${deviceToken}`,
+			':path': `/3/device/${deviceToken.toLowerCase()}`,
 			'authorization': `bearer ${jwt}`,
 			'apns-topic': bundleId,
 			'apns-push-type': 'alert',

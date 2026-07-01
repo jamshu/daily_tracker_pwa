@@ -298,6 +298,8 @@
 
 	<h2 class="section-title">Widgets</h2>
 	<div class="card">
+		<!-- ponytail: FIFA + News toggles temporarily hidden (App Store). Change to {#if true} to restore. -->
+		{#if false}
 		<button
 			type="button"
 			class="toggle-row"
@@ -324,6 +326,7 @@
 			</span>
 			<span class="switch" class:on={showNews} aria-hidden="true"><span class="knob" /></span>
 		</button>
+		{/if}
 		<button
 			type="button"
 			class="toggle-row"

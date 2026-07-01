@@ -51,8 +51,9 @@
 	// Only fetch widget data when the user has the widget enabled. Settings load
 	// async, so trigger reactively once they resolve; loadFifa/loadNews each guard
 	// against refetching internally.
-	$: if ($settings.showFifa) loadFifa();
-	$: if ($settings.showNews) loadNews();
+	// ponytail: FIFA + News widgets temporarily disabled (App Store). Remove `false &&` to restore.
+	$: if (false && $settings.showFifa) loadFifa();
+	$: if (false && $settings.showNews) loadNews();
 
 	async function doLogout() {
 		await logout();
@@ -353,14 +354,15 @@
 		<TodoWidget />
 	</div>
 
-	{#if $settings.showFifa}
+	<!-- ponytail: FIFA + News widgets temporarily disabled (App Store). Remove `false &&` to restore. -->
+	{#if false && $settings.showFifa}
 		<h2 class="section-title fade-in" style="--fade-delay:0.58s">FIFA World Cup 2026</h2>
 		<div class="fade-in" style="--fade-delay:0.60s">
 			<FifaCard />
 		</div>
 	{/if}
 
-	{#if $settings.showNews}
+	{#if false && $settings.showNews}
 		<h2 class="section-title fade-in" style="--fade-delay:0.62s">World News</h2>
 		<div class="fade-in" style="--fade-delay:0.64s">
 			<NewsCard />

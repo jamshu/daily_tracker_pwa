@@ -12,7 +12,6 @@
 		togglePrayer,
 		setActivity,
 		setCustomActivity,
-		markMissed,
 		toggleDeed,
 		toggleNafl,
 		load
@@ -357,9 +356,7 @@
 				activity={a}
 				value={$currentDay.activities[a.id] || 0}
 				target={$settings.activities[a.id]}
-				missed={$currentDay.missed?.[a.id] || false}
 				on:set={(e) => onActivitySet(a, e.detail.value)}
-				on:missed={() => markMissed($selectedDate, a.id, false, $settings.activities[a.id] ?? a.target)}
 			/>
 		{/each}
 	</div>
@@ -372,9 +369,7 @@
 					<CustomActivityCard
 						activity={{ id: a.id, name: a.name, unit: a.goal.unit, target: a.goal.value }}
 						value={$currentDay.customActivities?.[dayKey(a)] ?? 0}
-						missed={$currentDay.missed?.[dayKey(a)] || false}
 						on:set={(e) => onCustomSet(a, e.detail.value)}
-						on:missed={() => markMissed($selectedDate, dayKey(a), true, a.goal.value)}
 						on:delete={() => deleteActivity(a.id)}
 					/>
 				{:else}

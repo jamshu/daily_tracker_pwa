@@ -3,7 +3,6 @@
 	export let activity; // { id, name, unit, target, step }
 	export let value = 0;
 	export let target = null; // per-user override; falls back to activity.target
-	export let missed = false; // intentionally-not-done flag (red state)
 	const dispatch = createEventDispatcher();
 
 	$: tgt = target ?? activity.target;
@@ -16,15 +15,22 @@
 	}
 	const add = (n) => set(value + n);
 	const complete = () => set(tgt);
-	const miss = () => dispatch('missed');
+
+	// Tap the card to reveal the quick-add + Completed buttons (keeps the list tidy).
+	let expanded = false;
+	const toggle = () => (expanded = !expanded);
 </script>
 
-<div class="activity card" class:met class:missed>
-	<div class="head">
+<div class="activity card" class:met>
+	<div
+		class="head"
+		role="button"
+		tabindex="0"
+		on:click={toggle}
+		on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), toggle())}
+	>
 		<span class="name">{activity.name}</span>
-		<span class="goal" class:met class:missed>
-			{#if missed}Missed{:else}{value}/{tgt} {activity.unit}{/if}
-		</span>
+		<span class="goal" class:met>{value}/{tgt} {activity.unit}</span>
 	</div>
 
 	<input
@@ -33,19 +39,20 @@
 		min="0"
 		max={tgt}
 		step="1"
-		value={missed ? 0 : value}
-		style="--fill:{missed ? 0 : fill}%"
+		{value}
+		style="--fill:{fill}%"
 		on:input={(e) => set(Number(e.currentTarget.value))}
 		aria-label={`${activity.name} amount`}
 	/>
 
-	<div class="actions">
-		<button type="button" class="add" on:click={() => add(1)}>+1</button>
-		<button type="button" class="add" on:click={() => add(3)}>+3</button>
-		<button type="button" class="add" on:click={() => add(5)}>+5</button>
-		<button type="button" class="done" on:click={complete}>Completed</button>
-		<button type="button" class="miss" class:on={missed} on:click={miss}>Missed</button>
-	</div>
+	{#if expanded}
+		<div class="actions">
+			<button type="button" class="add" on:click={() => add(1)}>+1</button>
+			<button type="button" class="add" on:click={() => add(3)}>+3</button>
+			<button type="button" class="add" on:click={() => add(5)}>+5</button>
+			<button type="button" class="done" on:click={complete}>Completed</button>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -60,6 +67,7 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: 12px;
+		cursor: pointer;
 	}
 	.name {
 		font-family: var(--font-display);
@@ -85,10 +93,6 @@
 	}
 	.goal.met {
 		color: var(--green);
-		font-weight: 600;
-	}
-	.goal.missed {
-		color: var(--red, #ef4444);
 		font-weight: 600;
 	}
 
@@ -160,13 +164,5 @@
 	}
 	.actions .done:hover {
 		background: var(--teal-deep);
-	}
-	.actions .miss {
-		color: var(--red, #ef4444);
-	}
-	.actions .miss.on {
-		background: var(--red, #ef4444);
-		color: #fff;
-		border-color: var(--red, #ef4444);
 	}
 </style>

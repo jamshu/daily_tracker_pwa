@@ -113,6 +113,28 @@ export async function load() {
 	}
 }
 
+/**
+ * Fetch parsed day records for a date range (for the Report — separate from the
+ * 35-day `records` feed). `start` omitted = all-time (no lower bound).
+ * Returns [{ date, data }] parsed via parseDay. Best-effort; throws on failure.
+ */
+export async function loadReportRange(start, end) {
+	const domain = [['x_studio_date', '<=', end]];
+	if (start) domain.unshift(['x_studio_date', '>=', start]);
+	const rows = await odooClient.searchRecords(domain, FIELDS);
+	const myUid = get(user)?.uid;
+	const out = [];
+	for (const row of rows) {
+		if (!row.x_studio_date) continue;
+		if (myUid != null && row.create_uid) {
+			const owner = Array.isArray(row.create_uid) ? row.create_uid[0] : row.create_uid;
+			if (owner !== myUid) continue;
+		}
+		out.push({ date: row.x_studio_date, data: parseData(row.x_studio_json) });
+	}
+	return out;
+}
+
 /* -------------------------------- saving --------------------------------- */
 
 const timers = {}; // dateKey -> debounce timer
@@ -166,15 +188,19 @@ function mutate(date, fn) {
 	scheduleSave(date);
 }
 
+// Attendance is a single choice per prayer — exactly one of these (or none).
+const ATTENDANCE = ['jamath', 'home', 'late', 'missed'];
+
 export function togglePrayer(date, prayerId, field) {
 	mutate(date, (r) => {
 		if (!r.data.prayers[prayerId])
-			r.data.prayers[prayerId] = { jamath: false, home: false, sunnah: false, dhikr: false };
+			r.data.prayers[prayerId] = { jamath: false, home: false, late: false, missed: false, sunnah: false, dhikr: false };
 		const rec = r.data.prayers[prayerId];
 		rec[field] = !rec[field];
-		// Jamāʻah and Home are mutually exclusive — a prayer is prayed in one place.
-		if (field === 'jamath' && rec.jamath) rec.home = false;
-		if (field === 'home' && rec.home) rec.jamath = false;
+		// Attendance states are mutually exclusive — turning one on clears the rest.
+		if (rec[field] && ATTENDANCE.includes(field)) {
+			for (const f of ATTENDANCE) if (f !== field) rec[f] = false;
+		}
 	});
 }
 

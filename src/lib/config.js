@@ -25,6 +25,7 @@ export const WEIGHTS = {
 	jamath: 8,
 	homeMale: 2,
 	homeFemale: 8,
+	late: 1, // prayed late — partial credit in the attendance slot (missed = 0)
 	sunnah: 2,
 	dhikr: 2,
 	deed: 4,
@@ -73,7 +74,7 @@ export const MAX_SCORE =
 /** A fresh, empty record for one day. */
 export function emptyDay() {
 	const prayers = {};
-	for (const p of PRAYERS) prayers[p.id] = { jamath: false, home: false, sunnah: false, dhikr: false };
+	for (const p of PRAYERS) prayers[p.id] = { jamath: false, home: false, late: false, missed: false, sunnah: false, dhikr: false };
 	const activities = {};
 	for (const a of ACTIVITIES) activities[a.id] = 0;
 	const deeds = {};
@@ -99,6 +100,8 @@ export function parseDay(jsonStr) {
 					base.prayers[id] = {
 						jamath: !!o.prayers[id].jamath,
 						home: !!o.prayers[id].home,
+						late: !!o.prayers[id].late,
+						missed: !!o.prayers[id].missed,
 						sunnah: !!o.prayers[id].sunnah,
 						dhikr: !!o.prayers[id].dhikr
 					};
@@ -149,6 +152,7 @@ export function dayProgress(day, targets, sex) {
 		const rec = day.prayers?.[p.id];
 		if (rec?.jamath) score += WEIGHTS.jamath;
 		else if (rec?.home) score += homeMark;
+		else if (rec?.late) score += WEIGHTS.late; // missed → 0
 		if (p.hasSunnah && rec?.sunnah) score += WEIGHTS.sunnah;
 		if (rec?.dhikr) score += WEIGHTS.dhikr;
 	}

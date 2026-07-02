@@ -102,7 +102,7 @@
 	// summary stats for the selected day (prayers, activities, deeds)
 	$: prayerUnits = PRAYERS.reduce((n, p) => {
 		const r = $currentDay.prayers[p.id] || {};
-		return n + (r.jamath || r.home ? 1 : 0) + (p.hasSunnah && r.sunnah ? 1 : 0) + (r.dhikr ? 1 : 0);
+		return n + (r.jamath || r.home || r.late ? 1 : 0) + (p.hasSunnah && r.sunnah ? 1 : 0) + (r.dhikr ? 1 : 0);
 	}, 0);
 	$: activitiesMet = ACTIVITIES.filter(
 		(a) => ($currentDay.activities[a.id] || 0) >= ($settings.activities[a.id] ?? a.target)
@@ -135,6 +135,7 @@
 	function prayerPoints(field) {
 		if (field === 'jamath') return WEIGHTS.jamath;
 		if (field === 'home') return $settings.sex === 'female' ? WEIGHTS.homeFemale : WEIGHTS.homeMale;
+		if (field === 'late') return WEIGHTS.late;
 		if (field === 'sunnah') return WEIGHTS.sunnah;
 		return WEIGHTS.dhikr;
 	}
@@ -142,7 +143,8 @@
 	function onPrayerToggle(prayer, field) {
 		const wasOn = $currentDay.prayers[prayer.id]?.[field];
 		togglePrayer($selectedDate, prayer.id, field);
-		if (!wasOn) celebrate(field, prayerPoints(field));
+		// Celebrate scoring acts turned on; 'missed' scores 0 so no toast.
+		if (!wasOn && field !== 'missed') celebrate(field, prayerPoints(field));
 	}
 
 	function onDeedToggle(deed) {
@@ -213,6 +215,14 @@
 						<path d="M5 4H3v2a3 3 0 0 0 3 3M19 4h2v2a3 3 0 0 1-3 3" />
 					</svg>
 					{#if $pendingInviteCount}<span class="badge">{$pendingInviteCount}</span>{/if}
+				</button>
+				<button class="gear" on:click={() => goto(`${base}/report`)} title="Report" aria-label="report">
+					<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M3 3v18h18" />
+						<rect x="7" y="12" width="3" height="5" />
+						<rect x="12" y="8" width="3" height="9" />
+						<rect x="17" y="5" width="3" height="12" />
+					</svg>
 				</button>
 				<!-- ponytail: Budget temporarily hidden (App Store). Change to {#if true} to restore. -->
 				{#if false}

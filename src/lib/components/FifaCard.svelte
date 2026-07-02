@@ -414,8 +414,10 @@
 		color: var(--teal);
 		text-decoration: none;
 	}
-	.hl:hover {
-		text-decoration: underline;
+	@media (hover: hover) {
+		.hl:hover {
+			text-decoration: underline;
+		}
 	}
 	/* standings */
 	.grp-tabs {

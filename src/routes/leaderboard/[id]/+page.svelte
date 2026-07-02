@@ -183,7 +183,12 @@
 		background: var(--surface);
 		border: 1px solid var(--border);
 	}
-	.back:hover {
+	@media (hover: hover) {
+		.back:hover {
+			background: var(--surface-2);
+		}
+	}
+	.back:active {
 		background: var(--surface-2);
 	}
 	h1 {

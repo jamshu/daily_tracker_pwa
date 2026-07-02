@@ -156,7 +156,10 @@
 		color: inherit;
 		cursor: pointer;
 	}
-	.icon:hover { background: rgba(255, 255, 255, 0.16); }
+	@media (hover: hover) {
+		.icon:hover { background: rgba(255, 255, 255, 0.16); }
+	}
+	.icon:active { background: rgba(255, 255, 255, 0.16); }
 	.label { flex: 1; text-align: center; }
 	.label .tr { margin: 0; font-weight: 600; font-size: 1.05rem; }
 	.label .en { margin: 0.1rem 0 0; font-size: 0.8rem; opacity: 0.65; }
@@ -186,7 +189,10 @@
 		line-height: 1;
 		cursor: pointer;
 	}
-	.arrow:hover { color: #fff; }
+	@media (hover: hover) {
+		.arrow:hover { color: #fff; }
+	}
+	.arrow:active { color: #fff; }
 
 	/* ---- reader: card over an ambient animated backdrop ---- */
 	.reader {

@@ -369,7 +369,12 @@
 		background: var(--surface);
 		border: 1px solid var(--border);
 	}
-	.back:hover {
+	@media (hover: hover) {
+		.back:hover {
+			background: var(--surface-2);
+		}
+	}
+	.back:active {
 		background: var(--surface-2);
 	}
 	h1 {
@@ -458,7 +463,12 @@
 		place-items: center;
 		line-height: 1;
 	}
-	.stepper button:hover {
+	@media (hover: hover) {
+		.stepper button:hover {
+			background: var(--teal-deep);
+		}
+	}
+	.stepper button:active {
 		background: var(--teal-deep);
 	}
 	.stepper input {
@@ -497,7 +507,12 @@
 		color: var(--text);
 		text-align: left;
 	}
-	.theme:hover {
+	@media (hover: hover) {
+		.theme:hover {
+			background: var(--surface-2);
+		}
+	}
+	.theme:active {
 		background: var(--surface-2);
 	}
 	.theme.selected {
@@ -591,7 +606,10 @@
 		border: 1px solid var(--border);
 		padding: 0 16px;
 	}
-	.ghost:hover:not(:disabled) { border-color: var(--teal); color: var(--teal); }
+	@media (hover: hover) {
+		.ghost:hover:not(:disabled) { border-color: var(--teal); color: var(--teal); }
+	}
+	.ghost:active:not(:disabled) { border-color: var(--teal); color: var(--teal); }
 	.autosave-status {
 		min-height: 28px;
 		margin-top: 10px;

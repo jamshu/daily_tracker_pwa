@@ -50,7 +50,12 @@
 		place-items: center;
 		transition: all 0.15s ease;
 	}
-	.arrow:hover:not(:disabled) {
+	@media (hover: hover) {
+		.arrow:hover:not(:disabled) {
+			background: var(--surface-2);
+		}
+	}
+	.arrow:active:not(:disabled) {
 		background: var(--surface-2);
 	}
 	.arrow:disabled {

@@ -155,14 +155,18 @@
 	.actions .add {
 		min-width: 40px;
 	}
-	.actions .add:hover {
-		background: var(--teal-deep);
+	@media (hover: hover) {
+		.actions .add:hover {
+			background: var(--teal-deep);
+		}
 	}
 	.actions .done {
 		margin-left: auto;
 		color: var(--green);
 	}
-	.actions .done:hover {
-		background: var(--teal-deep);
+	@media (hover: hover) {
+		.actions .done:hover {
+			background: var(--teal-deep);
+		}
 	}
 </style>

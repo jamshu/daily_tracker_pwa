@@ -100,8 +100,10 @@
 		border: 1px solid var(--border);
 		transition: border-color 0.15s ease;
 	}
-	.src:hover {
-		border-color: var(--teal);
+	@media (hover: hover) {
+		.src:hover {
+			border-color: var(--teal);
+		}
 	}
 	.state {
 		padding: 22px 8px;
@@ -172,8 +174,10 @@
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}
-	.title:hover {
-		color: var(--teal);
+	@media (hover: hover) {
+		.title:hover {
+			color: var(--teal);
+		}
 	}
 	.desc {
 		margin: 0;

@@ -128,7 +128,13 @@
 		color: var(--text-dim);
 		transition: all 0.12s ease;
 	}
-	.toolbar button:hover {
+	@media (hover: hover) {
+		.toolbar button:hover {
+			background: var(--surface-2);
+			color: var(--text);
+		}
+	}
+	.toolbar button:active {
 		background: var(--surface-2);
 		color: var(--text);
 	}

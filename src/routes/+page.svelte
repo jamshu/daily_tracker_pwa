@@ -506,9 +506,16 @@
 		border: 1px solid var(--border);
 		transition: all 0.15s ease;
 	}
-	.logout:hover {
+	@media (hover: hover) {
+		.logout:hover {
+			color: var(--red);
+			border-color: var(--red);
+		}
+	}
+	.logout:active {
 		color: var(--red);
 		border-color: var(--red);
+		transform: scale(0.96);
 	}
 	.gear {
 		width: 44px;
@@ -521,9 +528,16 @@
 		border: 1px solid var(--border);
 		transition: all 0.15s ease;
 	}
-	.gear:hover {
+	@media (hover: hover) {
+		.gear:hover {
+			color: var(--text);
+			border-color: var(--teal);
+		}
+	}
+	.gear:active {
 		color: var(--text);
 		border-color: var(--teal);
+		transform: scale(0.96);
 	}
 	.trophy {
 		position: relative;
@@ -667,9 +681,16 @@
 		border: 1px dashed var(--border);
 		transition: all 0.15s ease;
 	}
-	.add-activity:hover {
+	@media (hover: hover) {
+		.add-activity:hover {
+			border-color: var(--teal);
+			color: var(--text);
+		}
+	}
+	.add-activity:active {
 		border-color: var(--teal);
 		color: var(--text);
+		transform: scale(0.99);
 	}
 	.foot {
 		text-align: center;
@@ -696,9 +717,11 @@
 		box-shadow: var(--shadow-sm);
 		transition: all 0.15s ease;
 	}
-	.dhikr-link:hover {
-		border-color: var(--teal);
-		transform: translateY(-1px);
+	@media (hover: hover) {
+		.dhikr-link:hover {
+			border-color: var(--teal);
+			transform: translateY(-1px);
+		}
 	}
 	.dhikr-link:active {
 		transform: scale(0.99);

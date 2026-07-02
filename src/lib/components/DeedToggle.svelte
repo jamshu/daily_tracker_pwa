@@ -103,9 +103,11 @@
 		border: 1px solid var(--border);
 		transition: all 0.15s ease;
 	}
-	.info:hover {
-		background: var(--surface-2);
-		color: var(--text);
+	@media (hover: hover) {
+		.info:hover {
+			background: var(--surface-2);
+			color: var(--text);
+		}
 	}
 	.info:active {
 		transform: scale(0.94);

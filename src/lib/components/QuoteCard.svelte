@@ -166,7 +166,13 @@
 		border: 1px solid var(--border);
 		transition: all 0.15s ease;
 	}
-	.iconbtn:hover:not(:disabled) {
+	@media (hover: hover) {
+		.iconbtn:hover:not(:disabled) {
+			color: var(--text);
+			background: var(--surface-2);
+		}
+	}
+	.iconbtn:active:not(:disabled) {
 		color: var(--text);
 		background: var(--surface-2);
 	}

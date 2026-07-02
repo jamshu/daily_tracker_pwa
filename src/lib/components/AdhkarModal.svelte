@@ -116,8 +116,10 @@
 		background: var(--bg-soft);
 		border: 1px solid var(--border);
 	}
-	.x:hover {
-		color: var(--text);
+	@media (hover: hover) {
+		.x:hover {
+			color: var(--text);
+		}
 	}
 	.tabs {
 		display: flex;

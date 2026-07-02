@@ -216,9 +216,11 @@
 	.back {
 		font-size: 1.6rem;
 	}
-	.x:hover,
-	.back:hover {
-		color: var(--text);
+	@media (hover: hover) {
+		.x:hover,
+		.back:hover {
+			color: var(--text);
+		}
 	}
 	.body {
 		overflow-y: auto;

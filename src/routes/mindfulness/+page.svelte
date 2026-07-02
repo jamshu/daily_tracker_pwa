@@ -272,7 +272,10 @@
 		color: inherit;
 		cursor: pointer;
 	}
-	.icon:hover { background: rgba(255, 255, 255, 0.16); }
+	@media (hover: hover) {
+		.icon:hover { background: rgba(255, 255, 255, 0.16); }
+	}
+	.icon:active { background: rgba(255, 255, 255, 0.16); }
 	.label { flex: 1; text-align: center; }
 	.label .tr { margin: 0; font-weight: 600; font-size: 1.05rem; }
 	.label .en { margin: 0.1rem 0 0; font-size: 0.8rem; opacity: 0.65; }
@@ -301,7 +304,10 @@
 		line-height: 1;
 		cursor: pointer;
 	}
-	.arrow:hover { color: #fff; }
+	@media (hover: hover) {
+		.arrow:hover { color: #fff; }
+	}
+	.arrow:active { color: #fff; }
 
 	/* ---- breathing flower (also the giant + tap target) ---- */
 	.flower {
@@ -476,7 +482,10 @@
 		cursor: pointer;
 		transition: background 0.2s, border-color 0.2s;
 	}
-	.reset:hover { background: rgba(255, 255, 255, 0.12); }
+	@media (hover: hover) {
+		.reset:hover { background: rgba(255, 255, 255, 0.12); }
+	}
+	.reset:active { background: rgba(255, 255, 255, 0.12); }
 	.reset.confirm {
 		border-color: hsl(var(--hue) 85% 60%);
 		background: hsl(var(--hue) 70% 45% / 0.35);

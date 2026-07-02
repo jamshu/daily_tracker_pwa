@@ -78,7 +78,9 @@
 		background: var(--bg-soft);
 		border: 1px solid var(--border);
 	}
-	.del:hover {
-		color: var(--red, #ef4444);
+	@media (hover: hover) {
+		.del:hover {
+			color: var(--red, #ef4444);
+		}
 	}
 </style>

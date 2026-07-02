@@ -381,7 +381,12 @@
 		place-items: center;
 		transition: filter 0.15s ease;
 	}
-	.primary:hover:not(:disabled) {
+	@media (hover: hover) {
+		.primary:hover:not(:disabled) {
+			filter: brightness(1.06);
+		}
+	}
+	.primary:active:not(:disabled) {
 		filter: brightness(1.06);
 	}
 	.primary:disabled {
@@ -406,7 +411,13 @@
 			background 0.15s ease,
 			color 0.15s ease;
 	}
-	.switch button:hover {
+	@media (hover: hover) {
+		.switch button:hover {
+			color: var(--teal-deep);
+			background: var(--bg-soft);
+		}
+	}
+	.switch button:active {
 		color: var(--teal-deep);
 		background: var(--bg-soft);
 	}

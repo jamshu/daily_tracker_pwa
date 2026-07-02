@@ -106,8 +106,10 @@
 		background: var(--bg-soft);
 		border: 1px solid var(--border);
 	}
-	.del:hover {
-		color: var(--red, #ef4444);
+	@media (hover: hover) {
+		.del:hover {
+			color: var(--red, #ef4444);
+		}
 	}
 
 	/* Slider — track shows progress fill up to the thumb via --fill. */
@@ -169,14 +171,18 @@
 	.actions .add {
 		min-width: 40px;
 	}
-	.actions .add:hover {
-		background: var(--teal-deep);
+	@media (hover: hover) {
+		.actions .add:hover {
+			background: var(--teal-deep);
+		}
 	}
 	.actions .done {
 		margin-left: auto;
 		color: var(--green);
 	}
-	.actions .done:hover {
-		background: var(--teal-deep);
+	@media (hover: hover) {
+		.actions .done:hover {
+			background: var(--teal-deep);
+		}
 	}
 </style>

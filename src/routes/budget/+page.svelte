@@ -399,7 +399,10 @@
 		background: var(--surface);
 		border: 1px solid var(--border);
 	}
-	.back:hover { background: var(--surface-2); }
+	@media (hover: hover) {
+		.back:hover { background: var(--surface-2); }
+	}
+	.back:active { background: var(--surface-2); }
 	.report-btn {
 		margin-left: auto;
 		padding: 7px 14px;
@@ -411,7 +414,10 @@
 		border: 1px solid var(--border);
 		transition: all 0.15s ease;
 	}
-	.report-btn:hover { border-color: var(--teal); color: var(--teal); }
+	@media (hover: hover) {
+		.report-btn:hover { border-color: var(--teal); color: var(--teal); }
+	}
+	.report-btn:active { border-color: var(--teal); color: var(--teal); }
 	h1 {
 		font-size: 1.6rem;
 		font-variation-settings: 'SOFT' 50;
@@ -439,7 +445,10 @@
 		place-items: center;
 		transition: all 0.15s ease;
 	}
-	.mnav:hover:not(:disabled) { border-color: var(--teal); }
+	@media (hover: hover) {
+		.mnav:hover:not(:disabled) { border-color: var(--teal); }
+	}
+	.mnav:active:not(:disabled) { border-color: var(--teal); }
 	.mnav:disabled { opacity: 0.35; }
 	.mlabel {
 		font-family: var(--font-display);
@@ -539,7 +548,10 @@
 		border: 1px solid var(--border);
 		transition: all 0.15s ease;
 	}
-	.add-exp:hover { color: var(--teal); border-color: var(--teal); }
+	@media (hover: hover) {
+		.add-exp:hover { color: var(--teal); border-color: var(--teal); }
+	}
+	.add-exp:active { color: var(--teal); border-color: var(--teal); }
 	.add-exp-input {
 		width: 86px;
 		padding: 5px 6px;
@@ -641,7 +653,10 @@
 		color: var(--text-faint);
 		transition: all 0.15s ease;
 	}
-	.del:hover { color: var(--red); background: color-mix(in srgb, var(--red) 12%, transparent); }
+	@media (hover: hover) {
+		.del:hover { color: var(--red); background: color-mix(in srgb, var(--red) 12%, transparent); }
+	}
+	.del:active { color: var(--red); background: color-mix(in srgb, var(--red) 12%, transparent); }
 
 	tfoot td {
 		padding: 10px 8px;
@@ -665,7 +680,10 @@
 		border-top: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
 		transition: color 0.15s ease;
 	}
-	.add-cat:hover { color: var(--teal); }
+	@media (hover: hover) {
+		.add-cat:hover { color: var(--teal); }
+	}
+	.add-cat:active { color: var(--teal); }
 	.add-row {
 		display: flex;
 		align-items: center;
@@ -715,7 +733,10 @@
 		white-space: nowrap;
 		transition: all 0.15s ease;
 	}
-	.copy-btn:hover:not(:disabled) { border-color: var(--teal); color: var(--teal); }
+	@media (hover: hover) {
+		.copy-btn:hover:not(:disabled) { border-color: var(--teal); color: var(--teal); }
+	}
+	.copy-btn:active:not(:disabled) { border-color: var(--teal); color: var(--teal); }
 	.copy-btn:disabled { opacity: 0.35; }
 
 	.autosave-status {

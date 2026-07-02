@@ -84,7 +84,12 @@
 		color: #5eead4;
 		text-decoration: none;
 	}
-	a:hover {
+	@media (hover: hover) {
+		a:hover {
+			text-decoration: underline;
+		}
+	}
+	a:active {
 		text-decoration: underline;
 	}
 	strong {

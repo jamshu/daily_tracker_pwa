@@ -248,7 +248,12 @@
 		color: #042f2a;
 		transition: all 0.18s ease;
 	}
-	.check:hover {
+	@media (hover: hover) {
+		.check:hover {
+			border-color: var(--green);
+		}
+	}
+	.check:active {
 		border-color: var(--green);
 	}
 	.check.checked {
@@ -294,7 +299,13 @@
 		flex: 0 0 auto;
 		transition: all 0.15s ease;
 	}
-	.del-todo:hover {
+	@media (hover: hover) {
+		.del-todo:hover {
+			color: var(--red);
+			background: color-mix(in srgb, var(--red) 12%, transparent);
+		}
+	}
+	.del-todo:active {
 		color: var(--red);
 		background: color-mix(in srgb, var(--red) 12%, transparent);
 	}
@@ -374,7 +385,13 @@
 		border: 1px solid var(--border);
 		transition: all 0.15s ease;
 	}
-	.chip:hover {
+	@media (hover: hover) {
+		.chip:hover {
+			color: var(--teal);
+			border-color: var(--teal);
+		}
+	}
+	.chip:active {
 		color: var(--teal);
 		border-color: var(--teal);
 	}
@@ -422,7 +439,12 @@
 		border-top: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
 		transition: color 0.15s ease;
 	}
-	.tw-new:hover {
+	@media (hover: hover) {
+		.tw-new:hover {
+			color: var(--teal);
+		}
+	}
+	.tw-new:active {
 		color: var(--teal);
 	}
 </style>

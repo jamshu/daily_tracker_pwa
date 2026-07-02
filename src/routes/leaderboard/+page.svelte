@@ -185,8 +185,10 @@
 		background: var(--surface);
 		border: 1px solid var(--border);
 	}
-	.back:hover {
-		background: var(--surface-2);
+	@media (hover: hover) {
+		.back:hover {
+			background: var(--surface-2);
+		}
 	}
 	h1 {
 		font-size: 1.6rem;

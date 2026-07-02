@@ -12,6 +12,7 @@
 		togglePrayer,
 		setActivity,
 		setCustomActivity,
+		markMissed,
 		toggleDeed,
 		toggleNafl,
 		load
@@ -138,7 +139,7 @@
 	function onActivitySet(activity, value) {
 		const target = $settings.activities[activity.id] ?? activity.target;
 		const prev = $currentDay.activities[activity.id] || 0;
-		setActivity($selectedDate, activity.id, value);
+		setActivity($selectedDate, activity.id, value, target);
 		if (prev < target && value >= target) celebrate(activity.id, WEIGHTS.activity);
 	}
 </script>
@@ -327,7 +328,9 @@
 				activity={a}
 				value={$currentDay.activities[a.id] || 0}
 				target={$settings.activities[a.id]}
+				missed={$currentDay.missed?.[a.id] || false}
 				on:set={(e) => onActivitySet(a, e.detail.value)}
+				on:missed={() => markMissed($selectedDate, a.id, false, $settings.activities[a.id] ?? a.target)}
 			/>
 		{/each}
 	</div>
@@ -339,7 +342,9 @@
 				<CustomActivityCard
 					activity={a}
 					value={$currentDay.customActivities?.[a.id] ?? 0}
-					on:set={(e) => setCustomActivity($selectedDate, a.id, e.detail.value)}
+					missed={$currentDay.missed?.[a.id] || false}
+					on:set={(e) => setCustomActivity($selectedDate, a.id, e.detail.value, a.target)}
+					on:missed={() => markMissed($selectedDate, a.id, true, a.target)}
 				/>
 			{/each}
 		</div>

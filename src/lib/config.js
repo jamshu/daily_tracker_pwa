@@ -80,7 +80,7 @@ export function emptyDay() {
 	for (const d of DEEDS) deeds[d.id] = false;
 	const nawafil = {};
 	for (const n of NAWAFIL) nawafil[n.id] = false;
-	return { prayers, activities, deeds, nawafil, customActivities: {} };
+	return { prayers, activities, deeds, nawafil, customActivities: {}, missed: {}, targets: {} };
 }
 
 /**
@@ -110,6 +110,20 @@ export function parseDay(jsonStr) {
 		if (o.customActivities && typeof o.customActivities === 'object' && !Array.isArray(o.customActivities)) {
 			for (const [id, v] of Object.entries(o.customActivities)) {
 				if (/^ca_[a-z0-9_]+$/.test(id)) base.customActivities[id] = Math.max(0, Number(v) || 0);
+			}
+		}
+		// `missed`: intentionally-not-done flag (UI red state). A missed activity
+		// has value 0, which already scores 0 — this never touches dayProgress.
+		if (o.missed && typeof o.missed === 'object' && !Array.isArray(o.missed)) {
+			for (const [id, v] of Object.entries(o.missed)) if (v) base.missed[id] = true;
+		}
+		// `targets`: snapshot of each activity's goal on the day it was logged, so
+		// later reports judge completion against the target that applied then (not
+		// current settings). Report-only — never used by dayProgress.
+		if (o.targets && typeof o.targets === 'object' && !Array.isArray(o.targets)) {
+			for (const [id, v] of Object.entries(o.targets)) {
+				const n = Number(v);
+				if (Number.isFinite(n) && n > 0) base.targets[id] = n;
 			}
 		}
 	} catch {

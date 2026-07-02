@@ -178,16 +178,43 @@ export function togglePrayer(date, prayerId, field) {
 	});
 }
 
-export function setActivity(date, activityId, value) {
+// `target` is the goal that applied when this was logged; snapshotted per day so
+// future reports judge completion against the then-current target (see parseDay).
+function snapshotTarget(r, id, target) {
+	if (target == null) return;
+	if (!r.data.targets) r.data.targets = {};
+	r.data.targets[id] = target;
+}
+
+export function setActivity(date, activityId, value, target = null) {
 	mutate(date, (r) => {
 		r.data.activities[activityId] = Math.max(0, Math.round(value));
+		if (r.data.missed) delete r.data.missed[activityId]; // any value clears "missed"
+		snapshotTarget(r, activityId, target);
 	});
 }
 
-export function setCustomActivity(date, id, value) {
+export function setCustomActivity(date, id, value, target = null) {
 	mutate(date, (r) => {
 		if (!r.data.customActivities) r.data.customActivities = {};
 		r.data.customActivities[id] = Math.max(0, Math.round(value));
+		if (r.data.missed) delete r.data.missed[id];
+		snapshotTarget(r, id, target);
+	});
+}
+
+/** Mark an activity (standard or custom) as intentionally missed: value 0 + red flag. */
+export function markMissed(date, id, isCustom = false, target = null) {
+	mutate(date, (r) => {
+		if (!r.data.missed) r.data.missed = {};
+		r.data.missed[id] = true;
+		if (isCustom) {
+			if (!r.data.customActivities) r.data.customActivities = {};
+			r.data.customActivities[id] = 0;
+		} else {
+			r.data.activities[id] = 0;
+		}
+		snapshotTarget(r, id, target);
 	});
 }
 

@@ -113,6 +113,22 @@
 			{/each}
 		</div>
 
+		<h2 class="section-title">Adhkār & Nawāfil</h2>
+		<div class="cards">
+			{#each Object.values(agg.deeds) as r}
+				<div class="arow">
+					<span class="aname">{r.name}</span>
+					<span class="acount"><b>{r.completed}</b>/{r.total} days</span>
+				</div>
+			{/each}
+			{#each Object.values(agg.nawafil) as r}
+				<div class="arow">
+					<span class="aname">{r.name}</span>
+					<span class="acount"><b>{r.completed}</b>/{r.total} days</span>
+				</div>
+			{/each}
+		</div>
+
 		<h2 class="section-title">Activities</h2>
 		<div class="cards">
 			{#each ACTIVITIES as a (a.id)}

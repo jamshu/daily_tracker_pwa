@@ -62,6 +62,14 @@
 	// Per-day values for custom activities are keyed by `act_<odooId>` in the day record.
 	const dayKey = (a) => `act_${a.id}`;
 
+	// Group additional activities by category for the on-screen separators.
+	$: activityGroups = groupByCategory($userActivities);
+	function groupByCategory(list) {
+		const m = {};
+		for (const a of list) (m[a.category || 'Other'] ??= []).push(a);
+		return Object.entries(m);
+	}
+
 	// Only fetch widget data when the user has the widget enabled. Settings load
 	// async, so trigger reactively once they resolve; loadFifa/loadNews each guard
 	// against refetching internally.
@@ -363,25 +371,28 @@
 
 	{#if $userActivities.length}
 		<h2 class="section-title fade-in" style="--fade-delay:0.40s">Additional Activities</h2>
-		<div class="activities fade-in" style="--fade-delay:0.42s">
-			{#each $userActivities as a (a.id)}
-				{#if a.goal}
-					<CustomActivityCard
-						activity={{ id: a.id, name: a.name, unit: a.goal.unit, target: a.goal.value }}
-						value={$currentDay.customActivities?.[dayKey(a)] ?? 0}
-						on:set={(e) => onCustomSet(a, e.detail.value)}
-						on:delete={() => deleteActivity(a.id)}
-					/>
-				{:else}
-					<BooleanActivityCard
-						activity={a}
-						done={($currentDay.customActivities?.[dayKey(a)] ?? 0) >= 1}
-						on:toggle={() => onCustomToggle(a)}
-						on:delete={() => deleteActivity(a.id)}
-					/>
-				{/if}
-			{/each}
-		</div>
+		{#each activityGroups as [category, items] (category)}
+			<h3 class="cat-sep fade-in" style="--fade-delay:0.42s">{category}</h3>
+			<div class="activities fade-in" style="--fade-delay:0.42s">
+				{#each items as a (a.id)}
+					{#if a.goal}
+						<CustomActivityCard
+							activity={{ id: a.id, name: a.name, unit: a.goal.unit, target: a.goal.value }}
+							value={$currentDay.customActivities?.[dayKey(a)] ?? 0}
+							on:set={(e) => onCustomSet(a, e.detail.value)}
+							on:delete={() => deleteActivity(a.id)}
+						/>
+					{:else}
+						<BooleanActivityCard
+							activity={a}
+							done={($currentDay.customActivities?.[dayKey(a)] ?? 0) >= 1}
+							on:toggle={() => onCustomToggle(a)}
+							on:delete={() => deleteActivity(a.id)}
+						/>
+					{/if}
+				{/each}
+			</div>
+		{/each}
 	{/if}
 
 	<button class="add-activity fade-in" style="--fade-delay:0.44s" on:click={openActivityModal}>
@@ -623,6 +634,15 @@
 	.activities {
 		display: grid;
 		gap: 10px;
+	}
+	.cat-sep {
+		margin: 14px 0 6px;
+		font-family: var(--font-display);
+		font-size: 0.78rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--text-dim);
 	}
 	.add-activity {
 		width: 100%;

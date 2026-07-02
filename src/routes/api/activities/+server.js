@@ -102,7 +102,9 @@ export async function GET({ cookies }) {
 
 		return json({
 			ok: true,
-			activities: userRows.map((r) => ({ id: r.id, name: r.x_name, goal: goalOf(r, goalMap) })),
+			activities: userRows.map((r) => ({
+				id: r.id, name: r.x_name, category: r.x_studio_category || 'Other', goal: goalOf(r, goalMap)
+			})),
 			presets: presetRows.map((r) => ({
 				id: r.id, name: r.x_name, category: r.x_studio_category || 'Other', goal: goalOf(r, goalMap)
 			}))
@@ -138,12 +140,13 @@ export async function POST({ request, cookies }) {
 			const presetId = Number(body.presetId);
 			if (!presetId) return json({ ok: false, error: 'presetId required' }, { status: 400 });
 			const [p] = await call(ACT_MODEL, 'read', [[presetId]], {
-				fields: ['x_name', 'x_studio_goal_id']
+				fields: ['x_name', 'x_studio_goal_id', 'x_studio_category']
 			});
 			if (!p) return json({ ok: false, error: 'Preset not found' }, { status: 404 });
 			const goalId = Array.isArray(p.x_studio_goal_id) ? p.x_studio_goal_id[0] : p.x_studio_goal_id;
 			const id = await call(ACT_MODEL, 'create', [{
 				x_name: p.x_name, x_studio_is_preset: false, x_studio_source_id: presetId,
+				x_studio_category: p.x_studio_category || false,
 				x_studio_goal_id: goalId || false, ...owner
 			}]);
 			return json({ ok: true, id });

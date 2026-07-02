@@ -177,6 +177,8 @@
 					</svg>
 					{#if $pendingInviteCount}<span class="badge">{$pendingInviteCount}</span>{/if}
 				</button>
+				<!-- ponytail: Budget temporarily hidden (App Store). Change to {#if true} to restore. -->
+				{#if false}
 				<button class="gear" on:click={() => goto(`${base}/budget`)} title="Budget" aria-label="budget">
 					<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<rect x="2" y="5" width="20" height="14" rx="3" />
@@ -184,6 +186,7 @@
 						<circle cx="16" cy="12" r="2" />
 					</svg>
 				</button>
+				{/if}
 				<button class="gear" on:click={() => goto(`${base}/settings`)} title="Settings" aria-label="settings">
 					<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<circle cx="12" cy="12" r="3" />

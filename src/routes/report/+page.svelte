@@ -2,11 +2,12 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	import { PRAYERS, ACTIVITIES } from '$lib/config.js';
+	import { PRAYERS, ACTIVITIES, DEEDS, NAWAFIL } from '$lib/config.js';
 	import { dateKey, loadReportRange } from '$lib/store.js';
 	import { settings, loadSettings } from '$lib/settings.js';
 	import { userActivities, loadActivities } from '$lib/activities.js';
-	import { aggregate, pct } from '$lib/report.js';
+	import { aggregate, pct, summarize } from '$lib/report.js';
+	import { displayEmoji } from '$lib/emoji.js';
 
 	const TABS = [
 		['week', 'Week'],
@@ -18,6 +19,7 @@
 	let loading = true;
 	let err = '';
 	let agg = null;
+	let sum = null;
 
 	// Calendar periods: this week (Mon→today), this month (1st→today),
 	// this year (Jan 1→today), all-time (no lower bound).
@@ -39,9 +41,11 @@
 			const { start, end } = rangeFor(tab);
 			const days = await loadReportRange(start, end);
 			agg = aggregate(days, { userActivities: $userActivities, settings: $settings });
+			sum = summarize(days, { settings: $settings });
 		} catch (e) {
 			err = e?.message || 'Could not load report';
 			agg = null;
+			sum = null;
 		} finally {
 			loading = false;
 		}
@@ -61,13 +65,19 @@
 	// Prayer segments for the stacked bar (order + colour).
 	const SEGS = [
 		['jamath', 'Jamāʻah', 'var(--teal)'],
-		['home', 'Alone', '#7c3aed'],
-		['late', 'Late', '#f59e0b'],
+		['home', 'Alone', 'var(--teal-deep)'],
+		['late', 'Late', 'var(--amber)'],
 		['missed', 'Missed', 'var(--red, #ef4444)']
 	];
 
 	// Additional (custom) activities as report rows.
-	$: extraRows = $userActivities.map((ua) => ({ key: `act_${ua.id}`, name: ua.name }));
+	$: extraRows = $userActivities.map((ua) => ({ key: `act_${ua.id}`, name: ua.name, emoji: displayEmoji(ua) }));
+
+	// Best-day date as a short human label ("2 Jul").
+	const shortDate = (key) => {
+		const [y, m, d] = key.split('-').map(Number);
+		return new Date(y, m - 1, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+	};
 </script>
 
 <svelte:head><title>Report — Daily Deed Tracker</title></svelte:head>
@@ -92,12 +102,32 @@
 	{:else if agg}
 		<p class="muted small">{agg.totalDays} day{agg.totalDays === 1 ? '' : 's'} tracked in this period.</p>
 
+		{#if sum}
+			<div class="tiles">
+				<div class="tile">
+					<span class="tile-emo emo" aria-hidden="true">🔥</span>
+					<span class="tile-big">{sum.streak}</span>
+					<span class="tile-lbl">day streak</span>
+				</div>
+				<div class="tile">
+					<span class="tile-emo emo" aria-hidden="true">🏆</span>
+					<span class="tile-big">{sum.bestDay ? Math.round(sum.bestDay.score * 100) : '—'}</span>
+					<span class="tile-lbl">{sum.bestDay ? `best · ${shortDate(sum.bestDay.date)}` : 'best day'}</span>
+				</div>
+				<div class="tile">
+					<span class="tile-emo emo" aria-hidden="true">💯</span>
+					<span class="tile-big">{sum.perfectDays}</span>
+					<span class="tile-lbl">perfect days</span>
+				</div>
+			</div>
+		{/if}
+
 		<h2 class="section-title">Prayers</h2>
 		<div class="cards">
 			{#each PRAYERS as p (p.id)}
 				{@const c = agg.prayers[p.id]}
 				<div class="card">
-					<div class="card-head"><span class="pname">{p.name}</span></div>
+					<div class="card-head"><span class="pname"><span class="emo" aria-hidden="true">{p.emoji}</span>{p.name}</span></div>
 					<div class="segbar">
 						{#each SEGS as [k, , colour]}
 							{#if c[k]}<span class="seg" style="width:{pct(c[k], agg.totalDays)}%;background:{colour}" />{/if}
@@ -115,16 +145,24 @@
 
 		<h2 class="section-title">Adhkār & Nawāfil</h2>
 		<div class="cards">
-			{#each Object.values(agg.deeds) as r}
+			{#each DEEDS as d (d.id)}
+				{@const r = agg.deeds[d.id]}
 				<div class="arow">
-					<span class="aname">{r.name}</span>
-					<span class="acount"><b>{r.completed}</b>/{r.total} days</span>
+					<div class="arow-top">
+						<span class="aname"><span class="emo" aria-hidden="true">{d.emoji}</span>{r.name}</span>
+						<span class="acount"><b>{r.completed}</b>/{r.total} days</span>
+					</div>
+					<span class="abar"><span class="abar-fill" style="width:{pct(r.completed, r.total)}%"></span></span>
 				</div>
 			{/each}
-			{#each Object.values(agg.nawafil) as r}
+			{#each NAWAFIL as n (n.id)}
+				{@const r = agg.nawafil[n.id]}
 				<div class="arow">
-					<span class="aname">{r.name}</span>
-					<span class="acount"><b>{r.completed}</b>/{r.total} days</span>
+					<div class="arow-top">
+						<span class="aname"><span class="emo" aria-hidden="true">{n.emoji}</span>{r.name}</span>
+						<span class="acount"><b>{r.completed}</b>/{r.total} days</span>
+					</div>
+					<span class="abar"><span class="abar-fill" style="width:{pct(r.completed, r.total)}%"></span></span>
 				</div>
 			{/each}
 		</div>
@@ -134,16 +172,22 @@
 			{#each ACTIVITIES as a (a.id)}
 				{@const r = agg.activities[a.id]}
 				<div class="arow">
-					<span class="aname">{r.name}</span>
-					<span class="acount"><b>{r.completed}</b>/{r.total} days</span>
+					<div class="arow-top">
+						<span class="aname"><span class="emo" aria-hidden="true">{a.emoji}</span>{r.name}</span>
+						<span class="acount"><b>{r.completed}</b>/{r.total} days</span>
+					</div>
+					<span class="abar"><span class="abar-fill" style="width:{pct(r.completed, r.total)}%"></span></span>
 				</div>
 			{/each}
 			{#each extraRows as e (e.key)}
 				{@const r = agg.activities[e.key]}
 				{#if r}
 					<div class="arow">
-						<span class="aname">{r.name}<span class="tagx">+</span></span>
-						<span class="acount"><b>{r.completed}</b>/{r.total} days</span>
+						<div class="arow-top">
+							<span class="aname"><span class="emo" aria-hidden="true">{e.emoji}</span>{r.name}<span class="tagx">+</span></span>
+							<span class="acount"><b>{r.completed}</b>/{r.total} days</span>
+						</div>
+						<span class="abar"><span class="abar-fill gold" style="width:{pct(r.completed, r.total)}%"></span></span>
 					</div>
 				{/if}
 			{/each}
@@ -201,8 +245,44 @@
 		color: var(--text-dim);
 	}
 	.tabs button.active {
-		color: #042f2a;
+		color: var(--on-accent);
 		background: linear-gradient(135deg, var(--teal), var(--green));
+	}
+	.tiles {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 10px;
+		margin-bottom: 4px;
+	}
+	.tile {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 3px;
+		padding: 14px 8px 12px;
+		background: var(--surface, var(--bg-soft));
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm, 12px);
+		text-align: center;
+	}
+	.tile-emo {
+		font-size: 1.15rem;
+	}
+	.tile-big {
+		font-family: var(--font-display);
+		font-size: 1.65rem;
+		font-weight: 600;
+		font-optical-sizing: auto;
+		font-variation-settings: 'SOFT' 40;
+		line-height: 1.1;
+		letter-spacing: -0.02em;
+		font-variant-numeric: tabular-nums;
+	}
+	.tile-lbl {
+		font-size: 0.68rem;
+		text-transform: uppercase;
+		letter-spacing: 0.07em;
+		color: var(--text-faint);
 	}
 	.muted {
 		color: var(--text-dim);
@@ -238,6 +318,10 @@
 		font-weight: 600;
 		font-size: 1.06rem;
 	}
+	.pname .emo {
+		font-size: 0.95rem;
+		margin-right: 8px;
+	}
 	.segbar {
 		display: flex;
 		height: 10px;
@@ -248,6 +332,18 @@
 	}
 	.seg {
 		height: 100%;
+		transform-origin: left;
+		animation: grow 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+	}
+	@keyframes grow {
+		from {
+			transform: scaleX(0);
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.seg {
+			animation: none;
+		}
 	}
 	.legend {
 		display: flex;
@@ -275,16 +371,50 @@
 	}
 	.arow {
 		display: flex;
-		align-items: center;
-		justify-content: space-between;
+		flex-direction: column;
+		gap: 9px;
 		background: var(--surface, var(--bg-soft));
 		border: 1px solid var(--border);
 		border-radius: var(--radius-sm, 12px);
 		padding: 12px 14px;
 	}
+	.arow-top {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+	}
 	.aname {
 		font-family: var(--font-display);
 		font-weight: 600;
+	}
+	.aname .emo {
+		font-size: 0.95rem;
+		margin-right: 8px;
+	}
+	.abar {
+		display: block;
+		height: 8px;
+		border-radius: 999px;
+		background: var(--bg-soft);
+		border: 1px solid var(--border);
+		overflow: hidden;
+	}
+	.abar-fill {
+		display: block;
+		height: 100%;
+		border-radius: 999px;
+		background: var(--teal);
+		transform-origin: left;
+		animation: grow 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+	}
+	.abar-fill.gold {
+		background: var(--gold);
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.abar-fill {
+			animation: none;
+		}
 	}
 	.tagx {
 		color: var(--teal);

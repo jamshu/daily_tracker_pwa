@@ -6,11 +6,11 @@
  * salah; most also track a Sunnah — Asr has no Sunnah, so hasSunnah is false.
  */
 export const PRAYERS = [
-	{ id: 'fajr', name: 'Fajr', hasSunnah: true, sunnah: '2 rakʻah before' },
-	{ id: 'dhuhr', name: 'Dhuhr', hasSunnah: true, sunnah: '4 before · 2 after' },
-	{ id: 'asr', name: 'Asr', hasSunnah: false, sunnah: '' },
-	{ id: 'maghrib', name: 'Maghrib', hasSunnah: true, sunnah: '2 after' },
-	{ id: 'isha', name: 'Isha', hasSunnah: true, sunnah: '2 after' }
+	{ id: 'fajr', name: 'Fajr', emoji: '🌅', hasSunnah: true, sunnah: '2 rakʻah before' },
+	{ id: 'dhuhr', name: 'Dhuhr', emoji: '☀️', hasSunnah: true, sunnah: '4 before · 2 after' },
+	{ id: 'asr', name: 'Asr', emoji: '🌤️', hasSunnah: false, sunnah: '' },
+	{ id: 'maghrib', name: 'Maghrib', emoji: '🌇', hasSunnah: true, sunnah: '2 after' },
+	{ id: 'isha', name: 'Isha', emoji: '🌙', hasSunnah: true, sunnah: '2 after' }
 ];
 
 /** Marks available across all prayers: Jamāʻah + Dhikr each, + Sunnah where it applies. */
@@ -35,25 +35,25 @@ export const WEIGHTS = {
 
 /** Target-based activities. value counts toward `target` in `unit`. */
 export const ACTIVITIES = [
-	{ id: 'exercise', name: 'Exercise', unit: 'min', target: 30, step: 5 },
-	{ id: 'books', name: 'Read Books', unit: 'min', target: 10, step: 1 },
-	{ id: 'quran', name: 'Read Qurʻan', unit: 'pages', target: 5, step: 1 },
-	{ id: 'sleep', name: 'Sleep', unit: 'hours', target: 6, step: 1 },
-	{ id: 'hydration', name: 'Hydration', unit: 'glasses', target: 8, step: 1 }
+	{ id: 'exercise', name: 'Exercise', emoji: '🏃', unit: 'min', target: 30, step: 5 },
+	{ id: 'books', name: 'Read Books', emoji: '📚', unit: 'min', target: 10, step: 1 },
+	{ id: 'quran', name: 'Read Qurʻan', emoji: '📖', unit: 'pages', target: 5, step: 1 },
+	{ id: 'sleep', name: 'Sleep', emoji: '😴', unit: 'hours', target: 6, step: 1 },
+	{ id: 'hydration', name: 'Hydration', emoji: '💧', unit: 'glasses', target: 8, step: 1 }
 ];
 
 /** Simple done / not-done daily deeds (one mark each). */
 export const DEEDS = [
-	{ id: 'adhkar_morning', name: 'Morning Adhkār', hint: 'After Fajr', guide: 'morning' },
-	{ id: 'adhkar_evening', name: 'Evening Adhkār', hint: 'After Asr / Maghrib', guide: 'evening' },
-	{ id: 'sadaqah', name: 'Sadaqah', hint: 'Charity given' }
+	{ id: 'adhkar_morning', name: 'Morning Adhkār', emoji: '🌄', hint: 'After Fajr', guide: 'morning' },
+	{ id: 'adhkar_evening', name: 'Evening Adhkār', emoji: '🌆', hint: 'After Asr / Maghrib', guide: 'evening' },
+	{ id: 'sadaqah', name: 'Sadaqah', emoji: '🤲', hint: 'Charity given' }
 ];
 
 /** Voluntary (nafl) prayers — simple done / not-done (one mark each). */
 export const NAWAFIL = [
-	{ id: 'tahajjud', name: 'Tahajjud', hint: 'Night prayer' },
-	{ id: 'duha', name: 'Duha', hint: 'Forenoon prayer' },
-	{ id: 'witr', name: 'Witr', hint: 'After Isha' }
+	{ id: 'tahajjud', name: 'Tahajjud', emoji: '🌌', hint: 'Night prayer' },
+	{ id: 'duha', name: 'Duha', emoji: '🌞', hint: 'Forenoon prayer' },
+	{ id: 'witr', name: 'Witr', emoji: '✨', hint: 'After Isha' }
 ];
 
 /**

@@ -245,7 +245,7 @@
 		display: grid;
 		place-items: center;
 		border: 2px solid var(--text-faint);
-		color: #042f2a;
+		color: var(--on-green);
 		transition: all 0.18s ease;
 	}
 	@media (hover: hover) {
@@ -410,7 +410,7 @@
 		border-radius: 8px;
 		font-weight: 700;
 		font-size: 0.84rem;
-		color: #042f2a;
+		color: var(--on-accent);
 		background: var(--teal);
 		flex: 1 1 auto;
 	}

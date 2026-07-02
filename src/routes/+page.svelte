@@ -30,6 +30,7 @@
 		openActivityModal
 	} from '$lib/activities.js';
 	import DeedToggle from '$lib/components/DeedToggle.svelte';
+	import { displayEmoji } from '$lib/emoji.js';
 	import QuoteCard from '$lib/components/QuoteCard.svelte';
 	import NotesCard from '$lib/components/NotesCard.svelte';
 	import DateNav from '$lib/components/DateNav.svelte';
@@ -92,12 +93,17 @@
 
 	const greeting = (() => {
 		const h = new Date().getHours();
-		if (h < 5) return 'Peaceful night';
-		if (h < 12) return 'Good morning';
-		if (h < 17) return 'Good afternoon';
-		if (h < 20) return 'Good evening';
-		return 'Good night';
+		if (h < 5) return { text: 'Peaceful night', emoji: '🌙' };
+		if (h < 12) return { text: 'Good morning', emoji: '🌅' };
+		if (h < 17) return { text: 'Good afternoon', emoji: '☀️' };
+		if (h < 20) return { text: 'Good evening', emoji: '🌇' };
+		return { text: 'Good night', emoji: '🌙' };
 	})();
+	const todayLabel = new Date().toLocaleDateString('en-GB', {
+		weekday: 'long',
+		day: 'numeric',
+		month: 'long'
+	});
 
 	// summary stats for the selected day (prayers, activities, deeds)
 	$: prayerUnits = PRAYERS.reduce((n, p) => {
@@ -108,6 +114,35 @@
 		(a) => ($currentDay.activities[a.id] || 0) >= ($settings.activities[a.id] ?? a.target)
 	).length;
 	$: deedsDone = DEEDS.filter((d) => $currentDay.deeds?.[d.id]).length;
+
+	// Per-bucket points for the hero breakdown — mirrors dayProgress()'s math.
+	const PRAYER_MAX = PRAYERS.reduce(
+		(n, p) => n + WEIGHTS.jamath + WEIGHTS.dhikr + (p.hasSunnah ? WEIGHTS.sunnah : 0),
+		0
+	);
+	const ACTIVITY_MAX = ACTIVITIES.length * WEIGHTS.activity;
+	const DEED_MAX = DEEDS.length * WEIGHTS.deed + NAWAFIL.length * WEIGHTS.nafl;
+	$: homeMark = $settings.sex === 'female' ? WEIGHTS.homeFemale : WEIGHTS.homeMale;
+	$: prayerPts = PRAYERS.reduce((n, p) => {
+		const r = $currentDay.prayers[p.id] || {};
+		let s = r.jamath ? WEIGHTS.jamath : r.home ? homeMark : r.late ? WEIGHTS.late : 0;
+		if (p.hasSunnah && r.sunnah) s += WEIGHTS.sunnah;
+		if (r.dhikr) s += WEIGHTS.dhikr;
+		return n + s;
+	}, 0);
+	$: activityPts = ACTIVITIES.reduce((n, a) => {
+		const target = $settings.activities[a.id] ?? a.target;
+		const v = Number($currentDay.activities[a.id] || 0);
+		return n + Math.min(v / target, 1) * WEIGHTS.activity;
+	}, 0);
+	$: deedPts =
+		DEEDS.reduce((n, d) => n + ($currentDay.deeds?.[d.id] ? WEIGHTS.deed : 0), 0) +
+		NAWAFIL.reduce((n, x) => n + ($currentDay.nawafil?.[x.id] ? WEIGHTS.nafl : 0), 0);
+	$: breakdown = [
+		{ label: 'Prayers', pts: prayerPts, max: PRAYER_MAX, color: 'var(--teal)' },
+		{ label: 'Activities', pts: activityPts, max: ACTIVITY_MAX, color: 'var(--gold)' },
+		{ label: 'Deeds & Nawāfil', pts: deedPts, max: DEED_MAX, color: 'var(--green)' }
+	];
 
 	$: message =
 		$currentProgress >= 1
@@ -131,6 +166,16 @@
 		selectedDate.set(e.detail.key);
 	}
 
+	// Perfect-day celebration — once per date per session, fired from the action
+	// handlers (never on load or date navigation) right after the store update.
+	const celebratedDays = new Set();
+	function maybePerfect() {
+		if ($currentProgress >= 1 && !celebratedDays.has($selectedDate)) {
+			celebratedDays.add($selectedDate);
+			congratulate('Māshāʼ Allāh — a perfect day! 🎉');
+		}
+	}
+
 	// Points a prayer act earns — drives the +N tap popup.
 	function prayerPoints(field) {
 		if (field === 'jamath') return WEIGHTS.jamath;
@@ -144,26 +189,38 @@
 		const wasOn = $currentDay.prayers[prayer.id]?.[field];
 		togglePrayer($selectedDate, prayer.id, field);
 		// Celebrate scoring acts turned on; 'missed' scores 0 so no toast.
-		if (!wasOn && field !== 'missed') celebrate(field, prayerPoints(field));
+		if (!wasOn && field !== 'missed') {
+			celebrate(field, prayerPoints(field));
+			maybePerfect();
+		}
 	}
 
 	function onDeedToggle(deed) {
 		const wasOn = $currentDay.deeds?.[deed.id];
 		toggleDeed($selectedDate, deed.id);
-		if (!wasOn) celebrate(deed.id, WEIGHTS.deed);
+		if (!wasOn) {
+			celebrate(deed.id, WEIGHTS.deed);
+			maybePerfect();
+		}
 	}
 
 	function onNaflToggle(nafl) {
 		const wasOn = $currentDay.nawafil?.[nafl.id];
 		toggleNafl($selectedDate, nafl.id);
-		if (!wasOn) celebrate(nafl.id, WEIGHTS.nafl);
+		if (!wasOn) {
+			celebrate(nafl.id, WEIGHTS.nafl);
+			maybePerfect();
+		}
 	}
 
 	function onActivitySet(activity, value) {
 		const target = $settings.activities[activity.id] ?? activity.target;
 		const prev = $currentDay.activities[activity.id] || 0;
 		setActivity($selectedDate, activity.id, value, target);
-		if (prev < target && value >= target) celebrate(activity.id, WEIGHTS.activity);
+		if (prev < target && value >= target) {
+			celebrate(activity.id, WEIGHTS.activity);
+			maybePerfect();
+		}
 	}
 
 	// Custom activities aren't scored, so use a message toast (not the points one)
@@ -196,7 +253,11 @@
 			</span>
 			<div class="brand-txt">
 				<h1>Daily Tracker</h1>
-				<span class="greet">{greeting}{#if $user?.name}, {$user.name}{/if}</span>
+				<span class="greet"
+					><span class="emo" aria-hidden="true">{greeting.emoji}</span>
+					{greeting.text}{#if $user?.name}, {$user.name}{/if}
+					<span class="dateline">· {todayLabel}</span></span
+				>
 			</div>
 			<div class="head-right">
 				{#if SYNC_LABEL[$syncState]}
@@ -262,7 +323,7 @@
 				<circle cx="50" cy="50" r="39" />
 			</g>
 		</svg>
-		<ProgressRing value={$currentProgress} />
+		<ProgressRing value={$currentProgress} size={184} />
 		<div class="hero-info">
 			<p class="msg">{message}</p>
 			<div class="stats">
@@ -279,6 +340,20 @@
 					<span class="lbl">deeds done</span>
 				</div>
 			</div>
+			<div class="breakdown">
+				{#each breakdown as b (b.label)}
+					<div class="brow">
+						<span class="brow-lbl">{b.label}</span>
+						<span class="brow-pts">{Math.round(b.pts)}<small>/{b.max} pts</small></span>
+						<span class="brow-bar">
+							<span
+								class="brow-fill"
+								style="width:{b.max ? Math.min(100, (b.pts / b.max) * 100) : 0}%; background:{b.color}"
+							></span>
+						</span>
+					</div>
+				{/each}
+			</div>
 			<p class="score-note">
 				The score only measures your daily progress. The true reward is with God,
 				weighed by your sincerity and intention — let it move you to do more, never
@@ -287,7 +362,7 @@
 		</div>
 	</section>
 
-	<h2 class="section-title fade-in" style="--fade-delay:0.10s">Prayers · Jamāʻah, Sunnah &amp; Dhikr</h2>
+	<h2 class="section-title fade-in" style="--fade-delay:0.10s"><span class="emo" aria-hidden="true">🕌</span>Prayers · Jamāʻah, Sunnah &amp; Dhikr</h2>
 	<div class="card fade-in" style="--fade-delay:0.12s">
 		{#each PRAYERS as p (p.id)}
 			<PrayerCard
@@ -344,7 +419,7 @@
 		</svg>
 	</button>
 
-	<h2 class="section-title fade-in" style="--fade-delay:0.22s">Voluntary Prayers</h2>
+	<h2 class="section-title fade-in" style="--fade-delay:0.22s"><span class="emo" aria-hidden="true">✨</span>Voluntary Prayers</h2>
 	<div class="card fade-in" style="--fade-delay:0.24s">
 		{#each NAWAFIL as n (n.id)}
 			<DeedToggle
@@ -355,7 +430,7 @@
 		{/each}
 	</div>
 
-	<h2 class="section-title fade-in" style="--fade-delay:0.28s">Daily Deeds</h2>
+	<h2 class="section-title fade-in" style="--fade-delay:0.28s"><span class="emo" aria-hidden="true">🤲</span>Daily Deeds</h2>
 	<div class="card fade-in" style="--fade-delay:0.30s">
 		{#each DEEDS as d (d.id)}
 			<DeedToggle
@@ -367,7 +442,7 @@
 		{/each}
 	</div>
 
-	<h2 class="section-title fade-in" style="--fade-delay:0.34s">Activities</h2>
+	<h2 class="section-title fade-in" style="--fade-delay:0.34s"><span class="emo" aria-hidden="true">🎯</span>Activities</h2>
 	<div class="activities fade-in" style="--fade-delay:0.36s">
 		{#each ACTIVITIES as a (a.id)}
 			<ActivityCard
@@ -380,21 +455,21 @@
 	</div>
 
 	{#if $userActivities.length}
-		<h2 class="section-title fade-in" style="--fade-delay:0.40s">Additional Activities</h2>
+		<h2 class="section-title fade-in" style="--fade-delay:0.40s"><span class="emo" aria-hidden="true">➕</span>Additional Activities</h2>
 		{#each activityGroups as [category, items] (category)}
 			<h3 class="cat-sep fade-in" style="--fade-delay:0.42s">{category}</h3>
 			<div class="activities fade-in" style="--fade-delay:0.42s">
 				{#each items as a (a.id)}
 					{#if a.goal}
 						<CustomActivityCard
-							activity={{ id: a.id, name: a.name, unit: a.goal.unit, target: a.goal.value }}
+							activity={{ id: a.id, name: a.name, emoji: displayEmoji(a), unit: a.goal.unit, target: a.goal.value }}
 							value={$currentDay.customActivities?.[dayKey(a)] ?? 0}
 							on:set={(e) => onCustomSet(a, e.detail.value)}
 							on:delete={() => deleteActivity(a.id)}
 						/>
 					{:else}
 						<BooleanActivityCard
-							activity={a}
+							activity={{ ...a, emoji: displayEmoji(a) }}
 							done={($currentDay.customActivities?.[dayKey(a)] ?? 0) >= 1}
 							on:toggle={() => onCustomToggle(a)}
 							on:delete={() => deleteActivity(a.id)}
@@ -410,13 +485,13 @@
 	</button>
 
 	{#if $settings.showNotes}
-		<h2 class="section-title fade-in" style="--fade-delay:0.46s">Notes</h2>
+		<h2 class="section-title fade-in" style="--fade-delay:0.46s"><span class="emo" aria-hidden="true">📝</span>Notes</h2>
 		<div class="fade-in" style="--fade-delay:0.48s">
 			<NotesCard date={$selectedDate} notes={$currentNotes} />
 		</div>
 	{/if}
 
-	<h2 class="section-title fade-in" style="--fade-delay:0.52s">Todo</h2>
+	<h2 class="section-title fade-in" style="--fade-delay:0.52s"><span class="emo" aria-hidden="true">✅</span>Todo</h2>
 	<div class="card fade-in" style="--fade-delay:0.54s">
 		<TodoWidget />
 	</div>
@@ -462,7 +537,7 @@
 		border-radius: 13px;
 		display: grid;
 		place-items: center;
-		color: #042f2a;
+		color: var(--on-accent);
 		background: linear-gradient(135deg, var(--teal), var(--gold));
 		box-shadow: var(--shadow);
 	}
@@ -488,6 +563,12 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+	.greet .emo {
+		font-size: 0.82rem;
+	}
+	.dateline {
+		color: var(--text-faint);
 	}
 	.head-right {
 		margin-left: auto;
@@ -645,6 +726,54 @@
 		letter-spacing: 0.08em;
 		color: var(--text-faint);
 	}
+	.breakdown {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+	.brow {
+		display: grid;
+		grid-template-columns: 1fr auto;
+		gap: 2px 10px;
+		align-items: baseline;
+	}
+	.brow-lbl {
+		font-size: 0.72rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--text-faint);
+	}
+	.brow-pts {
+		font-family: var(--font-display);
+		font-size: 0.88rem;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+	}
+	.brow-pts small {
+		font-family: var(--font-body);
+		font-size: 0.7rem;
+		font-weight: 600;
+		color: var(--text-faint);
+	}
+	.brow-bar {
+		grid-column: 1 / -1;
+		display: block;
+		height: 4px;
+		border-radius: 999px;
+		background: var(--bg-soft);
+		overflow: hidden;
+	}
+	.brow-fill {
+		display: block;
+		height: 100%;
+		border-radius: 999px;
+		transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.brow-fill {
+			transition: none;
+		}
+	}
 	.score-note {
 		margin: 0;
 		padding-top: 12px;
@@ -733,7 +862,7 @@
 		border-radius: 11px;
 		display: grid;
 		place-items: center;
-		color: #042f2a;
+		color: var(--on-accent);
 		background: linear-gradient(135deg, var(--teal), var(--gold));
 	}
 	.dl-text {

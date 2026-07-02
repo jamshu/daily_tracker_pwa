@@ -1,6 +1,11 @@
 <script>
 	import { createEventDispatcher } from 'svelte';
-	export let prayer; // { id, name, hasSunnah, sunnah }
+	import { slide } from 'svelte/transition';
+	export let prayer; // { id, name, emoji, hasSunnah, sunnah }
+
+	const reduced =
+		typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+	const dur = reduced ? 0 : 200;
 	export let record = { jamath: false, home: false, late: false, missed: false, sunnah: false, dhikr: false };
 	const dispatch = createEventDispatcher();
 
@@ -30,7 +35,7 @@
 		on:click={toggle}
 		on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), toggle())}
 	>
-		<span class="name">{prayer.name}</span>
+		<span class="name"><span class="emo" aria-hidden="true">{prayer.emoji}</span>{prayer.name}</span>
 		<span class="summary">
 			<span class="chip {status.key}">{status.label}</span>
 			{#if prayer.hasSunnah}<span class="tick" class:on={record.sunnah}>S</span>{/if}
@@ -39,6 +44,7 @@
 	</div>
 
 	{#if expanded}
+	<div class="body" transition:slide={{ duration: dur }}>
 		{#if prayer.hasSunnah}
 			<span class="hint">Sunnah: {prayer.sunnah}</span>
 		{/if}
@@ -59,6 +65,7 @@
 			<button class="pill dhikr" class:on={record.dhikr} aria-pressed={record.dhikr}
 				on:click={() => dispatch('toggle', { field: 'dhikr' })}><span class="dot" />Dhikr</button>
 		</div>
+	</div>
 	{/if}
 </div>
 
@@ -104,12 +111,23 @@
 		cursor: pointer;
 	}
 	.name {
+		display: inline-flex;
+		align-items: center;
+		gap: 9px;
 		font-family: var(--font-display);
 		font-weight: 600;
 		font-optical-sizing: auto;
 		font-variation-settings: 'SOFT' 40;
 		font-size: 1.14rem;
 		letter-spacing: -0.01em;
+	}
+	.name .emo {
+		font-size: 1.05rem;
+	}
+	.body {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
 	}
 	.prayer.done .name {
 		color: var(--green);
@@ -128,10 +146,10 @@
 		background: var(--bg-soft);
 		border: 1px solid var(--border);
 	}
-	.chip.jamath { color: #042f2a; background: var(--teal); border-color: var(--teal); }
+	.chip.jamath { color: var(--on-accent); background: var(--teal); border-color: var(--teal); }
 	.chip.home { color: #fff; background: var(--teal-deep); border-color: var(--teal-deep); }
-	.chip.late { color: #3a2600; background: #f59e0b; border-color: #f59e0b; }
-	.chip.missed { color: #fff; background: var(--red, #ef4444); border-color: var(--red, #ef4444); }
+	.chip.late { color: var(--on-amber); background: var(--amber); border-color: var(--amber); }
+	.chip.missed { color: var(--on-red); background: var(--red, #ef4444); border-color: var(--red, #ef4444); }
 	.tick {
 		width: 20px;
 		height: 20px;
@@ -145,7 +163,7 @@
 		border: 1px solid var(--border);
 	}
 	.tick.on {
-		color: #04261c;
+		color: var(--on-green);
 		background: var(--green);
 		border-color: var(--green);
 	}
@@ -179,7 +197,7 @@
 		transition: all 0.18s ease;
 	}
 	.pill.jamath.on {
-		color: #042f2a;
+		color: var(--on-accent);
 		background: var(--teal);
 		border-color: var(--teal);
 		box-shadow: 0 3px 14px color-mix(in srgb, var(--teal) 45%, transparent);
@@ -191,25 +209,25 @@
 		box-shadow: 0 3px 14px color-mix(in srgb, var(--teal-deep) 45%, transparent);
 	}
 	.pill.late.on {
-		color: #3a2600;
-		background: #f59e0b;
-		border-color: #f59e0b;
-		box-shadow: 0 3px 14px color-mix(in srgb, #f59e0b 45%, transparent);
+		color: var(--on-amber);
+		background: var(--amber);
+		border-color: var(--amber);
+		box-shadow: 0 3px 14px color-mix(in srgb, var(--amber) 45%, transparent);
 	}
 	.pill.missed.on {
-		color: #fff;
+		color: var(--on-red);
 		background: var(--red, #ef4444);
 		border-color: var(--red, #ef4444);
-		box-shadow: 0 3px 14px color-mix(in srgb, #ef4444 45%, transparent);
+		box-shadow: 0 3px 14px color-mix(in srgb, var(--red, #ef4444) 45%, transparent);
 	}
 	.pill.sunnah.on {
-		color: #2a1e05;
+		color: var(--on-gold);
 		background: var(--gold);
 		border-color: var(--gold);
 		box-shadow: 0 3px 14px color-mix(in srgb, var(--gold) 45%, transparent);
 	}
 	.pill.dhikr.on {
-		color: #04261c;
+		color: var(--on-green);
 		background: var(--green);
 		border-color: var(--green);
 		box-shadow: 0 3px 14px color-mix(in srgb, var(--green) 45%, transparent);

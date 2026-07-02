@@ -34,6 +34,15 @@
 
 	/* Ceremonial accent for hairline rules / ornaments. */
 	--ornament: var(--gold);
+
+	/* On-colors — text/icon color when sitting on a solid accent fill. Per-theme
+	   so light accents get dark text and dark accents get light text. */
+	--on-accent: #042f2a;
+	--on-green: #04261c;
+	--on-gold: #2a1e05;
+	--amber: #f59e0b; /* "late" status accent */
+	--on-amber: #3a2600;
+	--on-red: #fff;
 }
 
 /* ── Themes ─────────────────────────────────────────────────────────────
@@ -61,6 +70,11 @@
 	--shadow: 0 8px 24px rgba(20, 20, 19, 0.08);
 	--shadow-sm: 0 2px 8px rgba(20, 20, 19, 0.06);
 	--shadow-lg: 0 20px 50px -18px rgba(20, 20, 19, 0.16);
+	--on-accent: #fff;
+	--on-green: #fff;
+	--on-gold: #fff;
+	--amber: #b45309;
+	--on-amber: #fff;
 }
 
 /* GitHub Light. */
@@ -83,6 +97,11 @@
 	--shadow: 0 8px 24px rgba(31, 35, 40, 0.12);
 	--shadow-sm: 0 2px 8px rgba(31, 35, 40, 0.08);
 	--shadow-lg: 0 20px 50px -18px rgba(31, 35, 40, 0.18);
+	--on-accent: #fff;
+	--on-green: #fff;
+	--on-gold: #fff;
+	--amber: #b45309;
+	--on-amber: #fff;
 }
 
 /* GitHub Dark. */
@@ -102,6 +121,8 @@
 	--red: #f85149;
 	--bg-glow-a: rgba(47, 129, 247, 0.1);
 	--bg-glow-b: rgba(210, 153, 34, 0.06);
+	--on-accent: #fff;
+	--on-green: #fff;
 }
 
 /* Rosé Pine — muted dark, rose/iris accents. */
@@ -122,6 +143,11 @@
 	--bg-glow-a: rgba(235, 188, 186, 0.08);
 	--bg-glow-b: rgba(196, 167, 231, 0.06);
 	--shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+	--on-accent: #191724;
+	--on-green: #191724;
+	--on-gold: #191724;
+	--amber: #f6c177;
+	--on-amber: #191724;
 }
 
 /* Nord — cool arctic dark, frost-blue accent. */
@@ -142,6 +168,11 @@
 	--bg-glow-a: rgba(136, 192, 208, 0.1);
 	--bg-glow-b: rgba(180, 142, 173, 0.06);
 	--shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+	--on-accent: #2e3440;
+	--on-green: #2e3440;
+	--on-gold: #2e3440;
+	--amber: #ebcb8b;
+	--on-amber: #2e3440;
 }
 
 * {
@@ -221,6 +252,10 @@ h3 {
 	color: var(--text);
 	margin: 30px 4px 14px;
 }
+.section-title .emo {
+	font-size: 0.92em;
+	opacity: 0.9;
+}
 .section-title::after {
 	content: '';
 	flex: 1;
@@ -253,6 +288,32 @@ h3 {
 	transform: translateY(-2px);
 	border-color: color-mix(in srgb, var(--teal) 50%, var(--border));
 }
+.card--interactive:active {
+	transform: scale(0.995);
+}
+
+/* Gentle accent tint on any card under a real pointer — keeps touch untouched. */
+@media (hover: hover) {
+	.card {
+		transition:
+			border-color 0.15s ease,
+			box-shadow 0.2s ease;
+	}
+	.card:hover {
+		border-color: color-mix(in srgb, var(--teal) 35%, var(--border));
+	}
+}
+
+/* Emoji glyphs — force the color-emoji font stack and neutral style so serif
+   font-variation-settings on surrounding headings never distort them. */
+.emo {
+	font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+	font-style: normal;
+	font-weight: 400;
+	font-variation-settings: normal;
+	line-height: 1;
+	flex-shrink: 0;
+}
 
 .fade-in {
 	animation: fade 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -266,6 +327,18 @@ h3 {
 	}
 	to {
 		opacity: 1;
+		transform: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.fade-in {
+		animation: none;
+		opacity: 1;
+	}
+	.card--interactive,
+	.card--interactive:hover,
+	.card--interactive:active {
 		transform: none;
 	}
 }

@@ -9,6 +9,8 @@
 		addCustom,
 		createUnit
 	} from '$lib/activities.js';
+	import { displayEmoji } from '$lib/emoji.js';
+	import EmojiPicker from './EmojiPicker.svelte';
 
 	// Group presets by category for the picker list.
 	$: grouped = groupByCategory($presets);
@@ -99,7 +101,9 @@
 						<h3 class="cat">{category}</h3>
 						<div class="grid">
 							{#each items as p (p.id)}
-								<button class="chip" on:click={() => pickPreset(p)}>{p.name}</button>
+								<button class="chip" on:click={() => pickPreset(p)}
+									><span class="emo" aria-hidden="true">{displayEmoji(p)}</span>{p.name}</button
+								>
 							{/each}
 						</div>
 					{/each}
@@ -114,6 +118,11 @@
 				</header>
 				<div class="body">
 					<input class="field" placeholder="Activity name" bind:value={$draft.name} maxlength="60" />
+					<label class="lbl">Icon (optional)</label>
+					<EmojiPicker
+						value={$draft.emoji}
+						on:select={(e) => draft.update((d) => ({ ...d, emoji: e.detail }))}
+					/>
 					<button class="row" on:click={openGoal}>
 						<span class="row-label">Goal</span>
 						<span class="row-val">
@@ -237,7 +246,7 @@
 		font-family: var(--font-display);
 		font-size: 1rem;
 		font-weight: 700;
-		color: #042f2a;
+		color: var(--on-accent);
 		background: var(--teal);
 		border: 1px solid var(--teal);
 	}
@@ -261,6 +270,9 @@
 		gap: 8px;
 	}
 	.chip {
+		display: flex;
+		align-items: center;
+		gap: 8px;
 		padding: 12px 14px;
 		border-radius: 10px;
 		font-size: 0.92rem;
@@ -270,10 +282,13 @@
 		background: var(--bg-soft);
 		border: 1px solid var(--border);
 	}
+	.chip .emo {
+		font-size: 1rem;
+	}
 	.chip.active {
 		background: var(--teal);
 		border-color: var(--teal);
-		color: #042f2a;
+		color: var(--on-accent);
 	}
 	.field {
 		width: 100%;

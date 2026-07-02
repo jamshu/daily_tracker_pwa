@@ -411,7 +411,7 @@
 		background: transparent;
 	}
 	.seg-btn.on {
-		color: #042f2a;
+		color: var(--on-accent);
 		background: var(--teal);
 	}
 	.goals {
@@ -654,8 +654,8 @@
 		width: 18px;
 		height: 18px;
 		border-radius: 50%;
-		border: 2px solid rgba(4, 47, 42, 0.35);
-		border-top-color: #042f2a;
+		border: 2px solid color-mix(in srgb, var(--on-accent) 35%, transparent);
+		border-top-color: var(--on-accent);
 		animation: spin 0.7s linear infinite;
 	}
 	@keyframes spin {

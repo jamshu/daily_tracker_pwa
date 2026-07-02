@@ -1,12 +1,22 @@
 <script>
+	import { onMount } from 'svelte';
 	export let value = 0; // 0..1
 	export let size = 168;
 	export let stroke = 14;
 
+	// Sweep the arc in from 0 on first render (two-frame trick so the transition
+	// runs); afterwards it tracks `value` as normal. Skipped under reduced motion.
+	const reduced =
+		typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+	let mounted = reduced;
+	onMount(() => {
+		if (!mounted) requestAnimationFrame(() => (mounted = true));
+	});
+
 	$: radius = (size - stroke) / 2;
 	$: circ = 2 * Math.PI * radius;
 	$: score = Math.round(value * 100);
-	$: offset = circ * (1 - value);
+	$: offset = circ * (1 - (mounted ? value : 0));
 	// unique id so multiple rings (week strip etc.) don't share defs
 	const uid = 'ring-' + Math.random().toString(36).slice(2, 8);
 </script>
@@ -63,8 +73,12 @@
 		place-items: center;
 	}
 	.arc {
-		transition:
-			stroke-dashoffset 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+		transition: stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.arc {
+			transition: none;
+		}
 	}
 	.label {
 		position: absolute;

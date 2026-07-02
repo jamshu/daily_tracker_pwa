@@ -7,9 +7,9 @@ import { browser } from '$app/environment';
 import { base } from '$app/paths';
 import { congratulate } from './toast.js';
 
-/** User's own activities: [{ id, name, goal: { value, unit } | null }] */
+/** User's own activities: [{ id, name, emoji, category, goal: { value, unit } | null }] */
 export const userActivities = writable([]);
-/** Preset catalog: [{ id, name, category, goal: { value, unit } | null }] */
+/** Preset catalog: [{ id, name, emoji, category, goal: { value, unit } | null }] */
 export const presets = writable([]);
 /** Units available to pick: [{ id, name }] (globals + user's custom) */
 export const units = writable([]);
@@ -17,10 +17,10 @@ export const units = writable([]);
 /** Modal view: null | 'picker' | 'create' | 'goal' */
 export const activityModal = writable(null);
 /** In-progress custom activity being created in the modal. */
-export const draft = writable({ name: '', goal: null }); // goal: { value, unitId, unitName }
+export const draft = writable({ name: '', emoji: '', goal: null }); // goal: { value, unitId, unitName }
 
 export function openActivityModal() {
-	draft.set({ name: '', goal: null });
+	draft.set({ name: '', emoji: '', goal: null });
 	activityModal.set('picker');
 }
 export function closeActivityModal() {
@@ -67,13 +67,14 @@ export async function addFromPreset(presetId) {
 	congratulate('Activity added');
 }
 
-/** draft: { name, goal: { value, unitId } | null } */
+/** draft: { name, emoji, goal: { value, unitId } | null } */
 export async function addCustom(d) {
 	await api(
 		'/api/activities',
 		jsonPost({
 			action: 'add-custom',
 			name: d.name,
+			emoji: d.emoji || '',
 			goal: d.goal ? { value: d.goal.value, unitId: d.goal.unitId ?? null } : null
 		})
 	);

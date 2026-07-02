@@ -1,7 +1,16 @@
 <script>
 	import { toast, dismissToast } from '$lib/toast.js';
 
-	const COLORS = ['#14b8a6', '#d6a64a', '#34d399', '#f59e0b', '#22d3ee', '#a78bfa', '#fb7185', '#fcd34d'];
+	// Theme tokens — inline style attrs resolve CSS vars, so confetti follows the
+	// active palette instead of always using the midnight colours.
+	const COLORS = [
+		'var(--teal)',
+		'var(--gold)',
+		'var(--green)',
+		'var(--amber)',
+		'var(--teal-deep)',
+		'var(--red)'
+	];
 
 	let particles = [];
 	let sparkles = [];
@@ -237,8 +246,9 @@
 		font-weight: 900;
 		line-height: 1.35;
 		letter-spacing: -0.01em;
-		color: #fcd34d;
-		text-shadow: 0 0 16px rgba(252, 211, 77, 0.55), 0 0 32px rgba(245, 158, 11, 0.35),
+		color: var(--gold);
+		text-shadow: 0 0 16px color-mix(in srgb, var(--gold) 55%, transparent),
+			0 0 32px color-mix(in srgb, var(--amber) 35%, transparent),
 			0 2px 8px rgba(0, 0, 0, 0.55);
 		animation: popIn 0.34s cubic-bezier(0.16, 1.6, 0.3, 1) both;
 	}
@@ -253,7 +263,7 @@
 			from 0deg,
 			var(--gold, #d6a64a),
 			var(--green, #34d399),
-			#22d3ee,
+			var(--teal, #22d3ee),
 			var(--gold, #d6a64a)
 		);
 		-webkit-mask:
@@ -278,8 +288,9 @@
 		font-weight: 900;
 		letter-spacing: -0.03em;
 		line-height: 1;
-		color: #f59e0b;
-		text-shadow: 0 0 12px rgba(245, 158, 11, 0.45), 0 2px 8px rgba(0, 0, 0, 0.55);
+		color: var(--amber);
+		text-shadow: 0 0 12px color-mix(in srgb, var(--amber) 45%, transparent),
+			0 2px 8px rgba(0, 0, 0, 0.55);
 		animation: numPop 0.34s cubic-bezier(0.16, 1.8, 0.3, 1) both;
 	}
 

@@ -11,6 +11,7 @@ export const prerender = false;
 //   x_studio_category   → preset grouping label (presets only)
 //   x_studio_user_id    → owner (false for presets)
 //   x_studio_goal_id    → optional many2one x_goals (empty = boolean isDone)
+//   x_studio_icon       → optional emoji shown next to the name (char, size 16)
 //   x_studio_source_id  → optional link to the preset it was created from
 //   x_studio_company_id → company
 // x_goals: x_studio_value (int), x_studio_unit_id (many2one x_units)
@@ -21,17 +22,17 @@ const GOAL_MODEL = 'x_goals';
 // then GET serves static mocks and POST echoes success so the flow is testable.
 const STUB = false;
 const STUB_PRESETS = [
-	{ id: 101, name: 'Sunnan Al-Rawatib', category: 'Prayers', goal: null },
-	{ id: 102, name: 'Duha', category: 'Prayers', goal: null },
-	{ id: 103, name: 'Taraweeh', category: 'Prayers', goal: null },
-	{ id: 201, name: 'Mondays & Thursdays', category: 'Fasting', goal: null },
-	{ id: 202, name: 'White days fasting', category: 'Fasting', goal: null },
-	{ id: 301, name: 'Listen Quran', category: 'Learning & dawah', goal: { value: 10, unit: 'Minutes' } },
-	{ id: 302, name: 'Memorize Quran', category: 'Learning & dawah', goal: { value: 5, unit: 'Verses' } }
+	{ id: 101, name: 'Sunnan Al-Rawatib', emoji: '🕌', category: 'Prayers', goal: null },
+	{ id: 102, name: 'Duha', emoji: '🌞', category: 'Prayers', goal: null },
+	{ id: 103, name: 'Taraweeh', emoji: '', category: 'Prayers', goal: null },
+	{ id: 201, name: 'Mondays & Thursdays', emoji: '🌙', category: 'Fasting', goal: null },
+	{ id: 202, name: 'White days fasting', emoji: '', category: 'Fasting', goal: null },
+	{ id: 301, name: 'Listen Quran', emoji: '🎧', category: 'Learning & dawah', goal: { value: 10, unit: 'Minutes' } },
+	{ id: 302, name: 'Memorize Quran', emoji: '', category: 'Learning & dawah', goal: { value: 5, unit: 'Verses' } }
 ];
 const STUB_ACTIVITIES = [
-	{ id: 501, name: 'Read Hadith', goal: { value: 3, unit: 'Times' } },
-	{ id: 502, name: 'Smile (sadaqah)', goal: null }
+	{ id: 501, name: 'Read Hadith', emoji: '📜', goal: { value: 3, unit: 'Times' } },
+	{ id: 502, name: 'Smile (sadaqah)', emoji: '', goal: null }
 ];
 
 async function resolveSession(cookies) {
@@ -78,15 +79,28 @@ export async function GET({ cookies }) {
 			return result;
 		};
 
-		const fields = ['id', 'x_name', 'x_studio_category', 'x_studio_goal_id'];
-		const presetRows = await call(ACT_MODEL, 'search_read', [[['x_studio_is_preset', '=', true]]], {
-			fields, order: 'x_studio_category, x_studio_sequence, x_name'
-		});
-		const userRows = await call(
-			ACT_MODEL, 'search_read',
-			[[['x_studio_is_preset', '=', false], ['x_studio_user_id', '=', session.uid]]],
-			{ fields, order: 'x_studio_sequence, x_name' }
-		);
+		const baseFields = ['id', 'x_name', 'x_studio_category', 'x_studio_goal_id'];
+		const fetchRows = async (fields) => {
+			const presetRows = await call(ACT_MODEL, 'search_read', [[['x_studio_is_preset', '=', true]]], {
+				fields, order: 'x_studio_category, x_studio_sequence, x_name'
+			});
+			const userRows = await call(
+				ACT_MODEL, 'search_read',
+				[[['x_studio_is_preset', '=', false], ['x_studio_user_id', '=', session.uid]]],
+				{ fields, order: 'x_studio_sequence, x_name' }
+			);
+			return { presetRows, userRows };
+		};
+		let rows;
+		try {
+			rows = await fetchRows([...baseFields, 'x_studio_icon']);
+		} catch (fe) {
+			// x_studio_icon is a Studio field created by hand — if it doesn't exist
+			// yet, retry without it so the list still loads.
+			console.error('[activities] icon field read failed, retrying without:', fe?.message);
+			rows = await fetchRows(baseFields);
+		}
+		const { presetRows, userRows } = rows;
 		// Goal join is best-effort: if reading x_goals/x_units fails (e.g. ACL),
 		// still return the activities (goal-based ones degrade to a toggle) instead
 		// of failing the whole list. Log the real cause.
@@ -103,10 +117,12 @@ export async function GET({ cookies }) {
 		return json({
 			ok: true,
 			activities: userRows.map((r) => ({
-				id: r.id, name: r.x_name, category: r.x_studio_category || 'Other', goal: goalOf(r, goalMap)
+				id: r.id, name: r.x_name, emoji: r.x_studio_icon || '',
+				category: r.x_studio_category || 'Other', goal: goalOf(r, goalMap)
 			})),
 			presets: presetRows.map((r) => ({
-				id: r.id, name: r.x_name, category: r.x_studio_category || 'Other', goal: goalOf(r, goalMap)
+				id: r.id, name: r.x_name, emoji: r.x_studio_icon || '',
+				category: r.x_studio_category || 'Other', goal: goalOf(r, goalMap)
 			}))
 		});
 	} catch (e) {
@@ -139,14 +155,22 @@ export async function POST({ request, cookies }) {
 		if (body.action === 'add-from-preset') {
 			const presetId = Number(body.presetId);
 			if (!presetId) return json({ ok: false, error: 'presetId required' }, { status: 400 });
-			const [p] = await call(ACT_MODEL, 'read', [[presetId]], {
-				fields: ['x_name', 'x_studio_goal_id', 'x_studio_category']
-			});
+			const presetFields = ['x_name', 'x_studio_goal_id', 'x_studio_category'];
+			let p;
+			try {
+				[p] = await call(ACT_MODEL, 'read', [[presetId]], {
+					fields: [...presetFields, 'x_studio_icon']
+				});
+			} catch {
+				// x_studio_icon may not exist yet — retry without it.
+				[p] = await call(ACT_MODEL, 'read', [[presetId]], { fields: presetFields });
+			}
 			if (!p) return json({ ok: false, error: 'Preset not found' }, { status: 404 });
 			const goalId = Array.isArray(p.x_studio_goal_id) ? p.x_studio_goal_id[0] : p.x_studio_goal_id;
 			const id = await call(ACT_MODEL, 'create', [{
 				x_name: p.x_name, x_studio_is_preset: false, x_studio_source_id: presetId,
 				x_studio_category: p.x_studio_category || false,
+				...(p.x_studio_icon ? { x_studio_icon: p.x_studio_icon } : {}),
 				x_studio_goal_id: goalId || false, ...owner
 			}]);
 			return json({ ok: true, id });
@@ -155,6 +179,7 @@ export async function POST({ request, cookies }) {
 		if (body.action === 'add-custom') {
 			const name = String(body.name || '').trim().slice(0, 60);
 			if (!name) return json({ ok: false, error: 'name required' }, { status: 400 });
+			const emoji = String(body.emoji || '').trim().slice(0, 16);
 			let goalId = false;
 			if (body.goal && Number(body.goal.value) > 0 && Number(body.goal.unitId)) {
 				goalId = await call(GOAL_MODEL, 'create', [{
@@ -164,7 +189,8 @@ export async function POST({ request, cookies }) {
 				}]);
 			}
 			const id = await call(ACT_MODEL, 'create', [{
-				x_name: name, x_studio_is_preset: false, x_studio_goal_id: goalId, ...owner
+				x_name: name, x_studio_is_preset: false, x_studio_goal_id: goalId,
+				...(emoji ? { x_studio_icon: emoji } : {}), ...owner
 			}]);
 			return json({ ok: true, id });
 		}

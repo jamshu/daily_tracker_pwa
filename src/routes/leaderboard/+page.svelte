@@ -217,7 +217,7 @@
 		gap: 6px;
 	}
 	.tabs button.active {
-		color: #042f2a;
+		color: var(--on-accent);
 		background: linear-gradient(135deg, var(--teal), var(--green));
 	}
 	.dot {
@@ -330,7 +330,7 @@
 		border: 1px solid var(--border);
 	}
 	.mini.ok {
-		color: #042f2a;
+		color: var(--on-accent);
 		background: linear-gradient(135deg, var(--teal), var(--green));
 		border: none;
 	}
@@ -359,7 +359,7 @@
 		padding: 0 18px;
 		border-radius: var(--radius-sm);
 		font-weight: 700;
-		color: #042f2a;
+		color: var(--on-accent);
 		background: linear-gradient(135deg, var(--teal), var(--green));
 	}
 	.primary:disabled {

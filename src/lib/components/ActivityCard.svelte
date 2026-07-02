@@ -1,6 +1,11 @@
 <script>
 	import { createEventDispatcher } from 'svelte';
-	export let activity; // { id, name, unit, target, step }
+	import { slide } from 'svelte/transition';
+	export let activity; // { id, name, emoji, unit, target, step }
+
+	const reduced =
+		typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+	const dur = reduced ? 0 : 200;
 	export let value = 0;
 	export let target = null; // per-user override; falls back to activity.target
 	const dispatch = createEventDispatcher();
@@ -29,7 +34,7 @@
 		on:click={toggle}
 		on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), toggle())}
 	>
-		<span class="name">{activity.name}</span>
+		<span class="name">{#if activity.emoji}<span class="emo" aria-hidden="true">{activity.emoji}</span>{/if}{activity.name}</span>
 		<span class="goal" class:met>{value}/{tgt} {activity.unit}</span>
 	</div>
 
@@ -46,7 +51,7 @@
 	/>
 
 	{#if expanded}
-		<div class="actions">
+		<div class="actions" transition:slide={{ duration: dur }}>
 			<button type="button" class="add" on:click={() => add(1)}>+1</button>
 			<button type="button" class="add" on:click={() => add(3)}>+3</button>
 			<button type="button" class="add" on:click={() => add(5)}>+5</button>
@@ -81,6 +86,10 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+	.name .emo {
+		font-size: 1.02rem;
+		margin-right: 9px;
 	}
 	.goal {
 		font-family: var(--font-display);

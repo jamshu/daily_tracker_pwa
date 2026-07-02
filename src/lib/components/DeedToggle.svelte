@@ -1,6 +1,6 @@
 <script>
 	import { createEventDispatcher } from 'svelte';
-	export let deed; // { id, name, hint, guide? }
+	export let deed; // { id, name, emoji, hint, guide? }
 	export let done = false;
 	const dispatch = createEventDispatcher();
 </script>
@@ -15,7 +15,7 @@
 			{/if}
 		</span>
 		<span class="meta">
-			<span class="name">{deed.name}</span>
+			<span class="name">{#if deed.emoji}<span class="emo" aria-hidden="true">{deed.emoji}</span>{/if}{deed.name}</span>
 			{#if deed.hint}<span class="hint">{deed.hint}</span>{/if}
 		</span>
 	</button>
@@ -62,12 +62,25 @@
 		display: grid;
 		place-items: center;
 		border: 2px solid var(--text-faint);
-		color: #042f2a;
+		color: var(--on-green);
 		transition: all 0.18s ease;
 	}
 	.deed.done .check {
 		background: var(--green);
 		border-color: var(--green);
+	}
+	.deed.done .check svg {
+		animation: pop 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+	}
+	@keyframes pop {
+		0% { transform: scale(0.4); }
+		60% { transform: scale(1.18); }
+		100% { transform: scale(1); }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.deed.done .check svg {
+			animation: none;
+		}
 	}
 	.meta {
 		display: flex;
@@ -82,6 +95,10 @@
 		font-optical-sizing: auto;
 		font-variation-settings: 'SOFT' 40;
 		letter-spacing: -0.01em;
+	}
+	.name .emo {
+		font-size: 1rem;
+		margin-right: 8px;
 	}
 	.deed.done .name {
 		color: var(--green);

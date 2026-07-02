@@ -1,6 +1,6 @@
 <script>
 	import { createEventDispatcher } from 'svelte';
-	export let activity; // { id, name }
+	export let activity; // { id, name, emoji }
 	export let done = false; // per-day done/not-done
 	const dispatch = createEventDispatcher();
 </script>
@@ -14,7 +14,7 @@
 				</svg>
 			{/if}
 		</span>
-		<span class="name">{activity.name}</span>
+		<span class="name">{#if activity.emoji}<span class="emo" aria-hidden="true">{activity.emoji}</span>{/if}{activity.name}</span>
 	</button>
 	<button class="del" on:click={() => dispatch('delete')} aria-label={`remove ${activity.name}`}>×</button>
 </div>
@@ -46,12 +46,25 @@
 		display: grid;
 		place-items: center;
 		border: 2px solid var(--text-faint);
-		color: #042f2a;
+		color: var(--on-green);
 		transition: all 0.18s ease;
 	}
 	.bcard.done .check {
 		background: var(--green);
 		border-color: var(--green);
+	}
+	.bcard.done .check svg {
+		animation: pop 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+	}
+	@keyframes pop {
+		0% { transform: scale(0.4); }
+		60% { transform: scale(1.18); }
+		100% { transform: scale(1); }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.bcard.done .check svg {
+			animation: none;
+		}
 	}
 	.name {
 		font-family: var(--font-display);
@@ -63,6 +76,10 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+	.name .emo {
+		font-size: 1.02rem;
+		margin-right: 9px;
 	}
 	.bcard.done .name {
 		color: var(--green);

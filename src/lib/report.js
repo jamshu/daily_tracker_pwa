@@ -2,7 +2,7 @@
 // per-prayer attendance counts and per-activity days-completed. Completion uses
 // each day's `targets` snapshot (not current settings) so lowering a goal later
 // doesn't retroactively inflate past days. Kept pure/testable (report.test.mjs).
-import { PRAYERS, ACTIVITIES, DEEDS, NAWAFIL } from './config.js';
+import { PRAYERS, ACTIVITIES, DEEDS, NAWAFIL, dayProgress } from './config.js';
 
 /**
  * @param days  [{ date, data }] parsed via parseDay
@@ -64,3 +64,48 @@ export function aggregate(days, { userActivities = [], settings = {} } = {}) {
 
 /** Percentage helper for the prayer bars. */
 export const pct = (count, total) => (total ? Math.round((count / total) * 100) : 0);
+
+// Local-time YYYY-MM-DD key (mirrors store.js dateKey without importing it,
+// keeping this module dependency-free and testable in plain node).
+const keyOf = (d) =>
+	`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const dateOf = (key) => {
+	const [y, m, d] = key.split('-').map(Number);
+	return new Date(y, m - 1, d);
+};
+
+/**
+ * Headline stats for the report tiles. Scores each day with dayProgress()
+ * (honouring the per-day `targets` snapshot, falling back to settings).
+ * - streak: consecutive calendar days with score > 0 ending today (or yesterday
+ *   if today isn't scored yet); an untracked day breaks it.
+ * - bestDay: { date, score } of the highest-scoring day (null if none scored).
+ * - perfectDays: days with a full score.
+ * `today` is injectable for tests.
+ *
+ * @param days [{ date: 'YYYY-MM-DD', data }] parsed via parseDay
+ */
+export function summarize(days, { settings = {}, today = keyOf(new Date()) } = {}) {
+	const scoreByDate = new Map();
+	for (const { date, data } of days) {
+		const targets = { ...(settings.activities || {}), ...(data.targets || {}) };
+		scoreByDate.set(date, dayProgress(data, targets, settings.sex));
+	}
+
+	let bestDay = null;
+	let perfectDays = 0;
+	for (const [date, score] of scoreByDate) {
+		if (score >= 1) perfectDays++;
+		if (score > 0 && (!bestDay || score > bestDay.score)) bestDay = { date, score };
+	}
+
+	let streak = 0;
+	const cursor = dateOf(today);
+	if (!((scoreByDate.get(today) ?? 0) > 0)) cursor.setDate(cursor.getDate() - 1);
+	while ((scoreByDate.get(keyOf(cursor)) ?? 0) > 0) {
+		streak++;
+		cursor.setDate(cursor.getDate() - 1);
+	}
+
+	return { streak, bestDay, perfectDays };
+}

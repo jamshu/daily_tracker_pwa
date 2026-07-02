@@ -142,7 +142,7 @@
 	.tab.active {
 		background: var(--teal);
 		border-color: var(--teal);
-		color: #042f2a;
+		color: var(--on-accent);
 	}
 	.list {
 		overflow-y: auto;
@@ -179,7 +179,7 @@
 	.count {
 		font-size: 0.72rem;
 		font-weight: 700;
-		color: #042f2a;
+		color: var(--on-accent);
 		background: var(--gold);
 		padding: 3px 9px;
 		border-radius: 999px;

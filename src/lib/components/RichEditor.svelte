@@ -140,7 +140,7 @@
 	}
 	.toolbar button.on {
 		background: var(--teal);
-		color: #042f2a;
+		color: var(--on-accent);
 	}
 	.sep {
 		width: 1px;

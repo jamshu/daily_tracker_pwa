@@ -2,8 +2,8 @@
 // completion honouring the per-day `targets` snapshot and `act_<id>` keying.
 // Run: node src/lib/report.test.mjs
 import assert from 'node:assert';
-import { emptyDay, ACTIVITIES } from './config.js';
-import { aggregate, pct } from './report.js';
+import { emptyDay, ACTIVITIES, PRAYERS, DEEDS, NAWAFIL } from './config.js';
+import { aggregate, pct, summarize } from './report.js';
 
 const ex = ACTIVITIES[0].id; // exercise (default target 30)
 
@@ -41,3 +41,32 @@ assert.strictEqual(r.activities['act_7'].completed, 1, 'additional act_7 goal me
 assert.strictEqual(r.activities['act_7'].additional, true, 'additional flag');
 
 console.log('ok — report aggregation: prayer counts + snapshot-based completion');
+
+// ── summarize: streak / best day / perfect days ──
+// d1 and d2 score > 0 (prayer acts); d3 scores 0 (fajr missed only).
+// With "today" = 2026-07-03 (the zero day): today isn't scored → streak counts
+// back from 2026-07-02 → d2 + d1 = 2.
+const s = summarize(days, { settings: {}, today: '2026-07-03' });
+assert.strictEqual(s.streak, 2, 'streak ends at last scored day (today unscored)');
+assert.strictEqual(s.perfectDays, 0, 'no perfect days');
+assert.strictEqual(s.bestDay?.date, '2026-07-01', 'best day is the jamath day');
+assert.ok(s.bestDay.score > 0 && s.bestDay.score < 1, 'best day score in (0,1)');
+
+// A gap (untracked 2026-07-02) must break the streak.
+const gappy = [days[0], { date: '2026-07-03', data: d2 }];
+const sg = summarize(gappy, { settings: {}, today: '2026-07-03' });
+assert.strictEqual(sg.streak, 1, 'untracked day breaks the streak');
+
+// A fully perfect day: every prayer jamath+sunnah+dhikr, activities at target,
+// all deeds and nawafil done → score 1, counted as perfect.
+const dp = emptyDay();
+for (const p of PRAYERS) dp.prayers[p.id] = { jamath: true, home: false, late: false, missed: false, sunnah: p.hasSunnah, dhikr: true };
+for (const a of ACTIVITIES) dp.activities[a.id] = a.target;
+for (const d of DEEDS) dp.deeds[d.id] = true;
+for (const n of NAWAFIL) dp.nawafil[n.id] = true;
+const sp = summarize([{ date: '2026-07-04', data: dp }], { settings: {}, today: '2026-07-04' });
+assert.strictEqual(sp.perfectDays, 1, 'perfect day counted');
+assert.strictEqual(sp.streak, 1, 'perfect day streak');
+assert.strictEqual(sp.bestDay?.score, 1, 'best day score is 1');
+
+console.log('ok — summarize: streak, best day, perfect days');

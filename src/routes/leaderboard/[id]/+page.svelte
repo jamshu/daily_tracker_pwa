@@ -301,7 +301,7 @@
 		border: 1px solid var(--border);
 	}
 	.mini.ok {
-		color: #042f2a;
+		color: var(--on-accent);
 		background: linear-gradient(135deg, var(--teal), var(--green));
 		border: none;
 	}

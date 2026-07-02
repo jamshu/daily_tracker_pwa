@@ -30,13 +30,13 @@ function initialTheme() {
 	return DEFAULT_THEME;
 }
 
-// { activities, theme, shareGlobal, sex, customActivities, is_admin, showFifa, showNews, showNotes } — effective settings.
+// { activities, theme, shareGlobal, sex, is_admin, showFifa, showNews, showNotes } — effective settings.
+// (Custom activities moved to Odoo-backed x_activities; see src/lib/activities.js.)
 export const settings = writable({
 	activities: defaultTargets(),
 	theme: initialTheme(),
 	shareGlobal: false,
 	sex: 'male',
-	customActivities: [],
 	is_admin: false,
 	showFifa: true,
 	showNews: true,
@@ -73,7 +73,6 @@ export function resetSettings() {
 		theme: initialTheme(),
 		shareGlobal: false,
 		sex: 'male',
-		customActivities: [],
 		is_admin: false,
 		showFifa: true,
 		showNews: true,
@@ -93,7 +92,6 @@ export async function loadSettings() {
 			theme,
 			shareGlobal: d?.settings?.shareGlobal === true,
 			sex: coerceSex(d?.settings?.sex),
-			customActivities: Array.isArray(d?.settings?.customActivities) ? d.settings.customActivities : [],
 			is_admin: d?.settings?.is_admin === true,
 			showFifa: d?.settings?.showFifa !== false,
 			showNews: d?.settings?.showNews !== false,
@@ -105,7 +103,7 @@ export async function loadSettings() {
 	}
 }
 
-export async function saveSettings({ activities, theme, shareGlobal, sex, customActivities, showFifa, showNews, showNotes }) {
+export async function saveSettings({ activities, theme, shareGlobal, sex, showFifa, showNews, showNotes }) {
 	const res = await fetch(`${base}/api/settings`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -114,7 +112,6 @@ export async function saveSettings({ activities, theme, shareGlobal, sex, custom
 			theme,
 			shareGlobal: shareGlobal === true,
 			sex: coerceSex(sex),
-			customActivities: customActivities ?? [],
 			showFifa: showFifa !== false,
 			showNews: showNews !== false,
 			showNotes: showNotes !== false
@@ -128,7 +125,6 @@ export async function saveSettings({ activities, theme, shareGlobal, sex, custom
 		theme: savedTheme,
 		shareGlobal: d?.settings?.shareGlobal === true,
 		sex: coerceSex(d?.settings?.sex ?? sex),
-		customActivities: Array.isArray(d?.settings?.customActivities) ? d.settings.customActivities : [],
 		is_admin: d?.settings?.is_admin === true,
 		showFifa: d?.settings?.showFifa !== false,
 		showNews: d?.settings?.showNews !== false,

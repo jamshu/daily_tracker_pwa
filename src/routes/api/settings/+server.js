@@ -14,24 +14,6 @@ export const prerender = false;
 // Change this if you named the Studio field differently on res.users.
 const SETTINGS_FIELD = 'x_studio_settings';
 const ACTIVITY_IDS = ACTIVITIES.map((a) => a.id);
-const MAX_CUSTOM = 20;
-
-function sanitizeCustomActivities(arr) {
-	if (!Array.isArray(arr)) return [];
-	return arr.slice(0, MAX_CUSTOM).filter(
-		(a) =>
-			typeof a?.id === 'string' &&
-			/^ca_[a-z0-9_]{1,30}$/.test(a.id) &&
-			typeof a?.name === 'string' &&
-			a.name.trim()
-	).map((a) => ({
-		id: a.id,
-		name: String(a.name).trim().slice(0, 60),
-		unit: String(a.unit ?? '').trim().slice(0, 20) || 'times',
-		step: Math.max(1, Math.round(Number(a.step) || 1)),
-		target: Math.max(1, Math.round(Number(a.target) || 1))
-	}));
-}
 
 async function uidFromSession(cookies) {
 	const ctx = getContext(cookies);
@@ -98,13 +80,14 @@ export async function POST({ request, cookies }) {
 			]
 		);
 		const sex = coerceSex(body?.sex ?? current.sex);
-		const customActivities = sanitizeCustomActivities(body?.customActivities);
 		// Widget visibility toggles — default ON (only false when explicitly turned off).
 		const showFifa = body?.showFifa !== false;
 		const showNews = body?.showNews !== false;
 		const showNotes = body?.showNotes !== false;
 		// Spread `current` first so unknown keys (e.g. is_admin, push state) survive the save.
-		const settings = { ...current, activities, theme, shareGlobal, sex, customActivities, showFifa, showNews, showNotes };
+		// Drop any legacy customActivities from the stored blob (moved to x_activities).
+		const { customActivities: _drop, ...rest } = current;
+		const settings = { ...rest, activities, theme, shareGlobal, sex, showFifa, showNews, showNotes };
 
 		await adminExecute('res.users', 'write', [[uid], { [SETTINGS_FIELD]: JSON.stringify(settings) }]);
 		return json({ ok: true, settings });

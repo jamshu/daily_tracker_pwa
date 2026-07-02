@@ -24,6 +24,7 @@
 		<span class="goal" class:met class:missed>
 			{#if missed}Missed{:else}{value}/{tgt} {activity.unit}{/if}
 		</span>
+		<button class="del" on:click={() => dispatch('delete')} aria-label={`remove ${activity.name}`}>×</button>
 	</div>
 
 	<input
@@ -89,6 +90,20 @@
 	.goal.missed {
 		color: var(--red, #ef4444);
 		font-weight: 600;
+	}
+	.del {
+		flex: 0 0 auto;
+		width: 24px;
+		height: 24px;
+		border-radius: 7px;
+		font-size: 1.1rem;
+		line-height: 1;
+		color: var(--text-faint);
+		background: var(--bg-soft);
+		border: 1px solid var(--border);
+	}
+	.del:hover {
+		color: var(--red, #ef4444);
 	}
 
 	/* Slider — track shows progress fill up to the thumb via --fill. */

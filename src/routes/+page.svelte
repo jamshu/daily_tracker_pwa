@@ -21,6 +21,15 @@
 	import PrayerCard from '$lib/components/PrayerCard.svelte';
 	import ActivityCard from '$lib/components/ActivityCard.svelte';
 	import CustomActivityCard from '$lib/components/CustomActivityCard.svelte';
+	import BooleanActivityCard from '$lib/components/BooleanActivityCard.svelte';
+	import ActivityModal from '$lib/components/ActivityModal.svelte';
+	import {
+		userActivities,
+		loadActivities,
+		loadUnits,
+		deleteActivity,
+		openActivityModal
+	} from '$lib/activities.js';
 	import DeedToggle from '$lib/components/DeedToggle.svelte';
 	import QuoteCard from '$lib/components/QuoteCard.svelte';
 	import NotesCard from '$lib/components/NotesCard.svelte';
@@ -28,7 +37,7 @@
 	import WeekStrip from '$lib/components/WeekStrip.svelte';
 	import CelebrationToast from '$lib/components/CelebrationToast.svelte';
 	import AdhkarModal from '$lib/components/AdhkarModal.svelte';
-	import { celebrate } from '$lib/toast.js';
+	import { celebrate, congratulate } from '$lib/toast.js';
 	import { openAdhkar } from '$lib/adhkar.js';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
@@ -47,7 +56,12 @@
 		load();
 		loadSettings();
 		loadGroups(); // for the leaderboard invite badge
+		loadActivities();
+		loadUnits();
 	});
+
+	// Per-day values for custom activities are keyed by `act_<odooId>` in the day record.
+	const dayKey = (a) => `act_${a.id}`;
 
 	// Only fetch widget data when the user has the widget enabled. Settings load
 	// async, so trigger reactively once they resolve; loadFifa/loadNews each guard
@@ -141,6 +155,21 @@
 		const prev = $currentDay.activities[activity.id] || 0;
 		setActivity($selectedDate, activity.id, value, target);
 		if (prev < target && value >= target) celebrate(activity.id, WEIGHTS.activity);
+	}
+
+	// Custom activities aren't scored, so use a message toast (not the points one)
+	// when a goal is reached or a boolean activity is ticked done. Generic cheers.
+	const CUSTOM_CHEERS = ['Keep going!', 'Very good!', 'Well done!', 'Nice work!', 'Great job!', 'Keep it up!'];
+	const cheer = () => congratulate(CUSTOM_CHEERS[Math.floor(Math.random() * CUSTOM_CHEERS.length)]);
+	function onCustomSet(a, value) {
+		const prev = $currentDay.customActivities?.[dayKey(a)] ?? 0;
+		setCustomActivity($selectedDate, dayKey(a), value, a.goal.value);
+		if (prev < a.goal.value && value >= a.goal.value) cheer();
+	}
+	function onCustomToggle(a) {
+		const wasDone = ($currentDay.customActivities?.[dayKey(a)] ?? 0) >= 1;
+		setCustomActivity($selectedDate, dayKey(a), wasDone ? 0 : 1);
+		if (!wasDone) cheer();
 	}
 </script>
 
@@ -335,20 +364,34 @@
 		{/each}
 	</div>
 
-	{#if $settings.customActivities?.length}
+	{#if $userActivities.length}
 		<h2 class="section-title fade-in" style="--fade-delay:0.40s">Additional Activities</h2>
 		<div class="activities fade-in" style="--fade-delay:0.42s">
-			{#each $settings.customActivities as a (a.id)}
-				<CustomActivityCard
-					activity={a}
-					value={$currentDay.customActivities?.[a.id] ?? 0}
-					missed={$currentDay.missed?.[a.id] || false}
-					on:set={(e) => setCustomActivity($selectedDate, a.id, e.detail.value, a.target)}
-					on:missed={() => markMissed($selectedDate, a.id, true, a.target)}
-				/>
+			{#each $userActivities as a (a.id)}
+				{#if a.goal}
+					<CustomActivityCard
+						activity={{ id: a.id, name: a.name, unit: a.goal.unit, target: a.goal.value }}
+						value={$currentDay.customActivities?.[dayKey(a)] ?? 0}
+						missed={$currentDay.missed?.[dayKey(a)] || false}
+						on:set={(e) => onCustomSet(a, e.detail.value)}
+						on:missed={() => markMissed($selectedDate, dayKey(a), true, a.goal.value)}
+						on:delete={() => deleteActivity(a.id)}
+					/>
+				{:else}
+					<BooleanActivityCard
+						activity={a}
+						done={($currentDay.customActivities?.[dayKey(a)] ?? 0) >= 1}
+						on:toggle={() => onCustomToggle(a)}
+						on:delete={() => deleteActivity(a.id)}
+					/>
+				{/if}
 			{/each}
 		</div>
 	{/if}
+
+	<button class="add-activity fade-in" style="--fade-delay:0.44s" on:click={openActivityModal}>
+		+ Add activity
+	</button>
 
 	{#if $settings.showNotes}
 		<h2 class="section-title fade-in" style="--fade-delay:0.46s">Notes</h2>
@@ -384,6 +427,7 @@
 
 <CelebrationToast />
 <AdhkarModal />
+<ActivityModal />
 
 <style>
 	header {
@@ -584,6 +628,23 @@
 	.activities {
 		display: grid;
 		gap: 10px;
+	}
+	.add-activity {
+		width: 100%;
+		margin-top: 10px;
+		padding: 13px;
+		border-radius: 12px;
+		font-family: var(--font-display);
+		font-size: 0.98rem;
+		font-weight: 600;
+		color: var(--teal);
+		background: var(--bg-soft);
+		border: 1px dashed var(--border);
+		transition: all 0.15s ease;
+	}
+	.add-activity:hover {
+		border-color: var(--teal);
+		color: var(--text);
 	}
 	.foot {
 		text-align: center;

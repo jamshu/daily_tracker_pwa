@@ -109,7 +109,9 @@ export function parseDay(jsonStr) {
 		if (o.nawafil) for (const id in base.nawafil) base.nawafil[id] = !!o.nawafil[id];
 		if (o.customActivities && typeof o.customActivities === 'object' && !Array.isArray(o.customActivities)) {
 			for (const [id, v] of Object.entries(o.customActivities)) {
-				if (/^ca_[a-z0-9_]+$/.test(id)) base.customActivities[id] = Math.max(0, Number(v) || 0);
+				// New custom activities are keyed by `act_<odooId>` (see src/lib/activities.js).
+				// Legacy `ca_*` values are dropped (definitions moved to Odoo).
+				if (/^act_\d+$/.test(id)) base.customActivities[id] = Math.max(0, Number(v) || 0);
 			}
 		}
 		// `missed`: intentionally-not-done flag (UI red state). A missed activity

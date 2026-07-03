@@ -49,7 +49,7 @@ Extracts the ~30-line `dhikr-link` button markup (icon circle, title + subtitle,
 ### 5. Enablers
 
 - `src/routes/adhkar/[set]/+page.js`: add `{ set: 'janaza' }` to `entries()` so the janaza reader prerenders.
-- `src/routes/adhkar/[set]/+page.svelte`: back action uses `history.back()` when there is in-app history, falling back to `goto(base + '/')`, so the reader returns to the library when opened from it.
+- `src/routes/adhkar/[set]/+page.svelte` and `src/routes/recitations/+page.svelte`: back action uses `history.back()` when there is in-app history, falling back to `goto(base + '/')`, so both readers return to the library when opened from it.
 
 ## Error handling
 

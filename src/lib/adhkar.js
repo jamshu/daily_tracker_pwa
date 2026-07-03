@@ -387,9 +387,9 @@ export const ADHKAR = {
 				source: `Muslim · Qurʼan 2:158`
 			},
 			{
-				ar: `لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ، أَنْجَزَ وَعْدَهُ، وَنَصَرَ عَبْدَهُ، وَهَزَمَ الْأَحْزَابَ وَحْدَهُ`,
+				ar: `اللَّهُ أَكْبَرُ، اللَّهُ أَكْبَرُ، اللَّهُ أَكْبَرُ وَلِلَّهِ الْحَمْدُ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ، أَنْجَزَ وَعْدَهُ، وَنَصَرَ عَبْدَهُ، وَهَزَمَ الْأَحْزَابَ وَحْدَهُ`,
 				tr: `Dhikr on aṣ-Ṣafā and al-Marwah`,
-				en: `On each of aṣ-Ṣafā and al-Marwah face the qiblah, raise the hands and say this three times, making long duʻā in between: "There is no god but Allah alone, without partner. His is the dominion and His is the praise, and He is able to do all things. There is no god but Allah alone: He fulfilled His promise, gave victory to His servant, and defeated the confederates alone."`,
+				en: `On each of aṣ-Ṣafā and al-Marwah face the qiblah, raise the hands and say this three times, making long duʻā in between: "Allah is the Greatest, Allah is the Greatest, Allah is the Greatest, and to Allah belongs all praise. There is no god but Allah alone, without partner. His is the dominion and His is the praise, and He is able to do all things. There is no god but Allah alone: He fulfilled His promise, gave victory to His servant, and defeated the confederates alone."`,
 				count: `Step 8 — 3× on each mount`,
 				source: `Muslim`
 			},

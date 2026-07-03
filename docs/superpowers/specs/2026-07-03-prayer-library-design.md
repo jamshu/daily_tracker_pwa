@@ -29,7 +29,7 @@ Export `PRAYER_LIBRARY`: an array of `{ id, title, subtitle, icon, href }` (href
 | janaza | Janaza Prayer | `/adhkar/janaza` |
 | recitations | Protective Recitations | `/recitations` |
 
-`icon` is the SVG path data currently inlined per button on the home page. Adding a future item = one entry here (+ a set in `ADHKAR` if it uses the reader).
+`icon` is an array of SVG path `d` strings (some icons use two paths), taken from the markup currently inlined per button on the home page. Adding a future item = one entry here (+ a set in `ADHKAR` if it uses the reader).
 
 ### 2. Shared row component — `src/lib/components/LibraryLink.svelte`
 

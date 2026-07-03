@@ -333,3 +333,32 @@ export const ADHKAR = {
 		]
 	}
 };
+
+/* ----------------------------- prayer library ---------------------------- */
+// Entries for the "Prayers & Dhikr" library page (/prayers) and the home-page
+// shortcut. href is app-relative (base prepended at render); icon is a list of
+// SVG path `d` strings drawn in a 24×24 stroked viewBox. Future prayers/duas:
+// add an entry here (plus an ADHKAR set above if it opens in the reader).
+export const PRAYER_LIBRARY = [
+	{
+		id: 'afterSalah',
+		title: 'Dhikr after Salah',
+		subtitle: 'The remembrance to recite after every fard prayer',
+		icon: ['M21 12.8A9 9 0 1 1 11.2 3a7 7 0 1 0 9.8 9.8z'],
+		href: '/adhkar/afterSalah'
+	},
+	{
+		id: 'janaza',
+		title: 'Janaza Prayer',
+		subtitle: '4 Takbeers — duas for the funeral prayer',
+		icon: ['M12 2L8 7H4l2 5-4 5h5l5 5 5-5h5l-4-5 2-5h-4L12 2z'],
+		href: '/adhkar/janaza'
+	},
+	{
+		id: 'recitations',
+		title: 'Protective Recitations',
+		subtitle: 'Ayatul Kursi & the three Quls — Ikhlās, Falaq, Nās',
+		icon: ['M12 22s-8-4.5-8-11.5V5l8-3 8 3v5.5C20 17.5 12 22 12 22z', 'M9 11l2 2 4-4'],
+		href: '/recitations'
+	}
+];

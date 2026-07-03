@@ -14,7 +14,7 @@ One "Prayers & Dhikr" library page listing all collections, extensible so future
 ## Decisions (confirmed with user)
 
 - Library contains the 3 current collections: Dhikr after Salah, Janaza Prayer, Protective Recitations. Morning/Evening Adhkār stay reachable from the Daily Deeds info icons only.
-- Every library item opens as a full page: Janaza switches from the popup modal to the immersive `/adhkar/janaza` reader. Protective Recitations keeps its `/recitations` page.
+- ~~Every library item opens as a full page: Janaza switches from the popup modal to the immersive `/adhkar/janaza` reader.~~ **Amended during execution:** Janaza keeps its popup modal — it presents the separate male/female versions of the duas. Library entries therefore carry either `href` (page) or `modal` (ADHKAR set key). Protective Recitations keeps its `/recitations` page.
 - Home page keeps the "Dhikr after Salah" button and gains a "Prayers & Dhikr" library button; the Janaza and Protective Recitations buttons are removed.
 
 ## Design
@@ -23,11 +23,11 @@ One "Prayers & Dhikr" library page listing all collections, extensible so future
 
 Export `PRAYER_LIBRARY`: an array of `{ id, title, subtitle, icon, href }` (href is app-relative, `base` prepended at render). Initial entries:
 
-| id | title | href |
+| id | title | opens via |
 |---|---|---|
-| afterSalah | Dhikr after Salah | `/adhkar/afterSalah` |
-| janaza | Janaza Prayer | `/adhkar/janaza` |
-| recitations | Protective Recitations | `/recitations` |
+| afterSalah | Dhikr after Salah | `href: /adhkar/afterSalah` |
+| janaza | Janaza Prayer | `modal: janaza` (popup, male/female duas) |
+| recitations | Protective Recitations | `href: /recitations` |
 
 `icon` is an array of SVG path `d` strings (some icons use two paths), taken from the markup currently inlined per button on the home page. Adding a future item = one entry here (+ a set in `ADHKAR` if it uses the reader).
 
@@ -48,8 +48,8 @@ Extracts the ~30-line `dhikr-link` button markup (icon circle, title + subtitle,
 
 ### 5. Enablers
 
-- `src/routes/adhkar/[set]/+page.js`: add `{ set: 'janaza' }` to `entries()` so the janaza reader prerenders.
-- `src/routes/adhkar/[set]/+page.svelte` and `src/routes/recitations/+page.svelte`: back action uses `history.back()` when there is in-app history, falling back to `goto(base + '/')`, so both readers return to the library when opened from it.
+- `src/routes/adhkar/[set]/+page.svelte` and `src/routes/recitations/+page.svelte`: back action uses `history.back()` when there is in-app history, falling back to `goto(base + '/')`, so both readers return to the library when opened from it. (The janaza prerender entry was dropped with the modal amendment.)
+- `src/routes/prayers/+page.svelte` mounts `<AdhkarModal />` so modal entries open in place.
 
 ## Error handling
 

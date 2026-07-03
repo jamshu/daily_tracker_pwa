@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	import { budgetData, loadBudget, monthLabel, OPENING_ID } from '$lib/budget.js';
+	import { budgetData, loadBudget, monthLabel, summarizeBudget } from '$lib/budget.js';
 
 	function fmt(n) {
 		return Number.isFinite(n) ? n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }) : '—';
@@ -13,21 +13,12 @@
 		return (n > 0 ? '+' : '') + fmt(n);
 	}
 
-	$: rows = Object.entries($budgetData)
-		.map(([key, cats]) => {
-			const values = Object.entries(cats)
-				.filter(([id]) => id !== OPENING_ID)
-				.map(([, c]) => c);
-			const total = values.reduce((s, c) => s + (c.actual ?? 0), 0);
-			const budget = values.reduce((s, c) => s + (c.budget ?? 0), 0);
-			return { key, total, budget, diff: total - budget };
-		})
-		.filter(r => r.total > 0)
-		.sort((a, b) => a.key.localeCompare(b.key));
+	function pct(spent, budget) {
+		if (!budget) return spent > 0 ? 100 : 0;
+		return Math.min(100, Math.round((spent / budget) * 100));
+	}
 
-	$: grandTotal = rows.reduce((s, r) => s + r.total, 0);
-	$: grandBudget = rows.reduce((s, r) => s + r.budget, 0);
-	$: grandDiff = grandTotal - grandBudget;
+	$: ({ rows, grandTotal, grandBudget, grandDiff, avgDiff, bestMonth } = summarizeBudget($budgetData));
 
 	onMount(loadBudget);
 </script>
@@ -47,26 +38,47 @@
 	{#if rows.length === 0}
 		<p class="empty">No expense data recorded yet.</p>
 	{:else}
-		<div class="card report-card">
-			<div class="rh">
-				<span>Month</span>
-				<span>Budget</span>
-				<span>Spent</span>
-				<span>Diff</span>
+		<div class="tiles fade-in" style="--fade-delay:0.05s">
+			<div class="tile">
+				<span class="tile-emo emo" aria-hidden="true">💰</span>
+				<span class="tile-big">{fmt(grandTotal)}</span>
+				<span class="tile-lbl">total spent</span>
 			</div>
+			<div class="tile">
+				<span class="tile-emo emo" aria-hidden="true">{avgDiff <= 0 ? '📉' : '📈'}</span>
+				<span class="tile-big" class:red={avgDiff > 0} class:green={avgDiff < 0}>{fmtDiff(Math.round(avgDiff))}</span>
+				<span class="tile-lbl">avg over/under</span>
+			</div>
+			<div class="tile">
+				<span class="tile-emo emo" aria-hidden="true">🏆</span>
+				<span class="tile-big">{bestMonth ? fmt(bestMonth.total) : '—'}</span>
+				<span class="tile-lbl">{bestMonth ? `best · ${monthLabel(bestMonth.key)}` : 'best month'}</span>
+			</div>
+		</div>
+
+		<div class="cards fade-in" style="--fade-delay:0.10s">
 			{#each rows as r (r.key)}
-				<div class="rr" class:rr-over={r.diff > 0} class:rr-under={r.diff < 0}>
-					<span class="rlabel">{monthLabel(r.key)}</span>
-					<span class="ramount dim">{fmt(r.budget)}</span>
-					<span class="ramount">{fmt(r.total)}</span>
-					<span class="ramount" class:red={r.diff > 0} class:green={r.diff < 0}>{fmtDiff(r.diff)}</span>
+				<div class="mrow" class:mrow-over={r.diff > 0}>
+					<div class="mrow-top">
+						<span class="mname">{monthLabel(r.key)}</span>
+						<span class="mnums">
+							<span class="mspent">{fmt(r.total)}</span>
+							<span class="mbudget dim"> / {fmt(r.budget)}</span>
+							<span class="mdiff" class:red={r.diff > 0} class:green={r.diff < 0}>{fmtDiff(r.diff)}</span>
+						</span>
+					</div>
+					<span class="abar"><span class="abar-fill" class:over={r.diff > 0} style="width:{pct(r.total, r.budget)}%"></span></span>
 				</div>
 			{/each}
-			<div class="rtotal">
-				<span>Grand Total</span>
-				<span class="ramount dim">{fmt(grandBudget)}</span>
-				<span class="ramount teal">{fmt(grandTotal)}</span>
-				<span class="ramount" class:red={grandDiff > 0} class:green={grandDiff < 0}>{fmtDiff(grandDiff)}</span>
+			<div class="mrow mtotal">
+				<div class="mrow-top">
+					<span class="mname">Grand Total</span>
+					<span class="mnums">
+						<span class="mspent teal">{fmt(grandTotal)}</span>
+						<span class="mbudget dim"> / {fmt(grandBudget)}</span>
+						<span class="mdiff" class:red={grandDiff > 0} class:green={grandDiff < 0}>{fmtDiff(grandDiff)}</span>
+					</span>
+				</div>
 			</div>
 		</div>
 	{/if}
@@ -110,59 +122,119 @@
 		margin-top: 60px;
 		font-size: 0.9rem;
 	}
-	.report-card { padding: 0; }
-	.rh {
+	/* Stat tiles */
+	.tiles {
 		display: grid;
-		grid-template-columns: 1fr 90px 90px 80px;
-		gap: 12px;
-		padding: 8px 16px;
-		font-size: 0.7rem;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 10px;
+		margin-bottom: 14px;
+	}
+	.tile {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 3px;
+		padding: 14px 8px 12px;
+		background: var(--surface);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
+		text-align: center;
+	}
+	.tile-emo {
+		font-size: 1.15rem;
+	}
+	.tile-big {
+		font-family: var(--font-display);
+		font-size: 1.4rem;
+		font-weight: 600;
+		font-optical-sizing: auto;
+		font-variation-settings: 'SOFT' 40;
+		line-height: 1.1;
+		letter-spacing: -0.02em;
+		font-variant-numeric: tabular-nums;
+	}
+	.tile-big.red { color: var(--red); }
+	.tile-big.green { color: var(--green); }
+	.tile-lbl {
+		font-size: 0.68rem;
 		text-transform: uppercase;
 		letter-spacing: 0.07em;
 		color: var(--text-faint);
-		font-weight: 700;
-		border-bottom: 1px solid var(--border);
-		background: var(--surface-2);
-		text-align: right;
 	}
-	.rh span:first-child { text-align: left; }
-	.rr {
-		display: grid;
-		grid-template-columns: 1fr 90px 90px 80px;
-		gap: 12px;
-		align-items: center;
+
+	/* Per-month rows */
+	.cards {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+	.mrow {
+		display: flex;
+		flex-direction: column;
+		gap: 9px;
+		background: var(--surface);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
 		padding: 12px 16px;
-		border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
-		font-size: 0.92rem;
-		transition: background 0.15s ease;
 	}
-	.rr:last-of-type { border-bottom: none; }
-	.rr-over  { background: color-mix(in srgb, var(--red)   5%, transparent); }
-	.rr-under { background: color-mix(in srgb, var(--green) 5%, transparent); }
-	.rlabel {
+	.mrow-over {
+		background: color-mix(in srgb, var(--red) 5%, var(--surface));
+	}
+	.mrow-top {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 10px;
+		flex-wrap: wrap;
+	}
+	.mname {
+		font-family: var(--font-display);
 		font-weight: 600;
 		color: var(--text);
 	}
-	.ramount {
+	.mnums {
 		font-variant-numeric: tabular-nums;
-		font-weight: 600;
-		color: var(--text);
-		text-align: right;
+		font-size: 0.92rem;
 	}
-	.ramount.dim  { color: var(--text-faint); font-weight: 400; }
-	.ramount.teal { color: var(--teal); }
-	.red   { color: var(--red);   font-weight: 700; }
-	.green { color: var(--green); font-weight: 700; }
-	.rtotal {
-		display: grid;
-		grid-template-columns: 1fr 90px 90px 80px;
-		gap: 12px;
-		align-items: center;
-		padding: 13px 16px;
-		border-top: 2px solid var(--border);
-		background: var(--surface-2);
-		font-size: 0.95rem;
+	.mspent {
 		font-weight: 700;
 		color: var(--text);
+	}
+	.mspent.teal { color: var(--teal); }
+	.mbudget.dim { color: var(--text-faint); }
+	.mdiff {
+		margin-left: 8px;
+		font-weight: 600;
+		color: var(--text-dim);
+	}
+	.mdiff.red { color: var(--red); }
+	.mdiff.green { color: var(--green); }
+	.mtotal {
+		background: var(--surface-2);
+	}
+	.abar {
+		display: block;
+		height: 8px;
+		border-radius: 999px;
+		background: var(--bg-soft);
+		border: 1px solid var(--border);
+		overflow: hidden;
+	}
+	.abar-fill {
+		display: block;
+		height: 100%;
+		border-radius: 999px;
+		background: var(--teal);
+		transform-origin: left;
+		animation: grow 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+	}
+	.abar-fill.over {
+		background: var(--red);
+	}
+	@keyframes grow {
+		from { transform: scaleX(0); }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.abar-fill { animation: none; }
 	}
 </style>

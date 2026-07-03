@@ -17,6 +17,8 @@
 		OPENING_ID,
 		getOpening
 	} from '$lib/budget.js';
+	import { displayBudgetEmoji } from '$lib/budgetEmoji.js';
+	import EmojiPicker from '$lib/components/EmojiPicker.svelte';
 
 	const todayKey = monthKey();
 
@@ -27,6 +29,8 @@
 	let error = '';
 	let addingCat = false;
 	let newCatName = '';
+	let newCatEmoji = '';
+	let showEmojiPicker = false;
 	let saveTimer = null;
 	let addExpenseFor = null;   // catId currently adding an expense to
 	let addExpenseVal = '';
@@ -150,16 +154,26 @@
 	function startAddCat() {
 		addingCat = true;
 		newCatName = '';
+		newCatEmoji = '';
+		showEmojiPicker = false;
+	}
+
+	function cancelAddCat() {
+		addingCat = false;
+		newCatName = '';
+		newCatEmoji = '';
+		showEmojiPicker = false;
 	}
 
 	function confirmAddCat() {
 		const name = newCatName.trim();
-		if (!name) { addingCat = false; return; }
+		if (!name) { cancelAddCat(); return; }
 		const id = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
-		if (!id || rows[id]) { addingCat = false; return; }
-		rows = { ...rows, [id]: { budget: 0, actual: 0, label: name } };
-		addingCat = false;
-		newCatName = '';
+		if (!id || rows[id]) { cancelAddCat(); return; }
+		const entry = { budget: 0, actual: 0, label: name };
+		if (newCatEmoji) entry.emoji = newCatEmoji;
+		rows = { ...rows, [id]: entry };
+		cancelAddCat();
 		scheduleAutoSave();
 	}
 
@@ -216,7 +230,7 @@
 	</div>
 
 	<!-- Opening / Closing balance -->
-	<div class="balance card">
+	<div class="hero card fade-in" style="--fade-delay:0.05s">
 		<div class="bal-stat">
 			<span class="lbl">Opening</span>
 			<input
@@ -237,116 +251,107 @@
 		</div>
 	</div>
 
-	<!-- Summary bar -->
-	<div class="summary card">
-		<div class="stat">
-			<span class="big">{fmt(totalBudget)}</span>
-			<span class="lbl">Budget</span>
+	<!-- Summary tiles -->
+	<div class="tiles fade-in" style="--fade-delay:0.10s">
+		<div class="tile">
+			<span class="tile-emo emo" aria-hidden="true">📊</span>
+			<span class="tile-big">{fmt(totalBudget)}</span>
+			<span class="tile-lbl">budget</span>
 		</div>
-		<div class="divider" />
-		<div class="stat">
-			<span class="big">{fmt(totalActual)}</span>
-			<span class="lbl">Actual</span>
+		<div class="tile">
+			<span class="tile-emo emo" aria-hidden="true">💸</span>
+			<span class="tile-big">{fmt(totalActual)}</span>
+			<span class="tile-lbl">actual</span>
 		</div>
-		<div class="divider" />
-		<div class="stat">
-			<span class="big" class:over={totalOver} class:under={!totalOver && totalDiff !== 0}>{fmtDiff(totalDiff)}</span>
-			<span class="lbl">{totalOver ? 'Over' : 'Under'}</span>
+		<div class="tile">
+			<span class="tile-emo emo" aria-hidden="true">{totalOver ? '⚠️' : '✅'}</span>
+			<span class="tile-big" class:over={totalOver} class:under={!totalOver && totalDiff !== 0}>{fmtDiff(totalDiff)}</span>
+			<span class="tile-lbl">{totalOver ? 'over' : 'under'}</span>
 		</div>
 	</div>
 
-	<!-- Budget table -->
+	<!-- Categories -->
 	<h2 class="section-title">Categories</h2>
-	<div class="card table-card">
-		<div class="table-wrap">
-			<table>
-				<thead>
-					<tr>
-						<th class="l">Category</th>
-						<th>Budget</th>
-						<th>Actual</th>
-						<th>Diff</th>
-						<th class="del-col"></th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each catList as cat (cat.id)}
-						{@const calc = calcRow(cat)}
-						<tr class:row-over={calc.over}>
-							<td class="l cat-label">{cat.label}</td>
-							<td>
+	<div class="cards fade-in" style="--fade-delay:0.15s">
+		{#each catList as cat (cat.id)}
+			{@const calc = calcRow(cat)}
+			<div class="crow" class:crow-over={calc.over}>
+				<div class="crow-top">
+					<span class="cname"><span class="emo" aria-hidden="true">{displayBudgetEmoji(cat)}</span>{cat.label}</span>
+					<span class="cdiff" class:red={calc.over} class:green={!calc.over && calc.diff < 0}>{fmtDiff(calc.diff)}</span>
+					{#if !isDefaultCategory(cat.id)}
+						<button class="del" on:click={() => deleteCat(cat.id)} aria-label="delete {cat.label}">
+							<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4h6v2" />
+							</svg>
+						</button>
+					{/if}
+				</div>
+				<div class="crow-inputs">
+					<label class="cinput">
+						<span class="cinput-lbl">Budget</span>
+						<input
+							type="number"
+							min="0"
+							step="0.01"
+							value={cat.budget}
+							inputmode="decimal"
+							on:change={(e) => setVal(cat.id, 'budget', e.target.value)}
+							aria-label="{cat.label} budget"
+						/>
+					</label>
+					<label class="cinput">
+						<span class="cinput-lbl">Actual</span>
+						<div class="actual-cell">
+							{#if addExpenseFor === cat.id}
+								<input
+									class="add-exp-input"
+									type="number"
+									min="0"
+									step="0.01"
+									inputmode="decimal"
+									placeholder="+ amt"
+									bind:value={addExpenseVal}
+									on:keydown={(e) => { if (e.key === 'Enter') confirmAddExpense(cat.id); if (e.key === 'Escape') cancelAddExpense(); }}
+									on:blur={() => confirmAddExpense(cat.id)}
+									autofocus
+									aria-label="add expense to {cat.label}"
+								/>
+							{:else}
 								<input
 									type="number"
 									min="0"
 									step="0.01"
-									value={cat.budget}
+									value={cat.actual}
 									inputmode="decimal"
-									on:change={(e) => setVal(cat.id, 'budget', e.target.value)}
-									aria-label="{cat.label} budget"
+									on:change={(e) => setVal(cat.id, 'actual', e.target.value)}
+									aria-label="{cat.label} actual"
 								/>
-							</td>
-							<td>
-								<div class="actual-cell">
-									{#if addExpenseFor === cat.id}
-										<input
-											class="add-exp-input"
-											type="number"
-											min="0"
-											step="0.01"
-											inputmode="decimal"
-											placeholder="+ amt"
-											bind:value={addExpenseVal}
-											on:keydown={(e) => { if (e.key === 'Enter') confirmAddExpense(cat.id); if (e.key === 'Escape') cancelAddExpense(); }}
-											on:blur={() => confirmAddExpense(cat.id)}
-											autofocus
-											aria-label="add expense to {cat.label}"
-										/>
-									{:else}
-										<input
-											type="number"
-											min="0"
-											step="0.01"
-											value={cat.actual}
-											inputmode="decimal"
-											on:change={(e) => setVal(cat.id, 'actual', e.target.value)}
-											aria-label="{cat.label} actual"
-										/>
-										<button class="add-exp" on:click={() => startAddExpense(cat.id)} aria-label="add expense to {cat.label}" title="Add to actual">
-											<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-												<path d="M12 5v14M5 12h14" />
-											</svg>
-										</button>
-									{/if}
-								</div>
-							</td>
-							<td class="num" class:red={calc.over} class:green={!calc.over && calc.diff < 0}>{fmtDiff(calc.diff)}</td>
-							<td class="del-col">
-								{#if !isDefaultCategory(cat.id)}
-									<button class="del" on:click={() => deleteCat(cat.id)} aria-label="delete {cat.label}">
-										<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-											<polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4h6v2" />
-										</svg>
-									</button>
-								{/if}
-							</td>
-						</tr>
-					{/each}
-				</tbody>
-				<tfoot>
-					<tr class="totals">
-						<td class="l">Total</td>
-						<td class="num bold">{fmt(totalBudget)}</td>
-						<td class="num bold">{fmt(totalActual)}</td>
-						<td class="num bold" class:red={totalOver} class:green={!totalOver && totalDiff !== 0}>{fmtDiff(totalDiff)}</td>
-						<td class="del-col"></td>
-					</tr>
-				</tfoot>
-			</table>
-		</div>
+								<button class="add-exp" on:click={() => startAddExpense(cat.id)} aria-label="add expense to {cat.label}" title="Add to actual">
+									<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+										<path d="M12 5v14M5 12h14" />
+									</svg>
+								</button>
+							{/if}
+						</div>
+					</label>
+				</div>
+				<span class="abar"><span class="abar-fill" class:over={calc.over} style="width:{Math.min(100, calc.pct ?? 0)}%"></span></span>
+			</div>
+		{/each}
+	</div>
 
-		<!-- Add category -->
+	<!-- Add category -->
+	<div class="add-card fade-in" style="--fade-delay:0.18s">
 		{#if addingCat}
 			<div class="add-row">
+				<button
+					type="button"
+					class="emo-chip emo"
+					on:click={() => (showEmojiPicker = !showEmojiPicker)}
+					aria-label="pick icon"
+					aria-pressed={showEmojiPicker}
+				>{newCatEmoji || '＋'}</button>
 				<input
 					class="cat-input"
 					type="text"
@@ -356,8 +361,13 @@
 					autofocus
 				/>
 				<button class="confirm-btn" on:click={confirmAddCat}>Add</button>
-				<button class="cancel-btn" on:click={() => (addingCat = false)}>Cancel</button>
+				<button class="cancel-btn" on:click={cancelAddCat}>Cancel</button>
 			</div>
+			{#if showEmojiPicker}
+				<div class="picker-wrap">
+					<EmojiPicker value={newCatEmoji} on:select={(e) => (newCatEmoji = e.detail)} />
+				</div>
+			{/if}
 		{:else}
 			<button class="add-cat" on:click={startAddCat}>
 				<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -459,21 +469,6 @@
 		text-align: center;
 	}
 
-	/* Summary */
-	.summary {
-		display: flex;
-		align-items: center;
-		padding: 18px 20px;
-		gap: 0;
-		margin-bottom: 4px;
-	}
-	.stat {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 4px;
-	}
 	.big {
 		font-family: var(--font-display);
 		font-size: 1.5rem;
@@ -482,7 +477,6 @@
 		letter-spacing: -0.02em;
 	}
 	.big.over { color: var(--red); }
-	.big.under { color: var(--green); }
 	.lbl {
 		font-size: 0.7rem;
 		text-transform: uppercase;
@@ -496,7 +490,7 @@
 	}
 
 	/* Opening / Closing balance */
-	.balance {
+	.hero {
 		display: flex;
 		align-items: center;
 		padding: 16px 20px;
@@ -509,6 +503,46 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 6px;
+	}
+
+	/* Summary tiles */
+	.tiles {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 10px;
+		margin-bottom: 4px;
+	}
+	.tile {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 3px;
+		padding: 14px 8px 12px;
+		background: var(--surface);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
+		text-align: center;
+	}
+	.tile-emo {
+		font-size: 1.15rem;
+	}
+	.tile-big {
+		font-family: var(--font-display);
+		font-size: 1.5rem;
+		font-weight: 600;
+		font-optical-sizing: auto;
+		font-variation-settings: 'SOFT' 40;
+		line-height: 1.1;
+		letter-spacing: -0.02em;
+		font-variant-numeric: tabular-nums;
+	}
+	.tile-big.over { color: var(--red); }
+	.tile-big.under { color: var(--green); }
+	.tile-lbl {
+		font-size: 0.68rem;
+		text-transform: uppercase;
+		letter-spacing: 0.07em;
+		color: var(--text-faint);
 	}
 	.opening-input {
 		width: 120px;
@@ -570,48 +604,83 @@
 	.add-exp-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 	.add-exp-input:focus { outline: none; }
 
-	/* Table */
-	.table-card {
-		padding: 0;
-		overflow: hidden;
+	/* Category rows */
+	.cards {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
 	}
-	.table-wrap {
-		overflow-x: auto;
+	.crow {
+		display: flex;
+		flex-direction: column;
+		gap: 9px;
+		background: var(--surface);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
+		padding: 12px 14px;
 	}
-	table {
-		width: 100%;
-		border-collapse: collapse;
-		font-size: 0.88rem;
+	.crow-over {
+		background: color-mix(in srgb, var(--red) 5%, var(--surface));
 	}
-	thead th {
-		padding: 10px 8px;
-		font-size: 0.7rem;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: var(--text-faint);
-		font-weight: 700;
-		border-bottom: 1px solid var(--border);
-		background: var(--surface-2);
-		text-align: center;
+	.crow-top {
+		display: flex;
+		align-items: center;
+		gap: 10px;
 	}
-	thead th.l { text-align: left; padding-left: 14px; }
-	tbody td {
-		padding: 8px 8px;
-		border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
-		text-align: center;
-		color: var(--text-dim);
-	}
-	tbody td.l { text-align: left; padding-left: 14px; }
-	tbody tr:last-child td { border-bottom: none; }
-
-	.row-over {
-		background: color-mix(in srgb, var(--red) 5%, transparent);
-	}
-
-	.cat-label {
+	.cname {
+		flex: 1;
+		font-family: var(--font-display);
 		font-weight: 600;
 		color: var(--text);
-		white-space: nowrap;
+	}
+	.cname .emo {
+		font-size: 0.95rem;
+		margin-right: 8px;
+	}
+	.cdiff {
+		font-variant-numeric: tabular-nums;
+		font-weight: 600;
+		color: var(--text-dim);
+	}
+	.crow-inputs {
+		display: flex;
+		gap: 10px;
+	}
+	.cinput {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+	.cinput-lbl {
+		font-size: 0.72rem;
+		color: var(--text-faint);
+		flex-shrink: 0;
+	}
+	.abar {
+		display: block;
+		height: 8px;
+		border-radius: 999px;
+		background: var(--bg-soft);
+		border: 1px solid var(--border);
+		overflow: hidden;
+	}
+	.abar-fill {
+		display: block;
+		height: 100%;
+		border-radius: 999px;
+		background: var(--teal);
+		transform-origin: left;
+		animation: grow 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+	}
+	.abar-fill.over {
+		background: var(--red);
+	}
+	@keyframes grow {
+		from { transform: scaleX(0); }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.abar-fill { animation: none; }
 	}
 
 	input[type='number'] {
@@ -638,15 +707,13 @@
 		border-color: var(--teal);
 	}
 
-	.num { font-variant-numeric: tabular-nums; }
 	.red { color: var(--red); font-weight: 600; }
 	.green { color: var(--green); font-weight: 600; }
-	.bold { font-weight: 700; color: var(--text); }
 
-	.del-col { width: 28px; padding: 0 8px 0 4px; }
 	.del {
 		width: 24px;
 		height: 24px;
+		flex-shrink: 0;
 		border-radius: 6px;
 		display: grid;
 		place-items: center;
@@ -658,16 +725,13 @@
 	}
 	.del:active { color: var(--red); background: color-mix(in srgb, var(--red) 12%, transparent); }
 
-	tfoot td {
-		padding: 10px 8px;
-		border-top: 2px solid var(--border);
-		font-variant-numeric: tabular-nums;
-		text-align: center;
-	}
-	tfoot td.l { text-align: left; padding-left: 14px; color: var(--text); font-weight: 700; }
-	.totals { background: var(--surface-2); }
-
 	/* Add category */
+	.add-card {
+		background: var(--surface);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
+		overflow: hidden;
+	}
 	.add-cat {
 		display: flex;
 		align-items: center;
@@ -677,7 +741,6 @@
 		font-size: 0.84rem;
 		font-weight: 600;
 		color: var(--text-faint);
-		border-top: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
 		transition: color 0.15s ease;
 	}
 	@media (hover: hover) {
@@ -689,7 +752,24 @@
 		align-items: center;
 		gap: 8px;
 		padding: 10px 14px;
-		border-top: 1px solid var(--border);
+	}
+	.emo-chip {
+		width: 38px;
+		height: 38px;
+		flex-shrink: 0;
+		border-radius: 8px;
+		font-size: 1.1rem;
+		display: grid;
+		place-items: center;
+		background: var(--bg-soft);
+		border: 1px solid var(--border);
+		transition: border-color 0.15s ease;
+	}
+	.emo-chip[aria-pressed='true'] {
+		border-color: var(--teal);
+	}
+	.picker-wrap {
+		padding: 0 14px 12px;
 	}
 	.cat-input {
 		flex: 1;
@@ -708,7 +788,7 @@
 		border-radius: 8px;
 		font-weight: 700;
 		font-size: 0.84rem;
-		color: #042f2a;
+		color: var(--on-accent);
 		background: var(--teal);
 	}
 	.cancel-btn {

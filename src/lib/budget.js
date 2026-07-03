@@ -1,94 +1,28 @@
+// Custom budget store + API calls. Pure calculations (category defaults,
+// month-key arithmetic, aggregation) live in budgetCalc.js — re-exported here
+// so existing imports of '$lib/budget.js' keep working unchanged.
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import { base } from '$app/paths';
 
-export const DEFAULT_CATEGORIES = [
-	{ id: 'rent',          label: 'Rent / Mortgage' },
-	{ id: 'electricity',   label: 'Electricity' },
-	{ id: 'water',         label: 'Water' },
-	{ id: 'internet',      label: 'Internet' },
-	{ id: 'phone',         label: 'Phone' },
-	{ id: 'grocery',       label: 'Grocery' },
-	{ id: 'food',          label: 'Food' },
-	{ id: 'school',        label: 'School' },
-	{ id: 'kids',          label: 'Kids Expenses' },
-	{ id: 'transport',     label: 'Transport / Fuel' },
-	{ id: 'medical',       label: 'Medical' },
-	{ id: 'entertainment', label: 'Entertainment' },
-	{ id: 'clothing',      label: 'Clothing' },
-	{ id: 'fines_rta',     label: 'Fines / RTA' },
-	{ id: 'other',         label: 'Other' }
-];
-
-const DEFAULT_IDS = new Set(DEFAULT_CATEGORIES.map((c) => c.id));
-
-/** Reserved pseudo-category storing the month's opening balance in its `.budget`. */
-export const OPENING_ID = '$opening';
-
-/** Read the opening balance amount from a month's rows. */
-export function getOpening(rows) {
-	return rows?.[OPENING_ID]?.budget ?? 0;
-}
+export {
+	DEFAULT_CATEGORIES,
+	OPENING_ID,
+	getOpening,
+	monthKey,
+	monthLabel,
+	prevMonth,
+	nextMonth,
+	ensureMonth,
+	isDefaultCategory,
+	calcRow,
+	summarizeBudget
+} from './budgetCalc.js';
 
 /** Full months map: { "YYYY-MM": { catId: { budget, actual }, ... } } */
 export const budgetData = writable({});
 
 let loaded = false;
-
-export function monthKey(d = new Date()) {
-	const y = d.getFullYear();
-	const m = String(d.getMonth() + 1).padStart(2, '0');
-	return `${y}-${m}`;
-}
-
-export function monthLabel(key) {
-	const [y, m] = key.split('-').map(Number);
-	return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-}
-
-export function prevMonth(key) {
-	const [y, m] = key.split('-').map(Number);
-	const d = new Date(y, m - 2, 1);
-	return monthKey(d);
-}
-
-export function nextMonth(key) {
-	const [y, m] = key.split('-').map(Number);
-	const d = new Date(y, m, 1);
-	return monthKey(d);
-}
-
-/** Return rows for a month, seeding defaults if the month has no data yet. */
-export function ensureMonth(data, key) {
-	const existing = data[key];
-	if (existing) {
-		// Merge any missing default categories in at 0/0
-		const merged = {};
-		for (const c of DEFAULT_CATEGORIES) merged[c.id] = existing[c.id] ?? { budget: 0, actual: 0 };
-		// Append custom categories
-		for (const [id, val] of Object.entries(existing)) {
-			if (!DEFAULT_IDS.has(id)) merged[id] = val;
-		}
-		return merged;
-	}
-	// Fresh month
-	const fresh = {};
-	for (const c of DEFAULT_CATEGORIES) fresh[c.id] = { budget: 0, actual: 0 };
-	return fresh;
-}
-
-export function isDefaultCategory(id) {
-	return DEFAULT_IDS.has(id);
-}
-
-/** Compute diff + pct for a single { budget, actual } row. */
-export function calcRow(row) {
-	const b = row.budget ?? 0;
-	const a = row.actual ?? 0;
-	const diff = a - b;
-	const pct = b > 0 ? (a / b) * 100 : null;
-	return { diff, pct, over: diff > 0 };
-}
 
 export async function loadBudget() {
 	if (!browser || loaded) return;

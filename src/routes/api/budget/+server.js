@@ -39,6 +39,7 @@ function sanitizeMonth(month) {
 		const actual = Math.max(0, Number(val?.actual) || 0);
 		const entry = { budget, actual };
 		if (typeof val?.label === 'string' && val.label.trim()) entry.label = val.label.trim();
+		if (typeof val?.emoji === 'string' && val.emoji.trim()) entry.emoji = val.emoji.trim().slice(0, 16);
 		out[cat.trim()] = entry;
 		count++;
 	}

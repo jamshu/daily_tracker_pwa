@@ -1,8 +1,14 @@
 <script>
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	import { PRAYER_LIBRARY } from '$lib/adhkar.js';
+	import { PRAYER_LIBRARY, openAdhkar } from '$lib/adhkar.js';
 	import LibraryLink from '$lib/components/LibraryLink.svelte';
+	import AdhkarModal from '$lib/components/AdhkarModal.svelte';
+
+	function open(entry) {
+		if (entry.modal) openAdhkar(entry.modal);
+		else goto(`${base}${entry.href}`);
+	}
 </script>
 
 <svelte:head><title>Prayers & Dhikr — Daily Deed Tracker</title></svelte:head>
@@ -22,10 +28,12 @@
 			subtitle={entry.subtitle}
 			icon={entry.icon}
 			fadeDelay={0.06 + i * 0.05}
-			on:click={() => goto(`${base}${entry.href}`)}
+			on:click={() => open(entry)}
 		/>
 	{/each}
 </div>
+
+<AdhkarModal />
 
 <style>
 	.wrap {

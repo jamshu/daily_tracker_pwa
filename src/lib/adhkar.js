@@ -336,9 +336,10 @@ export const ADHKAR = {
 
 /* ----------------------------- prayer library ---------------------------- */
 // Entries for the "Prayers & Dhikr" library page (/prayers) and the home-page
-// shortcut. href is app-relative (base prepended at render); icon is a list of
-// SVG path `d` strings drawn in a 24×24 stroked viewBox. Future prayers/duas:
-// add an entry here (plus an ADHKAR set above if it opens in the reader).
+// shortcut. Each entry opens via exactly one of: href (app-relative page, base
+// prepended at render) or modal (an ADHKAR set key for the popup). icon is a
+// list of SVG path `d` strings drawn in a 24×24 stroked viewBox. Future
+// prayers/duas: add an entry here (plus an ADHKAR set above if needed).
 export const PRAYER_LIBRARY = [
 	{
 		id: 'afterSalah',
@@ -352,7 +353,9 @@ export const PRAYER_LIBRARY = [
 		title: 'Janaza Prayer',
 		subtitle: '4 Takbeers — duas for the funeral prayer',
 		icon: ['M12 2L8 7H4l2 5-4 5h5l5 5 5-5h5l-4-5 2-5h-4L12 2z'],
-		href: '/adhkar/janaza'
+		// Stays a modal (not the immersive reader): it presents the separate
+		// male/female versions of the duas side by side.
+		modal: 'janaza'
 	},
 	{
 		id: 'recitations',

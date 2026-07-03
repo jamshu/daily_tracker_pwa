@@ -54,6 +54,13 @@
 		if (e.key === 'ArrowLeft') go(-1);
 		else if (e.key === 'ArrowRight') go(1);
 	}
+
+	// Return to wherever this page was opened from (home or the prayer library);
+	// fall back to home on a cold deep-link with no in-app history.
+	function back() {
+		if (history.length > 1) history.back();
+		else goto(`${base}/`);
+	}
 </script>
 
 <svelte:head><title>Recitations</title></svelte:head>
@@ -68,7 +75,7 @@
 	on:touchend={touchEnd}
 >
 	<header class="bar">
-		<button class="icon" on:click={() => goto(`${base}/`)} aria-label="back" title="Back">
+		<button class="icon" on:click={back} aria-label="back" title="Back">
 			<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
 		</button>
 		<div class="label">

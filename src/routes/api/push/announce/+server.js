@@ -26,14 +26,19 @@ export async function POST({ request, cookies }) {
 		const { title, message } = (await request.json()) ?? {};
 		if (!title?.trim()) return json({ ok: false, error: 'Title is required' }, { status: 400 });
 
+		// Log the announcement, but never let a logging failure block delivery.
 		const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
-		await adminExecute('x_announcement', 'create', [
-			{
-				x_name: title.trim(),
-				x_studio_message: (message || '').trim(),
-				x_studio_sent_at: now
-			}
-		]);
+		try {
+			await adminExecute('x_announcement', 'create', [
+				{
+					x_name: title.trim(),
+					x_studio_message: (message || '').trim(),
+					x_studio_sent_at: now
+				}
+			]);
+		} catch (e) {
+			console.error('announce: failed to log x_announcement:', e?.message || e);
+		}
 		const count = await sendToAll({ title: title.trim(), body: (message || '').trim(), url: '/' });
 		return json({ ok: true, count });
 	} catch (e) {

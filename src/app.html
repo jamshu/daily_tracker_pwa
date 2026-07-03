@@ -11,13 +11,13 @@
 		<title>Daily Tracker</title>
 		<script>
 			// Apply cached theme before first paint to avoid a flash. New users
-			// (no cached theme) get the default 'github-dark' palette; keep this id
-			// in sync with DEFAULT_THEME in src/lib/themes.js.
+			// (no cached theme) get the default 'catppuccin-latte' palette; keep this
+			// id in sync with DEFAULT_THEME in src/lib/themes.js.
 			try {
 				var t = localStorage.getItem('theme');
-				document.documentElement.dataset.theme = t && /^[a-z-]+$/.test(t) ? t : 'github-dark';
+				document.documentElement.dataset.theme = t && /^[a-z-]+$/.test(t) ? t : 'catppuccin-latte';
 			} catch (e) {
-				document.documentElement.dataset.theme = 'github-dark';
+				document.documentElement.dataset.theme = 'catppuccin-latte';
 			}
 		</script>
 		%sveltekit.head%

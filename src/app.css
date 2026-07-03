@@ -175,6 +175,60 @@
 	--on-amber: #2e3440;
 }
 
+/* Catppuccin Latte — cool porcelain white, vibrant mauve accent. */
+:root[data-theme='catppuccin-latte'] {
+	--bg: #eff1f5;
+	--bg-soft: #e6e9ef;
+	--surface: #ffffff;
+	--surface-2: #e6e9ef;
+	--border: #ccd0da;
+	--text: #4c4f69;
+	--text-dim: #6c6f85;
+	--text-faint: #8c8fa1;
+	--teal: #8839ef;
+	--teal-deep: #7326d3;
+	--gold: #df8e1d;
+	--green: #40a02b;
+	--red: #d20f39;
+	--bg-glow-a: rgba(136, 57, 239, 0.07);
+	--bg-glow-b: rgba(254, 100, 11, 0.05);
+	--shadow: 0 8px 24px rgba(76, 79, 105, 0.1);
+	--shadow-sm: 0 2px 8px rgba(76, 79, 105, 0.07);
+	--shadow-lg: 0 20px 50px -18px rgba(76, 79, 105, 0.18);
+	--on-accent: #fff;
+	--on-green: #fff;
+	--on-gold: #fff;
+	--amber: #fe640b;
+	--on-amber: #fff;
+}
+
+/* Everforest Light — warm parchment, forest aqua accent. */
+:root[data-theme='everforest-light'] {
+	--bg: #fdf6e3;
+	--bg-soft: #f4f0d9;
+	--surface: #fffbef;
+	--surface-2: #f4f0d9;
+	--border: #e0dcc7;
+	--text: #5c6a72;
+	--text-dim: #708089;
+	--text-faint: #939f91;
+	--teal: #35a77c;
+	--teal-deep: #2b8a66;
+	--gold: #dfa000;
+	--green: #8da101;
+	--red: #f85552;
+	--bg-glow-a: rgba(53, 167, 124, 0.08);
+	--bg-glow-b: rgba(223, 160, 0, 0.05);
+	--shadow: 0 8px 24px rgba(92, 106, 114, 0.1);
+	--shadow-sm: 0 2px 8px rgba(92, 106, 114, 0.07);
+	--shadow-lg: 0 20px 50px -18px rgba(92, 106, 114, 0.18);
+	--on-accent: #fff;
+	--on-green: #fff;
+	--on-gold: #fff;
+	--amber: #df8e1d;
+	--on-amber: #fff;
+}
+
 * {
 	box-sizing: border-box;
 }

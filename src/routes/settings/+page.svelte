@@ -303,11 +303,11 @@
 		<div class="card">
 			<div class="admin-section">
 				<p class="admin-label">Send announcement to all subscribers</p>
-				<div class="add-custom-form" style="flex-direction:column;align-items:stretch;gap:8px;">
-					<input class="cinput" type="text" placeholder="Title" bind:value={announceTitle} maxlength="80" />
-					<textarea class="cinput admin-textarea" rows="3" placeholder="Message (optional)" bind:value={announceBody}></textarea>
+				<div class="admin-form">
+					<input class="admin-input" type="text" placeholder="Title" bind:value={announceTitle} maxlength="80" />
+					<textarea class="admin-input admin-textarea" rows="3" placeholder="Message (optional)" bind:value={announceBody}></textarea>
 					<button
-						class="confirm-btn"
+						class="admin-btn"
 						type="button"
 						disabled={announceBusy || !announceTitle.trim()}
 						on:click={sendAnnouncement}
@@ -320,7 +320,7 @@
 			<div class="admin-section" style="border-top:1px solid var(--border);margin-top:4px;padding-top:4px;">
 				<p class="admin-label">Send score reminder to all subscribers</p>
 				<button
-					class="confirm-btn"
+					class="admin-btn"
 					type="button"
 					disabled={remindBusy}
 					on:click={sendReminder}
@@ -683,9 +683,44 @@
 		color: var(--text-dim);
 		margin: 0;
 	}
+	.admin-form {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
+		padding: 4px 14px 14px;
+	}
+	.admin-input {
+		padding: 8px 10px;
+		border-radius: 8px;
+		border: 1px solid var(--border);
+		background: var(--bg-soft);
+		color: var(--text);
+		font-family: inherit;
+		/* 16px min — smaller makes iOS Safari auto-zoom on focus and stay zoomed. */
+		font-size: 16px;
+	}
+	.admin-input::placeholder {
+		color: var(--text-faint);
+	}
+	.admin-input:focus {
+		outline: none;
+		border-color: var(--teal);
+	}
+	.admin-btn {
+		padding: 9px 14px;
+		border-radius: 8px;
+		font-weight: 700;
+		font-size: 0.84rem;
+		color: var(--on-accent);
+		background: var(--teal);
+	}
+	.admin-btn:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
 	.admin-textarea {
 		resize: vertical;
 		min-height: 68px;
-		font-family: inherit;
 	}
 </style>

@@ -27,8 +27,7 @@ const STUB_PRESETS = [
 	{ id: 103, name: 'Taraweeh', emoji: '', category: 'Prayers', goal: null },
 	{ id: 201, name: 'Mondays & Thursdays', emoji: '🌙', category: 'Fasting', goal: null },
 	{ id: 202, name: 'White days fasting', emoji: '', category: 'Fasting', goal: null },
-	{ id: 301, name: 'Listen Quran', emoji: '🎧', category: 'Learning & dawah', goal: { value: 10, unit: 'Minutes' } },
-	{ id: 302, name: 'Memorize Quran', emoji: '', category: 'Learning & dawah', goal: { value: 5, unit: 'Verses' } }
+	{ id: 301, name: 'Listen Quran', emoji: '🎧', category: 'Learning & dawah', goal: { value: 10, unit: 'Minutes' } }
 ];
 const STUB_ACTIVITIES = [
 	{ id: 501, name: 'Read Hadith', emoji: '📜', goal: { value: 3, unit: 'Times' } },

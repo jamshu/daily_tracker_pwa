@@ -30,16 +30,17 @@ export const WEIGHTS = {
 	dhikr: 2,
 	deed: 4,
 	nafl: 4,
-	activity: 2
+	activity: 2 // default — an activity's own `weight` (see ACTIVITIES) takes precedence
 };
 
-/** Target-based activities. value counts toward `target` in `unit`. */
+/**
+ * Target-based activities. value counts toward `target` in `unit`.
+ * `weight` overrides WEIGHTS.activity — Qurʻan acts count double.
+ */
 export const ACTIVITIES = [
-	{ id: 'exercise', name: 'Exercise', emoji: '🏃', unit: 'min', target: 30, step: 5 },
-	{ id: 'books', name: 'Read Books', emoji: '📚', unit: 'min', target: 10, step: 1 },
-	{ id: 'quran', name: 'Read Qurʻan', emoji: '📖', unit: 'pages', target: 5, step: 1 },
-	{ id: 'sleep', name: 'Sleep', emoji: '😴', unit: 'hours', target: 6, step: 1 },
-	{ id: 'hydration', name: 'Hydration', emoji: '💧', unit: 'glasses', target: 8, step: 1 }
+	{ id: 'exercise', name: 'Exercise', emoji: '🏃', unit: 'min', target: 30, step: 5, weight: 2 },
+	{ id: 'quran', name: 'Read Qurʻan', emoji: '📖', unit: 'pages', target: 5, step: 1, weight: 4 },
+	{ id: 'memorize', name: 'Memorize Qurʻan', emoji: '🧠', unit: 'verses', target: 5, step: 1, weight: 4 }
 ];
 
 /** Simple done / not-done daily deeds (one mark each). */
@@ -67,7 +68,7 @@ const PRAYER_POINTS = PRAYERS.reduce(
 );
 export const MAX_SCORE =
 	PRAYER_POINTS +
-	ACTIVITIES.length * WEIGHTS.activity +
+	ACTIVITIES.reduce((n, a) => n + (a.weight ?? WEIGHTS.activity), 0) +
 	DEEDS.length * WEIGHTS.deed +
 	NAWAFIL.length * WEIGHTS.nafl;
 
@@ -159,7 +160,7 @@ export function dayProgress(day, targets, sex) {
 	for (const a of ACTIVITIES) {
 		const target = (targets && targets[a.id]) || a.target;
 		const v = Number(day.activities?.[a.id] || 0);
-		score += Math.min(v / target, 1) * WEIGHTS.activity;
+		score += Math.min(v / target, 1) * (a.weight ?? WEIGHTS.activity);
 	}
 	for (const d of DEEDS) {
 		if (day.deeds?.[d.id]) score += WEIGHTS.deed;

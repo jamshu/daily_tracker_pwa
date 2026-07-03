@@ -152,7 +152,7 @@
 		(n, p) => n + WEIGHTS.jamath + WEIGHTS.dhikr + (p.hasSunnah ? WEIGHTS.sunnah : 0),
 		0
 	);
-	const ACTIVITY_MAX = ACTIVITIES.length * WEIGHTS.activity;
+	const ACTIVITY_MAX = ACTIVITIES.reduce((n, a) => n + (a.weight ?? WEIGHTS.activity), 0);
 	const DEED_MAX = DEEDS.length * WEIGHTS.deed + NAWAFIL.length * WEIGHTS.nafl;
 	$: homeMark = $settings.sex === 'female' ? WEIGHTS.homeFemale : WEIGHTS.homeMale;
 	$: prayerPts = PRAYERS.reduce((n, p) => {
@@ -165,7 +165,7 @@
 	$: activityPts = ACTIVITIES.reduce((n, a) => {
 		const target = $settings.activities[a.id] ?? a.target;
 		const v = Number($currentDay.activities[a.id] || 0);
-		return n + Math.min(v / target, 1) * WEIGHTS.activity;
+		return n + Math.min(v / target, 1) * (a.weight ?? WEIGHTS.activity);
 	}, 0);
 	$: deedPts =
 		DEEDS.reduce((n, d) => n + ($currentDay.deeds?.[d.id] ? WEIGHTS.deed : 0), 0) +
@@ -250,7 +250,7 @@
 		const prev = $currentDay.activities[activity.id] || 0;
 		setActivity($selectedDate, activity.id, value, target);
 		if (prev < target && value >= target) {
-			celebrate(activity.id, WEIGHTS.activity);
+			celebrate(activity.id, activity.weight ?? WEIGHTS.activity);
 			maybePerfect();
 		}
 	}

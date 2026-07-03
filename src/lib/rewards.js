@@ -80,23 +80,6 @@ export const REWARDS = {
 			source: 'Al-Hakim'
 		}
 	],
-	books: [
-		{
-			title: 'Read — the first word revealed',
-			quote: 'Read! In the name of your Lord who created.',
-			source: 'Qurʼan 96:1'
-		},
-		{
-			title: 'A path to Paradise',
-			quote: 'Whoever treads a path seeking knowledge, Allah will ease for him a path to Paradise.',
-			source: 'Muslim'
-		},
-		{
-			title: 'Inheritors of the Prophets',
-			quote: 'The scholars are the inheritors of the Prophets, and the Prophets leave behind knowledge as their inheritance.',
-			source: 'Abu Dawud & Tirmidhi'
-		}
-	],
 	quran: [
 		{
 			title: 'Ten rewards for every letter',
@@ -114,38 +97,21 @@ export const REWARDS = {
 			source: 'Bukhari'
 		}
 	],
-	sleep: [
+	memorize: [
 		{
-			title: 'Sleep is a mercy',
-			quote: 'And among His signs is your sleep by night and by day, and your seeking of His bounty.',
-			source: 'Qurʼan 30:23'
+			title: 'Recite and ascend',
+			quote: 'It will be said to the companion of the Qurʼan: Recite and ascend, and recite as you used to recite in the world, for your rank is at the last verse you recite.',
+			source: 'Abu Dawud & Tirmidhi'
 		},
 		{
-			title: 'Sleep in a state of purity',
-			quote: 'Whoever sleeps in a state of purity, an angel stays with him through the night and says: O Allah, forgive Your servant, for he slept in a state of purity.',
-			source: 'Ibn Hibban'
-		},
-		{
-			title: 'Rest the body, ready the soul',
-			quote: 'Your body has a right over you — so give every deserving one their right.',
-			source: 'Bukhari'
-		}
-	],
-	hydration: [
-		{
-			title: 'Maa shaa Allah — from water, life',
-			quote: 'And We made from water every living thing.',
-			source: 'Qurʼan 21:30'
-		},
-		{
-			title: 'The Sunnah of drinking',
-			quote: 'The Prophet ﷺ would breathe three times while drinking, saying it is more satisfying and wholesome.',
+			title: 'With the noble angels',
+			quote: 'The one who is proficient in the Qurʼan will be with the noble, obedient scribes (angels).',
 			source: 'Bukhari & Muslim'
 		},
 		{
-			title: 'The best of charity',
-			quote: 'Which charity is best? He said: Giving water to drink.',
-			source: 'Abu Dawud & Ibn Majah'
+			title: 'A heart that carries the Qurʼan',
+			quote: 'The one who has nothing of the Qurʼan in his heart is like a ruined house.',
+			source: 'Tirmidhi'
 		}
 	],
 	adhkar_morning: [

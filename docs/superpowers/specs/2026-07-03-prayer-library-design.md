@@ -28,6 +28,7 @@ Export `PRAYER_LIBRARY`: an array of `{ id, title, subtitle, icon, href }` (href
 | afterSalah | Dhikr after Salah | `href: /adhkar/afterSalah` |
 | janaza | Janaza Prayer | `modal: janaza` (popup, male/female duas) |
 | recitations | Protective Recitations | `href: /recitations` |
+| umrah | Umrah Guide (added during execution) | `href: /adhkar/umrah` (immersive reader, 9 steps) |
 
 `icon` is an array of SVG path `d` strings (some icons use two paths), taken from the markup currently inlined per button on the home page. Adding a future item = one entry here (+ a set in `ADHKAR` if it uses the reader).
 

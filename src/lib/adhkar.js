@@ -331,6 +331,77 @@ export const ADHKAR = {
 				source: `Tirmidhi · Ahmad`
 			}
 		]
+	},
+	umrah: {
+		title: 'Umrah Guide',
+		subtitle: 'The rites step by step — ihrām to halq',
+		items: [
+			{
+				ar: `لَبَّيْكَ عُمْرَةً`,
+				tr: `Labbayka ʻumrah — ihrām & intention`,
+				en: `At the mīqāt: bathe, men put on the two ihrām garments, and after a prayer make the intention by saying "Labbayka ʻumrah" (Here I am, O Allah, for ʻUmrah). From this moment the ihrām restrictions apply.`,
+				count: `Step 1`,
+				source: `Bukhari · Muslim`
+			},
+			{
+				ar: `لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيكَ لَكَ لَبَّيْكَ، إِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ، لَا شَرِيكَ لَكَ`,
+				tr: `At-Talbiyah`,
+				en: `Here I am, O Allah, here I am. Here I am, You have no partner, here I am. Verily all praise, favour and sovereignty are Yours. You have no partner. Recite it abundantly — men aloud — until you begin the tawāf.`,
+				count: `Step 2`,
+				reward: `No Muslim says the talbiyah except that everything to his right and left — stones, trees and earth — says it with him.`,
+				source: `Tirmidhi · Ibn Majah`
+			},
+			{
+				ar: `اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ`,
+				tr: `Entering al-Masjid al-Ḥarām`,
+				en: `Enter with the right foot and say: "O Allah, open for me the gates of Your mercy." Stop the talbiyah when you reach the Kaʻbah.`,
+				count: `Step 3`,
+				source: `Muslim`
+			},
+			{
+				ar: `بِسْمِ اللَّهِ وَاللَّهُ أَكْبَرُ`,
+				tr: `Ṭawāf — seven circuits of the Kaʻbah`,
+				en: `Begin at the Black Stone: touch or kiss it if easy, otherwise point to it saying "Bismillāhi wallāhu akbar". Circle the Kaʻbah seven times anticlockwise. Men keep the right shoulder bared (iḍṭibāʻ) throughout and walk briskly (raml) in the first three circuits. Any dhikr and duʻā may be made while circling.`,
+				count: `Step 4`,
+				source: `Bukhari · Bayhaqi`
+			},
+			{
+				ar: `رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ`,
+				tr: `Between ar-Rukn al-Yamānī and the Black Stone`,
+				en: `In every circuit, between the Yemeni corner and the Black Stone, say: "Our Lord, give us good in this world and good in the Hereafter, and protect us from the punishment of the Fire."`,
+				count: `Step 5`,
+				source: `Abu Dawud · Ahmad`
+			},
+			{
+				ar: `وَاتَّخِذُوا مِن مَّقَامِ إِبْرَاهِيمَ مُصَلًّى`,
+				tr: `Two rakʻahs at Maqām Ibrāhīm, then Zamzam`,
+				en: `Pray two rakʻahs behind Maqām Ibrāhīm if possible — anywhere in the mosque if crowded — reciting al-Kāfirūn in the first and al-Ikhlāṣ in the second, then drink Zamzam water.`,
+				count: `Step 6`,
+				source: `Muslim · Qurʼan 2:125`
+			},
+			{
+				ar: `إِنَّ الصَّفَا وَالْمَرْوَةَ مِن شَعَائِرِ اللَّهِ`,
+				tr: `Saʻī — seven laps between aṣ-Ṣafā and al-Marwah`,
+				en: `Approaching aṣ-Ṣafā recite the āyah and say "I begin with what Allah began with". Ṣafā to Marwah is one lap; finish the seventh on al-Marwah. Men jog gently between the green lights. Duʻā on the way is unrestricted.`,
+				count: `Step 7`,
+				source: `Muslim · Qurʼan 2:158`
+			},
+			{
+				ar: `لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ، أَنْجَزَ وَعْدَهُ، وَنَصَرَ عَبْدَهُ، وَهَزَمَ الْأَحْزَابَ وَحْدَهُ`,
+				tr: `Dhikr on aṣ-Ṣafā and al-Marwah`,
+				en: `On each of aṣ-Ṣafā and al-Marwah face the qiblah, raise the hands and say this three times, making long duʻā in between: "There is no god but Allah alone, without partner. His is the dominion and His is the praise, and He is able to do all things. There is no god but Allah alone: He fulfilled His promise, gave victory to His servant, and defeated the confederates alone."`,
+				count: `Step 8 — 3× on each mount`,
+				source: `Muslim`
+			},
+			{
+				ar: `اللَّهُمَّ اغْفِرْ لِلْمُحَلِّقِينَ`,
+				tr: `Ḥalq or taqṣīr — shaving or shortening the hair`,
+				en: `Men shave the whole head (better) or shorten all of it; women cut a fingertip's length. The Prophet ﷺ prayed three times for forgiveness for the men who shave. Your ʻUmrah is now complete and the ihrām restrictions are lifted.`,
+				count: `Step 9`,
+				reward: `The Prophet ﷺ said: "O Allah, forgive those who shave their heads" — three times.`,
+				source: `Bukhari · Muslim`
+			}
+		]
 	}
 };
 
@@ -363,5 +434,12 @@ export const PRAYER_LIBRARY = [
 		subtitle: 'Ayatul Kursi & the three Quls — Ikhlās, Falaq, Nās',
 		icon: ['M12 22s-8-4.5-8-11.5V5l8-3 8 3v5.5C20 17.5 12 22 12 22z', 'M9 11l2 2 4-4'],
 		href: '/recitations'
+	},
+	{
+		id: 'umrah',
+		title: 'Umrah Guide',
+		subtitle: 'The rites step by step — ihrām, tawāf, saʻī, halq',
+		icon: ['M5 6h14v15H5z', 'M5 10h14'],
+		href: '/adhkar/umrah'
 	}
 ];

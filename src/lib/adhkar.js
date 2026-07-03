@@ -382,7 +382,7 @@ export const ADHKAR = {
 			{
 				ar: `إِنَّ الصَّفَا وَالْمَرْوَةَ مِن شَعَائِرِ اللَّهِ ۖ فَمَنْ حَجَّ الْبَيْتَ أَوِ اعْتَمَرَ فَلَا جُنَاحَ عَلَيْهِ أَن يَطَّوَّفَ بِهِمَا ۚ وَمَن تَطَوَّعَ خَيْرًا فَإِنَّ اللَّهَ شَاكِرٌ عَلِيمٌ`,
 				tr: `Saʻī — seven laps between aṣ-Ṣafā and al-Marwah`,
-				en: `"Indeed, aṣ-Ṣafā and al-Marwah are among the symbols of Allah. So whoever makes Hajj to the House or performs ʻUmrah — there is no blame upon him for walking between them. And whoever volunteers good — indeed, Allah is Appreciative and Knowing." Approaching aṣ-Ṣafā recite this āyah and say "I begin with what Allah began with". Ṣafā to Marwah is one lap; finish the seventh on al-Marwah. Men jog gently between the green lights.`,
+				en: `"Indeed, aṣ-Ṣafā and al-Marwah are among the symbols of Allah. So whoever makes Hajj to the House or performs ʻUmrah — there is no blame upon him for walking between them. And whoever volunteers good — indeed, Allah is Appreciative and Knowing." When approaching aṣ-Ṣafā for the first time only, recite this āyah and say "I begin with what Allah began with". Ṣafā to Marwah is one lap; finish the seventh on al-Marwah. Men jog gently between the green lights.`,
 				count: `Step 7`,
 				source: `Muslim · Qurʼan 2:158`
 			},

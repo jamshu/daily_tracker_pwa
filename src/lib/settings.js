@@ -40,7 +40,7 @@ export const settings = writable({
 	is_admin: false,
 	showFifa: true,
 	showNews: true,
-	showNotes: true
+	showNotes: false
 });
 
 // Apply a theme to <html> immediately and cache it for pre-paint (app.html).
@@ -76,7 +76,7 @@ export function resetSettings() {
 		is_admin: false,
 		showFifa: true,
 		showNews: true,
-		showNotes: true
+		showNotes: false
 	});
 }
 
@@ -95,7 +95,7 @@ export async function loadSettings() {
 			is_admin: d?.settings?.is_admin === true,
 			showFifa: d?.settings?.showFifa !== false,
 			showNews: d?.settings?.showNews !== false,
-			showNotes: d?.settings?.showNotes !== false
+			showNotes: d?.settings?.showNotes === true
 		});
 		applyTheme(theme);
 	} catch {
@@ -114,7 +114,7 @@ export async function saveSettings({ activities, theme, shareGlobal, sex, showFi
 			sex: coerceSex(sex),
 			showFifa: showFifa !== false,
 			showNews: showNews !== false,
-			showNotes: showNotes !== false
+			showNotes: showNotes === true
 		})
 	});
 	const d = await res.json().catch(() => ({}));
@@ -128,7 +128,7 @@ export async function saveSettings({ activities, theme, shareGlobal, sex, showFi
 		is_admin: d?.settings?.is_admin === true,
 		showFifa: d?.settings?.showFifa !== false,
 		showNews: d?.settings?.showNews !== false,
-		showNotes: d?.settings?.showNotes !== false
+		showNotes: d?.settings?.showNotes === true
 	});
 	applyTheme(savedTheme);
 }

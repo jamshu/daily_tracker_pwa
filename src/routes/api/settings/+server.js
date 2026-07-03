@@ -80,10 +80,11 @@ export async function POST({ request, cookies }) {
 			]
 		);
 		const sex = coerceSex(body?.sex ?? current.sex);
-		// Widget visibility toggles — default ON (only false when explicitly turned off).
+		// Widget visibility toggles — FIFA/News default ON (only false when explicitly
+		// turned off); Notes defaults OFF (only true when explicitly turned on).
 		const showFifa = body?.showFifa !== false;
 		const showNews = body?.showNews !== false;
-		const showNotes = body?.showNotes !== false;
+		const showNotes = body?.showNotes === true;
 		// Spread `current` first so unknown keys (e.g. is_admin, push state) survive the save.
 		// Drop any legacy customActivities from the stored blob (moved to x_activities).
 		const { customActivities: _drop, ...rest } = current;

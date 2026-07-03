@@ -14,7 +14,7 @@
 	let sex = 'male';
 	let showFifa = true;
 	let showNews = true;
-	let showNotes = true;
+	let showNotes = false;
 	let busy = false;
 	let status = ''; // '' | 'saving' | 'saved' | 'error'
 	let error = '';
@@ -41,7 +41,7 @@
 		sex = $settings.sex === 'female' ? 'female' : 'male';
 		showFifa = $settings.showFifa !== false;
 		showNews = $settings.showNews !== false;
-		showNotes = $settings.showNotes !== false;
+		showNotes = $settings.showNotes === true;
 		isAdmin = $settings.is_admin === true;
 		mounted = true;
 

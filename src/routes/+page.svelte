@@ -38,7 +38,8 @@
 	import CelebrationToast from '$lib/components/CelebrationToast.svelte';
 	import AdhkarModal from '$lib/components/AdhkarModal.svelte';
 	import { celebrate, congratulate } from '$lib/toast.js';
-	import { openAdhkar } from '$lib/adhkar.js';
+	import { openAdhkar, PRAYER_LIBRARY } from '$lib/adhkar.js';
+	import LibraryLink from '$lib/components/LibraryLink.svelte';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { user, logout } from '$lib/auth.js';
@@ -50,7 +51,10 @@
 	import { loadNews } from '$lib/news.js';
 	import TodoWidget from '$lib/components/TodoWidget.svelte';
 
-	const todayK = dateKey();
+	let todayK = dateKey();
+
+	// Home-page shortcut: the most-used daily collection, straight from the library data.
+	const afterSalah = PRAYER_LIBRARY.find((e) => e.id === 'afterSalah');
 
 	onMount(() => {
 		load();
@@ -58,6 +62,17 @@
 		loadGroups(); // for the leaderboard invite badge
 		loadActivities();
 		loadUnits();
+		// The PWA can stay open across midnight; re-check the clock so "today"
+		// rolls forward without a full restart — every 10 min and on foreground.
+		const tick = setInterval(refreshToday, 10 * 60 * 1000);
+		const onVisible = () => {
+			if (document.visibilityState === 'visible') refreshToday();
+		};
+		document.addEventListener('visibilitychange', onVisible);
+		return () => {
+			clearInterval(tick);
+			document.removeEventListener('visibilitychange', onVisible);
+		};
 	});
 
 	// Per-day values for custom activities are keyed by `act_<odooId>` in the day record.
@@ -91,19 +106,36 @@
 		idle: ''
 	};
 
-	const greeting = (() => {
+	function makeGreeting() {
 		const h = new Date().getHours();
 		if (h < 5) return { text: 'Peaceful night', emoji: '🌙' };
 		if (h < 12) return { text: 'Good morning', emoji: '🌅' };
 		if (h < 17) return { text: 'Good afternoon', emoji: '☀️' };
 		if (h < 20) return { text: 'Good evening', emoji: '🌇' };
 		return { text: 'Good night', emoji: '🌙' };
-	})();
-	const todayLabel = new Date().toLocaleDateString('en-GB', {
-		weekday: 'long',
-		day: 'numeric',
-		month: 'long'
-	});
+	}
+	function fmtToday() {
+		return new Date().toLocaleDateString('en-GB', {
+			weekday: 'long',
+			day: 'numeric',
+			month: 'long'
+		});
+	}
+	let greeting = makeGreeting();
+	let todayLabel = fmtToday();
+
+	function refreshToday() {
+		greeting = makeGreeting();
+		const nk = dateKey();
+		if (nk === todayK) return;
+		const wasOnToday = $selectedDate === todayK;
+		todayK = nk;
+		todayLabel = fmtToday();
+		// Follow to the new day only if the user was viewing "today";
+		// leave them alone if they were browsing a past date.
+		if (wasOnToday) selectedDate.set(nk);
+		load();
+	}
 
 	// summary stats for the selected day (prayers, activities, deeds)
 	$: prayerUnits = PRAYERS.reduce((n, p) => {
@@ -285,8 +317,6 @@
 						<rect x="17" y="5" width="3" height="12" />
 					</svg>
 				</button>
-				<!-- ponytail: Budget temporarily hidden (App Store). Change to {#if true} to restore. -->
-				{#if false}
 				<button class="gear" on:click={() => goto(`${base}/budget`)} title="Budget" aria-label="budget">
 					<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<rect x="2" y="5" width="20" height="14" rx="3" />
@@ -294,7 +324,6 @@
 						<circle cx="16" cy="12" r="2" />
 					</svg>
 				</button>
-				{/if}
 				<button class="gear" on:click={() => goto(`${base}/settings`)} title="Settings" aria-label="settings">
 					<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<circle cx="12" cy="12" r="3" />
@@ -373,51 +402,21 @@
 		{/each}
 	</div>
 
-	<button class="dhikr-link fade-in" style="--fade-delay:0.16s" on:click={() => goto(`${base}/adhkar/afterSalah`)}>
-		<span class="dl-icon">
-			<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 1 0 9.8 9.8z" />
-			</svg>
-		</span>
-		<span class="dl-text">
-			<strong>Dhikr after Salah</strong>
-			<small>The remembrance to recite after every fard prayer</small>
-		</span>
-		<svg class="dl-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-			<path d="M9 18l6-6-6-6" />
-		</svg>
-	</button>
+	<LibraryLink
+		title={afterSalah.title}
+		subtitle={afterSalah.subtitle}
+		icon={afterSalah.icon}
+		fadeDelay={0.16}
+		on:click={() => goto(`${base}${afterSalah.href}`)}
+	/>
 
-	<button class="dhikr-link fade-in" style="--fade-delay:0.17s" on:click={() => openAdhkar('janaza')}>
-		<span class="dl-icon">
-			<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M12 2L8 7H4l2 5-4 5h5l5 5 5-5h5l-4-5 2-5h-4L12 2z" />
-			</svg>
-		</span>
-		<span class="dl-text">
-			<strong>Janaza Prayer</strong>
-			<small>4 Takbeers — duas for the funeral prayer</small>
-		</span>
-		<svg class="dl-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-			<path d="M9 18l6-6-6-6" />
-		</svg>
-	</button>
-
-	<button class="dhikr-link fade-in" style="--fade-delay:0.18s" on:click={() => goto(`${base}/recitations`)}>
-		<span class="dl-icon">
-			<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M12 22s-8-4.5-8-11.5V5l8-3 8 3v5.5C20 17.5 12 22 12 22z" />
-				<path d="M9 11l2 2 4-4" />
-			</svg>
-		</span>
-		<span class="dl-text">
-			<strong>Protective Recitations</strong>
-			<small>Ayatul Kursi & the three Quls — Ikhlās, Falaq, Nās</small>
-		</span>
-		<svg class="dl-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-			<path d="M9 18l6-6-6-6" />
-		</svg>
-	</button>
+	<LibraryLink
+		title="Prayers & Dhikr"
+		subtitle="Janaza, protective recitations and more — the full library"
+		icon={['M4 19.5A2.5 2.5 0 0 1 6.5 17H20', 'M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z']}
+		fadeDelay={0.17}
+		on:click={() => goto(`${base}/prayers`)}
+	/>
 
 	<h2 class="section-title fade-in" style="--fade-delay:0.22s"><span class="emo" aria-hidden="true">✨</span>Voluntary Prayers</h2>
 	<div class="card fade-in" style="--fade-delay:0.24s">
@@ -827,63 +826,6 @@
 		font-size: 0.76rem;
 		color: var(--text-faint);
 	}
-	.dhikr-link {
-		width: 100%;
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		margin-top: 26px;
-		padding: 13px 14px;
-		border-radius: var(--radius);
-		text-align: left;
-		color: var(--text);
-		background: linear-gradient(
-			135deg,
-			color-mix(in srgb, var(--teal) 16%, transparent),
-			color-mix(in srgb, var(--gold) 12%, transparent)
-		);
-		border: 1px solid var(--border);
-		box-shadow: var(--shadow-sm);
-		transition: all 0.15s ease;
-	}
-	@media (hover: hover) {
-		.dhikr-link:hover {
-			border-color: var(--teal);
-			transform: translateY(-1px);
-		}
-	}
-	.dhikr-link:active {
-		transform: scale(0.99);
-	}
-	.dl-icon {
-		flex-shrink: 0;
-		width: 38px;
-		height: 38px;
-		border-radius: 11px;
-		display: grid;
-		place-items: center;
-		color: var(--on-accent);
-		background: linear-gradient(135deg, var(--teal), var(--gold));
-	}
-	.dl-text {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-		min-width: 0;
-	}
-	.dl-text strong {
-		font-size: 0.98rem;
-		font-weight: 700;
-	}
-	.dl-text small {
-		font-size: 0.76rem;
-		color: var(--text-dim);
-	}
-	.dl-chev {
-		flex-shrink: 0;
-		color: var(--text-faint);
-	}
 	@media (max-width: 520px) {
 		.hero {
 			flex-direction: column;
@@ -892,7 +834,7 @@
 		.stats {
 			justify-content: center;
 		}
-		/* On phones the 5 nav buttons don't fit beside the title — drop them to
+		/* On phones the nav buttons don't fit beside the title — drop them to
 		   their own right-aligned line so the header never overflows. */
 		.head-right {
 			width: 100%;

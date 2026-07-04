@@ -39,7 +39,7 @@
 		</span>
 		<span class="name">{#if activity.emoji}<span class="emo" aria-hidden="true">{activity.emoji}</span>{/if}{activity.name}</span>
 	</button>
-	<button class="cfg" on:click|stopPropagation={() => dispatch('edit-goal')} aria-label={`edit goal for ${activity.name}`}>⚙</button>
+	<button class="cfg" on:click|stopPropagation={() => dispatch('edit-goal')} aria-label={`edit goal for ${activity.name}`}>&#9881;&#65038;</button>
 	<button
 		class="del"
 		class:confirm={confirmingDelete}
@@ -126,7 +126,12 @@
 		border: 1px solid var(--border);
 	}
 	.cfg {
+		/* grid-center the gear glyph — iOS renders it with a baseline offset */
+		display: grid;
+		place-items: center;
+		padding: 0;
 		font-size: 0.85rem;
+		line-height: 0;
 	}
 	@media (hover: hover) {
 		.del:hover {

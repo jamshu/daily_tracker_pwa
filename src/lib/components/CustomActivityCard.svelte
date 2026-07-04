@@ -71,23 +71,31 @@
 		>{confirmingDelete ? 'Confirm?' : '×'}</button>
 	</div>
 
-	<input
-		class="slider"
-		type="range"
-		min="0"
-		max={tgt}
-		step="1"
-		{value}
-		style="--fill:{fill}%"
-		on:input={(e) => set(Number(e.currentTarget.value))}
-		aria-label={`${activity.name} amount`}
-	/>
+	<!-- Interactive slider only when expanded — a bare range input catches
+	     accidental drags while scrolling the page on touch screens. -->
+	{#if expanded}
+		<input
+			class="slider"
+			type="range"
+			min="0"
+			max={tgt}
+			step="1"
+			{value}
+			style="--fill:{fill}%"
+			on:input={(e) => set(Number(e.currentTarget.value))}
+			aria-label={`${activity.name} amount`}
+			transition:slide={{ duration: dur }}
+		/>
+	{:else}
+		<div class="track" style="--fill:{fill}%" aria-hidden="true"></div>
+	{/if}
 
 	{#if expanded}
 		<div class="actions" transition:slide={{ duration: dur }}>
 			<button type="button" class="add" on:click={() => add(1)}>+1</button>
 			<button type="button" class="add" on:click={() => add(3)}>+3</button>
 			<button type="button" class="add" on:click={() => add(5)}>+5</button>
+			<button type="button" class="reset" on:click={() => set(0)}>Reset</button>
 			<button type="button" class="done" on:click={complete}>Completed</button>
 		</div>
 	{/if}
@@ -187,6 +195,17 @@
 	.activity.met .slider {
 		background: linear-gradient(90deg, var(--green) var(--fill, 0%), var(--bg-soft) var(--fill, 0%));
 	}
+	/* Read-only progress bar shown while collapsed — same look, no thumb. */
+	.track {
+		width: 100%;
+		height: 9px;
+		border-radius: 999px;
+		border: 1px solid var(--border);
+		background: linear-gradient(90deg, var(--teal) var(--fill, 0%), var(--bg-soft) var(--fill, 0%));
+	}
+	.activity.met .track {
+		background: linear-gradient(90deg, var(--green) var(--fill, 0%), var(--bg-soft) var(--fill, 0%));
+	}
 	.slider::-webkit-slider-thumb {
 		-webkit-appearance: none;
 		appearance: none;
@@ -236,11 +255,15 @@
 			background: var(--teal-deep);
 		}
 	}
-	.actions .done {
+	.actions .reset {
 		margin-left: auto;
+		color: var(--red, #ef4444);
+	}
+	.actions .done {
 		color: var(--green);
 	}
 	@media (hover: hover) {
+		.actions .reset:hover,
 		.actions .done:hover {
 			background: var(--teal-deep);
 		}

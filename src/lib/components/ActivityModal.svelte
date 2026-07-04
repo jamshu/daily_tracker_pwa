@@ -5,8 +5,10 @@
 		presets,
 		units,
 		draft,
+		editingActivity,
 		addFromPreset,
 		addCustom,
+		setActivityGoal,
 		createUnit
 	} from '$lib/activities.js';
 	import { displayEmoji } from '$lib/emoji.js';
@@ -50,6 +52,46 @@
 
 	function clearGoal() {
 		draft.update((d) => ({ ...d, goal: null }));
+	}
+
+	// ── edit-goal mode (goal of an existing activity, opened from its card) ──
+	// Pre-fill the goal-view working state when the modal switches into edit mode.
+	let prevModal = null;
+	$: if ($activityModal !== prevModal) {
+		if ($activityModal === 'edit-goal' && $editingActivity) {
+			const g = $editingActivity.goal;
+			goalValue = g ? String(g.value) : '';
+			selectedUnitId = g?.unitId ?? $units[0]?.id ?? null;
+			customUnit = '';
+		}
+		prevModal = $activityModal;
+	}
+
+	let savingGoal = false;
+	async function saveEditedGoal() {
+		if (savingGoal) return;
+		const value = Math.max(1, Math.round(Number(goalValue) || 0));
+		let unitId = selectedUnitId;
+		const custom = customUnit.trim();
+		savingGoal = true;
+		try {
+			if (custom) unitId = (await createUnit(custom)).id;
+			if (!unitId) return; // need a unit
+			await setActivityGoal($editingActivity.id, { value, unitId });
+			closeActivityModal();
+		} finally {
+			savingGoal = false;
+		}
+	}
+	async function removeEditedGoal() {
+		if (savingGoal) return;
+		savingGoal = true;
+		try {
+			await setActivityGoal($editingActivity.id, null);
+			closeActivityModal();
+		} finally {
+			savingGoal = false;
+		}
 	}
 
 	let creating = false;
@@ -139,11 +181,17 @@
 					</button>
 				</div>
 
-			<!-- ── GOAL ── -->
-			{:else if $activityModal === 'goal'}
+			<!-- ── GOAL (create flow) / EDIT-GOAL (existing activity) ── -->
+			{:else if $activityModal === 'goal' || $activityModal === 'edit-goal'}
+				{@const editing = $activityModal === 'edit-goal'}
 				<header>
-					<button class="back" on:click={() => activityModal.set('create')} aria-label="back">‹</button>
-					<div class="titles"><h2>Set goal</h2></div>
+					{#if !editing}
+						<button class="back" on:click={() => activityModal.set('create')} aria-label="back">‹</button>
+					{/if}
+					<div class="titles">
+						<h2>{editing ? 'Edit goal' : 'Set goal'}</h2>
+						{#if editing && $editingActivity}<p class="sub">{$editingActivity.name}</p>{/if}
+					</div>
 					<button class="x" on:click={closeActivityModal} aria-label="close">×</button>
 				</header>
 				<div class="body">
@@ -160,9 +208,16 @@
 						{/each}
 					</div>
 					<input class="field" placeholder="Custom unit" bind:value={customUnit} maxlength="20" />
-					<button class="primary" disabled={!(Number(goalValue) > 0) || !(selectedUnitId || customUnit.trim())} on:click={saveGoal}>
+					<button
+						class="primary"
+						disabled={!(Number(goalValue) > 0) || !(selectedUnitId || customUnit.trim()) || savingGoal}
+						on:click={editing ? saveEditedGoal : saveGoal}
+					>
 						Save
 					</button>
+					{#if editing && $editingActivity?.goal}
+						<button class="clear" on:click={removeEditedGoal}>Remove goal</button>
+					{/if}
 				</div>
 			{/if}
 		</div>
@@ -209,6 +264,14 @@
 	.titles h2 {
 		font-size: 1.15rem;
 		font-weight: 800;
+	}
+	.titles .sub {
+		margin: 2px 0 0;
+		font-size: 0.8rem;
+		color: var(--text-dim);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 	.x,
 	.back {

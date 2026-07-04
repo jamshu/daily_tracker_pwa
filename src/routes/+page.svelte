@@ -27,7 +27,8 @@
 		loadActivities,
 		loadUnits,
 		deleteActivity,
-		openActivityModal
+		openActivityModal,
+		openGoalEditor
 	} from '$lib/activities.js';
 	import DeedToggle from '$lib/components/DeedToggle.svelte';
 	import { displayEmoji } from '$lib/emoji.js';
@@ -464,6 +465,7 @@
 							activity={{ id: a.id, name: a.name, emoji: displayEmoji(a), unit: a.goal.unit, target: a.goal.value }}
 							value={$currentDay.customActivities?.[dayKey(a)] ?? 0}
 							on:set={(e) => onCustomSet(a, e.detail.value)}
+							on:edit-goal={() => openGoalEditor({ id: a.id, name: a.name, goal: a.goal })}
 							on:delete={() => deleteActivity(a.id)}
 						/>
 					{:else}
@@ -471,6 +473,7 @@
 							activity={{ ...a, emoji: displayEmoji(a) }}
 							done={($currentDay.customActivities?.[dayKey(a)] ?? 0) >= 1}
 							on:toggle={() => onCustomToggle(a)}
+							on:edit-goal={() => openGoalEditor({ id: a.id, name: a.name, goal: a.goal })}
 							on:delete={() => deleteActivity(a.id)}
 						/>
 					{/if}

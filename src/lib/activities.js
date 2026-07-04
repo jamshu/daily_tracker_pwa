@@ -14,17 +14,24 @@ export const presets = writable([]);
 /** Units available to pick: [{ id, name }] (globals + user's custom) */
 export const units = writable([]);
 
-/** Modal view: null | 'picker' | 'create' | 'goal' */
+/** Modal view: null | 'picker' | 'create' | 'goal' | 'edit-goal' */
 export const activityModal = writable(null);
 /** In-progress custom activity being created in the modal. */
 export const draft = writable({ name: '', emoji: '', goal: null }); // goal: { value, unitId, unitName }
+/** Activity whose goal is being edited: { id, name, goal: { value, unit, unitId } | null } | null */
+export const editingActivity = writable(null);
 
 export function openActivityModal() {
 	draft.set({ name: '', emoji: '', goal: null });
 	activityModal.set('picker');
 }
+export function openGoalEditor(activity) {
+	editingActivity.set(activity);
+	activityModal.set('edit-goal');
+}
 export function closeActivityModal() {
 	activityModal.set(null);
+	editingActivity.set(null);
 }
 
 async function api(path, opts) {
@@ -80,6 +87,20 @@ export async function addCustom(d) {
 	);
 	await loadActivities();
 	congratulate('Activity added');
+}
+
+/** goal: { value, unitId } | null (null removes the goal → boolean activity). */
+export async function setActivityGoal(id, goal) {
+	await api(
+		'/api/activities',
+		jsonPost({
+			action: 'set-goal',
+			id,
+			goal: goal ? { value: goal.value, unitId: goal.unitId } : null
+		})
+	);
+	await loadActivities();
+	congratulate(goal ? 'Goal updated' : 'Goal removed');
 }
 
 export async function deleteActivity(id) {

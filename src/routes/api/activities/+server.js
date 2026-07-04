@@ -55,7 +55,8 @@ async function resolveGoals(call, goalIds) {
 	const map = {};
 	for (const r of rows) {
 		const unit = Array.isArray(r.x_studio_unit_id) ? r.x_studio_unit_id[1] : '';
-		map[r.id] = { value: r.x_studio_value, unit };
+		const unitId = Array.isArray(r.x_studio_unit_id) ? r.x_studio_unit_id[0] : null;
+		map[r.id] = { value: r.x_studio_value, unit, unitId };
 	}
 	return map;
 }
@@ -138,6 +139,7 @@ export async function POST({ request, cookies }) {
 
 		if (STUB) {
 			if (body.action === 'delete') return json({ ok: true });
+			if (body.action === 'set-goal') return json({ ok: true });
 			return json({ ok: true, id: Date.now() });
 		}
 		assertConfigured();
@@ -192,6 +194,41 @@ export async function POST({ request, cookies }) {
 				...(emoji ? { x_studio_icon: emoji } : {}), ...owner
 			}]);
 			return json({ ok: true, id });
+		}
+
+		// Change/add/remove the goal of an existing activity. A user-owned goal row
+		// is updated in place; a preset/default goal (x_studio_user_id false, shared
+		// by many users) is never written — a new x_goals row is created and the
+		// activity repointed instead.
+		if (body.action === 'set-goal') {
+			const id = Number(body.id);
+			if (!id) return json({ ok: false, error: 'id required' }, { status: 400 });
+			if (!body.goal) {
+				// Remove goal → boolean activity. Old goal row left intact.
+				await call(ACT_MODEL, 'write', [[id], { x_studio_goal_id: false }]);
+				return json({ ok: true });
+			}
+			const value = Math.round(Number(body.goal.value));
+			const unitId = Number(body.goal.unitId);
+			if (!(value > 0) || !unitId)
+				return json({ ok: false, error: 'goal value/unit required' }, { status: 400 });
+			const [act] = await call(ACT_MODEL, 'read', [[id]], { fields: ['x_studio_goal_id'] });
+			if (!act) return json({ ok: false, error: 'Activity not found' }, { status: 404 });
+			const curGoalId = Array.isArray(act.x_studio_goal_id)
+				? act.x_studio_goal_id[0]
+				: act.x_studio_goal_id;
+			const goalFields = { x_name: `${value}`, x_studio_value: value, x_studio_unit_id: unitId };
+			if (curGoalId) {
+				const [g] = await call(GOAL_MODEL, 'read', [[curGoalId]], { fields: ['x_studio_user_id'] });
+				const goalOwner = Array.isArray(g?.x_studio_user_id) ? g.x_studio_user_id[0] : false;
+				if (goalOwner === session.uid) {
+					await call(GOAL_MODEL, 'write', [[curGoalId], goalFields]);
+					return json({ ok: true, goalId: curGoalId });
+				}
+			}
+			const goalId = await call(GOAL_MODEL, 'create', [{ ...goalFields, ...owner }]);
+			await call(ACT_MODEL, 'write', [[id], { x_studio_goal_id: goalId }]);
+			return json({ ok: true, goalId });
 		}
 
 		if (body.action === 'delete') {

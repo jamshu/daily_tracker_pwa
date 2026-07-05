@@ -106,7 +106,7 @@
 	{:else if state === 'error'}
 		<div class="card empty">Couldn't load this group.</div>
 	{:else if board}
-		<p class="cap">Today's score (out of 100).</p>
+		<p class="cap">Today's score (out of 100), measured against the standard targets — it can differ slightly from your home ring if you've customized activity targets.</p>
 		<div class="card list">
 			<div class="row head">
 				<span class="rank">#</span>

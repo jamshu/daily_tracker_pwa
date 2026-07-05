@@ -96,7 +96,7 @@
 			</div>
 		{:else if $global}
 			<p class="note">
-				{#if $global.myRank}Your rank: <strong>#{$global.myRank}</strong> · {/if}Today's score (out of 100).
+				{#if $global.myRank}Your rank: <strong>#{$global.myRank}</strong> · {/if}Today's score (out of 100), measured against the standard targets — it can differ slightly from your home ring if you've customized activity targets.
 			</p>
 			{#if $global.rows.length}
 				<div class="card list">

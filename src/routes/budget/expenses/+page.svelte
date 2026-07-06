@@ -57,6 +57,11 @@
 	$: filteredTotal = filtered.reduce((s, e) => s + (e.x_studio_amount || 0), 0);
 	$: catById = Object.fromEntries(catList.map((c) => [c.id, c]));
 
+	// Form renders inside {#if showForm}, so this fires each time it opens.
+	function focusOnMount(node) {
+		node.focus();
+	}
+
 	function todayStr() {
 		const d = new Date();
 		return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -276,7 +281,7 @@
 				</div>
 				<div class="frow">
 					<input class="grow" type="text" placeholder="Description" maxlength="120" bind:value={fDesc} aria-label="description" />
-					<input class="famt" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" bind:value={fAmt} required aria-label="amount" />
+					<input class="famt" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" bind:value={fAmt} use:focusOnMount required aria-label="amount" />
 				</div>
 				<div class="frow">
 					<label class="bill-pick">

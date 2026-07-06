@@ -32,8 +32,6 @@
 	let newCatEmoji = '';
 	let showEmojiPicker = false;
 	let saveTimer = null;
-	let addExpenseFor = null;   // catId currently adding an expense to
-	let addExpenseVal = '';
 
 	// Sync rows from store whenever month or store changes
 	$: rows = ensureMonth($budgetData, month);
@@ -70,7 +68,9 @@
 			if (id === OPENING_ID || isDefaultCategory(id)) continue;
 			all.push({ id, ...val, label: val.label || id });
 		}
-		return all;
+		// Cards with amounts rise to the top; empty ones keep their order below.
+		const hasAmount = (c) => (c.budget || 0) > 0 || (c.actual || 0) > 0;
+		return [...all.filter(hasAmount), ...all.filter((c) => !hasAmount(c))];
 	}
 
 	function fmt(n) {
@@ -105,23 +105,6 @@
 		const v = Math.max(0, parseFloat(raw) || 0);
 		rows = { ...rows, [OPENING_ID]: { budget: v, actual: 0 } };
 		scheduleAutoSave();
-	}
-
-	function startAddExpense(id) {
-		addExpenseFor = id;
-		addExpenseVal = '';
-	}
-
-	function confirmAddExpense(id) {
-		const amt = Math.max(0, parseFloat(addExpenseVal) || 0);
-		if (amt > 0) setVal(id, 'actual', (rows[id]?.actual ?? 0) + amt);
-		addExpenseFor = null;
-		addExpenseVal = '';
-	}
-
-	function cancelAddExpense() {
-		addExpenseFor = null;
-		addExpenseVal = '';
 	}
 
 	function goPrev() {
@@ -205,7 +188,8 @@
 		scheduleAutoSave();
 	}
 
-	onMount(loadBudget);
+	// Force reload — expense mutations denormalize actuals server-side.
+	onMount(() => loadBudget(true));
 </script>
 
 <svelte:head><title>Budget · Daily Tracker</title></svelte:head>
@@ -218,6 +202,7 @@
 			</svg>
 		</button>
 		<h1>Budget</h1>
+		<button class="report-btn expenses-btn" on:click={() => goto(`${base}/budget/expenses?month=${month}`)}>Expenses</button>
 		<button class="report-btn" on:click={() => goto(`${base}/budget/report`)}>Report</button>
 	</header>
 
@@ -300,41 +285,17 @@
 							aria-label="{cat.label} budget"
 						/>
 					</label>
-					<label class="cinput">
+					<span class="cinput">
 						<span class="cinput-lbl">Actual</span>
 						<div class="actual-cell">
-							{#if addExpenseFor === cat.id}
-								<input
-									class="add-exp-input"
-									type="number"
-									min="0"
-									step="0.01"
-									inputmode="decimal"
-									placeholder="+ amt"
-									bind:value={addExpenseVal}
-									on:keydown={(e) => { if (e.key === 'Enter') confirmAddExpense(cat.id); if (e.key === 'Escape') cancelAddExpense(); }}
-									on:blur={() => confirmAddExpense(cat.id)}
-									autofocus
-									aria-label="add expense to {cat.label}"
-								/>
-							{:else}
-								<input
-									type="number"
-									min="0"
-									step="0.01"
-									value={cat.actual}
-									inputmode="decimal"
-									on:change={(e) => setVal(cat.id, 'actual', e.target.value)}
-									aria-label="{cat.label} actual"
-								/>
-								<button class="add-exp" on:click={() => startAddExpense(cat.id)} aria-label="add expense to {cat.label}" title="Add to actual">
-									<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-										<path d="M12 5v14M5 12h14" />
-									</svg>
-								</button>
-							{/if}
+							<span class="actual-val" aria-label="{cat.label} actual">{fmt(cat.actual ?? 0)}</span>
+							<button class="add-exp" on:click={() => { flushSave(); goto(`${base}/budget/expenses?month=${month}&cat=${cat.id}`); }} aria-label="add expense to {cat.label}" title="Add expense">
+								<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M12 5v14M5 12h14" />
+								</svg>
+							</button>
 						</div>
-					</label>
+					</span>
 				</div>
 				<span class="abar"><span class="abar-fill" class:over={calc.over} style="width:{Math.min(100, calc.pct ?? 0)}%"></span></span>
 			</div>
@@ -413,6 +374,7 @@
 		.back:hover { background: var(--surface-2); }
 	}
 	.back:active { background: var(--surface-2); }
+	.report-btn + .report-btn { margin-left: 0; }
 	.report-btn {
 		margin-left: auto;
 		padding: 7px 14px;
@@ -586,23 +548,13 @@
 		.add-exp:hover { color: var(--teal); border-color: var(--teal); }
 	}
 	.add-exp:active { color: var(--teal); border-color: var(--teal); }
-	.add-exp-input {
-		width: 86px;
-		padding: 5px 6px;
-		border-radius: 8px;
-		border: 1px solid var(--teal);
-		background: var(--bg-soft);
-		color: var(--text);
-		/* 16px min — smaller makes iOS Safari auto-zoom on focus and stay zoomed. */
-		font-size: 16px;
+	.actual-val {
+		min-width: 64px;
 		font-variant-numeric: tabular-nums;
+		font-weight: 600;
 		text-align: right;
-		font-family: inherit;
-		-moz-appearance: textfield;
+		color: var(--text);
 	}
-	.add-exp-input::-webkit-outer-spin-button,
-	.add-exp-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-	.add-exp-input:focus { outline: none; }
 
 	/* Category rows */
 	.cards {

@@ -24,8 +24,8 @@ export const budgetData = writable({});
 
 let loaded = false;
 
-export async function loadBudget() {
-	if (!browser || loaded) return;
+export async function loadBudget(force = false) {
+	if (!browser || (loaded && !force)) return;
 	loaded = true;
 	try {
 		const res = await fetch(`${base}/api/budget`);

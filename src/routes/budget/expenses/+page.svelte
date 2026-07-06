@@ -191,7 +191,19 @@
 		}
 	}
 
+	let confirmDeleteId = null;
+	let confirmTimer = null;
+
 	async function remove(exp) {
+		// First tap arms the button (red "confirm"); second tap within 3s deletes.
+		if (confirmDeleteId !== exp.id) {
+			confirmDeleteId = exp.id;
+			clearTimeout(confirmTimer);
+			confirmTimer = setTimeout(() => (confirmDeleteId = null), 3000);
+			return;
+		}
+		clearTimeout(confirmTimer);
+		confirmDeleteId = null;
 		error = '';
 		try {
 			await deleteExpense(exp.id);
@@ -337,10 +349,19 @@
 							</svg>
 						</button>
 					{/if}
-					<button class="del" on:click={() => remove(exp)} aria-label="delete {exp.x_name}">
-						<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-							<polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4h6v2" />
-						</svg>
+					<button
+						class="del"
+						class:armed={confirmDeleteId === exp.id}
+						on:click={() => remove(exp)}
+						aria-label={confirmDeleteId === exp.id ? 'confirm delete ' + exp.x_name : 'delete ' + exp.x_name}
+					>
+						{#if confirmDeleteId === exp.id}
+							<span class="del-confirm">Sure?</span>
+						{:else}
+							<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4h6v2" />
+							</svg>
+						{/if}
 					</button>
 				</div>
 				{#if billOpenId === exp.id}
@@ -567,13 +588,23 @@
 	}
 	.ebill,
 	.del {
-		width: 28px;
+		min-width: 28px;
 		height: 28px;
 		flex-shrink: 0;
 		border-radius: 6px;
 		display: grid;
 		place-items: center;
 		color: var(--text-faint);
+	}
+	.del.armed {
+		padding: 0 8px;
+		color: #fff;
+		background: var(--red);
+	}
+	.del-confirm {
+		font-size: 0.74rem;
+		font-weight: 700;
+		white-space: nowrap;
 	}
 	.ebill.active { color: var(--teal); }
 	@media (hover: hover) {

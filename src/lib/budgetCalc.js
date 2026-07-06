@@ -108,10 +108,13 @@ export function summarizeBudget(monthsData) {
 	const grandBudget = rows.reduce((s, r) => s + r.budget, 0);
 	const grandDiff = grandTotal - grandBudget;
 	const avgDiff = rows.length ? grandDiff / rows.length : 0;
-	// "Best month" = lowest total spend.
-	const bestMonth = rows.length
-		? rows.reduce((best, r) => (!best || r.total < best.total ? r : best), null)
-		: null;
+	// "Best month" = lowest total spend. Current month excluded — it's always
+	// partial, so it would always win.
+	const currentKey = monthKey();
+	const bestMonth = rows.reduce(
+		(best, r) => (r.key !== currentKey && (!best || r.total < best.total) ? r : best),
+		null
+	);
 
 	return { rows, grandTotal, grandBudget, grandDiff, avgDiff, bestMonth };
 }

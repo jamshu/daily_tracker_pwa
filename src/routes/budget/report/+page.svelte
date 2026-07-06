@@ -58,7 +58,7 @@
 
 		<div class="cards fade-in" style="--fade-delay:0.10s">
 			{#each rows as r (r.key)}
-				<div class="mrow" class:mrow-over={r.diff > 0}>
+				<button class="mrow" class:mrow-over={r.diff > 0} on:click={() => goto(`${base}/budget?month=${r.key}`)} aria-label="open {monthLabel(r.key)} budget">
 					<div class="mrow-top">
 						<span class="mname">{monthLabel(r.key)}</span>
 						<span class="mnums">
@@ -68,7 +68,7 @@
 						</span>
 					</div>
 					<span class="abar"><span class="abar-fill" class:over={r.diff > 0} style="width:{pct(r.total, r.budget)}%"></span></span>
-				</div>
+				</button>
 			{/each}
 			<div class="mrow mtotal">
 				<div class="mrow-top">
@@ -176,7 +176,15 @@
 		border: 1px solid var(--border);
 		border-radius: var(--radius-sm);
 		padding: 12px 16px;
+		text-align: left;
+		font: inherit;
+		color: inherit;
+		width: 100%;
 	}
+	@media (hover: hover) {
+		button.mrow:hover { border-color: var(--teal); }
+	}
+	button.mrow:active { border-color: var(--teal); }
 	.mrow-over {
 		background: color-mix(in srgb, var(--red) 5%, var(--surface));
 	}

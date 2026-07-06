@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
+	import { page } from '$app/stores';
 	import {
 		budgetData,
 		loadBudget,
@@ -189,7 +190,11 @@
 	}
 
 	// Force reload — expense mutations denormalize actuals server-side.
-	onMount(() => loadBudget(true));
+	onMount(() => {
+		const m = $page.url.searchParams.get('month');
+		if (m && /^\d{4}-\d{2}$/.test(m)) month = m;
+		loadBudget(true);
+	});
 </script>
 
 <svelte:head><title>Budget · Daily Tracker</title></svelte:head>

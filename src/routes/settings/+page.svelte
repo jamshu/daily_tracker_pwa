@@ -6,6 +6,7 @@
 	import { settings, loadSettings, saveSettings, applyTheme } from '$lib/settings.js';
 	import { THEMES, DEFAULT_THEME } from '$lib/themes.js';
 	import { getPermission } from '$lib/push.js';
+	import { deleteAccount } from '$lib/auth.js';
 
 	// form state: activity id -> target value
 	let form = Object.fromEntries(ACTIVITIES.map((a) => [a.id, a.target]));
@@ -32,6 +33,12 @@
 	let announceStatus = '';
 	let remindBusy = false;
 	let remindStatus = '';
+
+	// account deletion state
+	let deleteArmed = false;
+	let deleteText = '';
+	let deleteBusy = false;
+	let deleteError = '';
 
 	onMount(async () => {
 		await loadSettings();
@@ -121,6 +128,20 @@
 			remindStatus = e.message;
 		} finally {
 			remindBusy = false;
+		}
+	}
+
+	async function doDeleteAccount() {
+		if (deleteText.trim().toUpperCase() !== 'DELETE') return;
+		deleteBusy = true;
+		deleteError = '';
+		try {
+			await deleteAccount();
+			goto(`${base}/login`);
+		} catch (e) {
+			deleteError = e?.message || 'Could not delete account';
+		} finally {
+			deleteBusy = false;
 		}
 	}
 </script>
@@ -332,6 +353,48 @@
 			</div>
 		</div>
 	{/if}
+
+	<h2 class="section-title">Account</h2>
+	<div class="card">
+		<div class="danger-row">
+			<span class="meta">
+				<span class="name">Delete account</span>
+				<span class="unit">Permanently deletes your account and all your data. This cannot be undone.</span>
+			</span>
+			{#if !deleteArmed}
+				<button class="danger-btn" type="button" on:click={() => { deleteArmed = true; deleteText = ''; deleteError = ''; }}>
+					Delete
+				</button>
+			{/if}
+		</div>
+		{#if deleteArmed}
+			<div class="danger-confirm">
+				<p class="danger-hint">Type <strong>DELETE</strong> to confirm:</p>
+				<input
+					class="admin-input"
+					type="text"
+					placeholder="DELETE"
+					autocapitalize="characters"
+					autocomplete="off"
+					bind:value={deleteText}
+				/>
+				<div class="danger-actions">
+					<button class="ghost" type="button" disabled={deleteBusy} on:click={() => { deleteArmed = false; deleteText = ''; deleteError = ''; }}>
+						Cancel
+					</button>
+					<button
+						class="danger-btn"
+						type="button"
+						disabled={deleteBusy || deleteText.trim().toUpperCase() !== 'DELETE'}
+						on:click={doDeleteAccount}
+					>
+						{deleteBusy ? 'Deleting…' : 'Delete forever'}
+					</button>
+				</div>
+			</div>
+		{/if}
+		{#if deleteError}<p class="err" style="margin:0 14px 12px">{deleteError}</p>{/if}
+	</div>
 
 	<div class="reset-row">
 		<button class="ghost" type="button" on:click={resetDefaults} disabled={busy}>Reset to defaults</button>
@@ -670,6 +733,47 @@
 		font-size: 0.84rem;
 		color: var(--text-faint);
 		margin: 0;
+	}
+
+	/* account deletion */
+	.danger-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 14px;
+		padding: 14px;
+	}
+	.danger-row .meta {
+		flex: 1;
+	}
+	.danger-btn {
+		flex: 0 0 auto;
+		padding: 9px 16px;
+		border-radius: 8px;
+		font-weight: 700;
+		font-size: 0.84rem;
+		color: #fff;
+		background: var(--red, #dc2626);
+	}
+	.danger-btn:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
+	.danger-confirm {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding: 0 14px 14px;
+	}
+	.danger-hint {
+		margin: 0;
+		font-size: 0.84rem;
+		color: var(--text-dim);
+	}
+	.danger-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 8px;
 	}
 
 	/* admin panel */

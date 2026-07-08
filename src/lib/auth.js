@@ -74,6 +74,15 @@ export async function resetPassword(email, code, password, confirm) {
 	return true;
 }
 
+// Permanently delete the account and all its data (App Store 5.1.1(v)).
+export async function deleteAccount() {
+	const res = await fetch(url('/api/auth/delete'), { method: 'POST' });
+	const d = await res.json().catch(() => ({}));
+	if (!res.ok || !d.ok) throw new Error(d.error || 'Could not delete account');
+	user.set(null);
+	return true;
+}
+
 export async function logout() {
 	try {
 		await fetch(url('/api/auth/logout'), { method: 'POST' });

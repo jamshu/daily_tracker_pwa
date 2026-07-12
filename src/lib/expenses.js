@@ -24,11 +24,16 @@ function patchActual({ month, category, actual }) {
 	}));
 }
 
-export async function listExpenses(month) {
-	const res = await fetch(`${base}/api/expenses?month=${month}`);
+export async function listExpenses({ month, from, to } = {}) {
+	const qs = from && to ? `from=${from}&to=${to}` : `month=${month}`;
+	const res = await fetch(`${base}/api/expenses?${qs}`);
 	const body = await res.json().catch(() => ({}));
 	if (!res.ok || !body.ok) throw new Error(body.error || 'Could not load expenses');
-	return body.expenses;
+	return { expenses: body.expenses, tags: body.tags ?? [] };
+}
+
+export function addTag(name) {
+	return post({ action: 'addTag', name });
 }
 
 export async function fetchBillImage(id) {

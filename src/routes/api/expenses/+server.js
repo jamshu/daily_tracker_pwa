@@ -18,6 +18,7 @@ export const prerender = false;
 // into x_budget's JSON `actual`, so the budget/report pages need no changes.
 const EXPENSE_MODEL = 'x_expense';
 const BUDGET_MODEL = 'x_budget';
+const TAG_MODEL = 'x_expense_tag'; // x_name + x_studio_company_id, linked via x_expense.x_studio_tag_ids
 const MAX_PER_MONTH = 500;
 const MAX_IMAGE_B64 = 1_400_000; // ~1 MB binary
 
@@ -64,23 +65,51 @@ export async function GET({ url, cookies }) {
 			return json({ ok: true, image: rows[0].x_studio_bill || null });
 		}
 
+		// Either month=YYYY-MM or an explicit from/to date range (inclusive).
 		const month = url.searchParams.get('month') || '';
-		if (!/^\d{4}-\d{2}$/.test(month)) {
-			return json({ ok: false, error: 'month=YYYY-MM required' }, { status: 400 });
-		}
-		const [from, to] = monthRange(month);
-		const { result: expenses, sessionId: newSid } = await sessionCallKw(
-			session.sid, EXPENSE_MODEL, 'search_read',
-			[[['x_studio_date', '>=', from], ['x_studio_date', '<', to]]],
-			{
-				// Never fetch x_studio_bill in lists — a month of bills is megabytes.
-				fields: ['id', 'x_name', 'x_studio_date', 'x_studio_category', 'x_studio_amount', 'x_studio_bill_filename'],
-				order: 'x_studio_date desc, id desc'
+		const qFrom = url.searchParams.get('from') || '';
+		const qTo = url.searchParams.get('to') || '';
+		let domain;
+		if (/^\d{4}-\d{2}-\d{2}$/.test(qFrom) && /^\d{4}-\d{2}-\d{2}$/.test(qTo)) {
+			if (qTo < qFrom) return json({ ok: false, error: 'Range end before start' }, { status: 400 });
+			if (new Date(qTo) - new Date(qFrom) > 366 * 86_400_000) {
+				return json({ ok: false, error: 'Range too large (max 1 year)' }, { status: 400 });
 			}
-		);
-		if (newSid) refreshSessionCookie(cookies, newSid, session.sid);
+			domain = [['x_studio_date', '>=', qFrom], ['x_studio_date', '<=', qTo]];
+		} else if (/^\d{4}-\d{2}$/.test(month)) {
+			const [from, to] = monthRange(month);
+			domain = [['x_studio_date', '>=', from], ['x_studio_date', '<', to]];
+		} else {
+			return json({ ok: false, error: 'month=YYYY-MM or from/to=YYYY-MM-DD required' }, { status: 400 });
+		}
 
-		return json({ ok: true, expenses: expenses ?? [] });
+		let sid = session.sid;
+		const call = async (model, ...args) => {
+			const { result, sessionId } = await sessionCallKw(sid, model, ...args);
+			if (sessionId) { refreshSessionCookie(cookies, sessionId, sid); sid = sessionId; }
+			return result;
+		};
+
+		// Tag model may not exist yet (Odoo Studio setup pending) — degrade to no tags
+		// rather than breaking the whole expense list.
+		let tags = [];
+		let hasTags = true;
+		try {
+			tags = (await call(TAG_MODEL, 'search_read', [[]], { fields: ['id', 'x_name'], order: 'x_name asc' })) ?? [];
+		} catch {
+			hasTags = false;
+		}
+
+		const fields = ['id', 'x_name', 'x_studio_date', 'x_studio_category', 'x_studio_amount', 'x_studio_bill_filename'];
+		if (hasTags) fields.push('x_studio_tag_ids');
+		const expenses = await call(EXPENSE_MODEL, 'search_read', [domain], {
+			// Never fetch x_studio_bill in lists — a month of bills is megabytes.
+			fields,
+			order: 'x_studio_date desc, id desc',
+			limit: 2000 // ponytail: range mode cap; raise if year-long ranges ever exceed it
+		});
+
+		return json({ ok: true, expenses: expenses ?? [], tags });
 	} catch (e) {
 		const status = e?.status || 500;
 		if (status === 401) clearSessionCookie(cookies);
@@ -155,8 +184,23 @@ export async function POST({ request, cookies }) {
 				vals.x_studio_bill = image || false;
 				vals.x_studio_bill_filename = image ? String(body.filename || 'bill.jpg').slice(0, 80) : false;
 			}
+			// Omitting tagIds leaves existing tags untouched on update.
+			if (Array.isArray(body.tagIds)) {
+				const ids = body.tagIds.map(Number).filter((n) => Number.isInteger(n) && n > 0).slice(0, 20);
+				vals.x_studio_tag_ids = [[6, 0, ids]];
+			}
 			return { vals, category, month: date.slice(0, 7) };
 		};
+
+		if (body.action === 'addTag') {
+			const name = String(body.name || '').trim().slice(0, 40);
+			if (!name) return json({ ok: false, error: 'Tag name required' }, { status: 400 });
+			const existing = await call(TAG_MODEL, 'search_read',
+				[[['x_name', '=ilike', name]]], { fields: ['id', 'x_name'], limit: 1 });
+			if (existing?.length) return json({ ok: true, tag: existing[0] });
+			const id = await call(TAG_MODEL, 'create', [{ x_name: name, x_studio_company_id: companyId }]);
+			return json({ ok: true, tag: { id, x_name: name } });
+		}
 
 		if (body.action === 'add') {
 			const { error, vals, category, month } = sanitize();

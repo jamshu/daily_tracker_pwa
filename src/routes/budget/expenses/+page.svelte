@@ -22,16 +22,24 @@
 		updateExpense,
 		deleteExpense,
 		fetchBillImage,
-		compressImage
+		compressImage,
+		addTag
 	} from '$lib/expenses.js';
 
 	const todayKey = monthKey();
 
 	let month = todayKey;
 	let catFilter = '';      // '' = all
+	let tagFilter = [];      // selected tag ids, [] = all
+	let tags = [];           // [{ id, x_name }] from list response
 	let expenses = [];
 	let loading = false;
 	let error = '';
+
+	// Custom date range mode (overrides month nav while active)
+	let rangeMode = false;
+	let rangeFrom = '';
+	let rangeTo = '';
 
 	// Entry form
 	let showForm = false;
@@ -43,6 +51,8 @@
 	let fImage = null;       // { image, filename } from compressImage
 	let fPreview = '';       // data URL for thumbnail
 	let fHasBill = false;    // editing a row that already has a bill
+	let fTagIds = [];        // selected tag ids for the form
+	let newTagName = '';
 	let lastAutoDesc = '';   // last auto-filled description — only clobber our own fill
 	let saving = false;
 
@@ -53,9 +63,14 @@
 
 	$: rows = ensureMonth($budgetData, month);
 	$: catList = buildCatList(rows);
-	$: filtered = catFilter ? expenses.filter((e) => e.x_studio_category === catFilter) : expenses;
+	$: filtered = expenses.filter(
+		(e) =>
+			(!catFilter || e.x_studio_category === catFilter) &&
+			(!tagFilter.length || (e.x_studio_tag_ids || []).some((id) => tagFilter.includes(id)))
+	);
 	$: filteredTotal = filtered.reduce((s, e) => s + (e.x_studio_amount || 0), 0);
 	$: catById = Object.fromEntries(catList.map((c) => [c.id, c]));
+	$: tagById = Object.fromEntries(tags.map((t) => [t.id, t]));
 
 	// Form renders inside {#if showForm}, so this fires each time it opens.
 	function focusOnMount(node) {
@@ -92,7 +107,10 @@
 		loading = true;
 		error = '';
 		try {
-			expenses = await listExpenses(month);
+			const usingRange = rangeMode && rangeFrom && rangeTo;
+			const res = await listExpenses(usingRange ? { from: rangeFrom, to: rangeTo } : { month });
+			expenses = res.expenses;
+			tags = res.tags;
 		} catch (e) {
 			error = e?.message || 'Could not load expenses';
 		} finally {
@@ -113,6 +131,24 @@
 		}
 	}
 
+	function toggleRange() {
+		rangeMode = !rangeMode;
+		if (rangeMode) {
+			if (!rangeFrom) rangeFrom = `${month}-01`;
+			if (!rangeTo) rangeTo = todayStr();
+		}
+		closeBill();
+		refresh();
+	}
+
+	function onRangeChange() {
+		if (rangeFrom && rangeTo && rangeFrom <= rangeTo) refresh();
+	}
+
+	function toggleTagFilter(id) {
+		tagFilter = tagFilter.includes(id) ? tagFilter.filter((t) => t !== id) : [...tagFilter, id];
+	}
+
 	function openAdd(catId = '') {
 		editingId = null;
 		fCat = catId || catFilter || '';
@@ -123,6 +159,8 @@
 		fImage = null;
 		fPreview = '';
 		fHasBill = false;
+		fTagIds = [];
+		newTagName = '';
 		showForm = true;
 		autoFillDesc();
 	}
@@ -143,7 +181,28 @@
 		fImage = null;
 		fPreview = '';
 		fHasBill = !!exp.x_studio_bill_filename;
+		fTagIds = [...(exp.x_studio_tag_ids || [])];
+		newTagName = '';
 		showForm = true;
+	}
+
+	function toggleFormTag(id) {
+		fTagIds = fTagIds.includes(id) ? fTagIds.filter((t) => t !== id) : [...fTagIds, id];
+	}
+
+	async function createTag() {
+		const name = newTagName.trim();
+		if (!name) return true;
+		try {
+			const { tag } = await addTag(name);
+			if (!tags.some((t) => t.id === tag.id)) tags = [...tags, tag];
+			if (!fTagIds.includes(tag.id)) fTagIds = [...fTagIds, tag.id];
+			newTagName = '';
+			return true;
+		} catch (e) {
+			error = e?.message || 'Could not add tag';
+			return false;
+		}
 	}
 
 	function closeForm() {
@@ -166,11 +225,14 @@
 	}
 
 	async function submitForm() {
+		// Tag typed but not confirmed with Enter/+ — create it now so it isn't lost.
+		if (newTagName.trim() && !(await createTag())) return;
 		const payload = {
 			category: fCat,
 			date: fDate,
 			description: fDesc,
-			amount: parseFloat(fAmt)
+			amount: parseFloat(fAmt),
+			tagIds: fTagIds
 		};
 		// Only send image when a new file was picked — omitting it keeps an existing bill.
 		if (fImage) {
@@ -262,10 +324,23 @@
 
 	<!-- Month navigator -->
 	<div class="month-nav">
-		<button class="mnav" on:click={goPrev} aria-label="previous month">‹</button>
-		<span class="mlabel">{monthLabel(month)}</span>
-		<button class="mnav" on:click={goNext} disabled={month >= todayKey} aria-label="next month">›</button>
+		<button class="mnav" on:click={goPrev} disabled={rangeMode} aria-label="previous month">‹</button>
+		<span class="mlabel" class:dim={rangeMode}>{monthLabel(month)}</span>
+		<button class="mnav" on:click={goNext} disabled={rangeMode || month >= todayKey} aria-label="next month">›</button>
+		<button class="range-toggle" class:active={rangeMode} on:click={toggleRange} aria-label="custom date range">
+			<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+			</svg>
+		</button>
 	</div>
+
+	{#if rangeMode}
+		<div class="range-row card">
+			<input type="date" bind:value={rangeFrom} max={rangeTo || todayStr()} on:change={onRangeChange} aria-label="from date" />
+			<span class="range-sep">→</span>
+			<input type="date" bind:value={rangeTo} min={rangeFrom} max={todayStr()} on:change={onRangeChange} aria-label="to date" />
+		</div>
+	{/if}
 
 	<!-- Filter + total -->
 	<div class="bar card">
@@ -277,6 +352,16 @@
 		</select>
 		<span class="bar-total">{fmt(filteredTotal)}</span>
 	</div>
+
+	{#if tags.length}
+		<div class="tagbar">
+			{#each tags as t (t.id)}
+				<button class="chip" class:on={tagFilter.includes(t.id)} on:click={() => toggleTagFilter(t.id)}>
+					{t.x_name}
+				</button>
+			{/each}
+		</div>
+	{/if}
 
 	<!-- Entry form -->
 	<div class="form-card card">
@@ -294,6 +379,26 @@
 				<div class="frow">
 					<input class="grow" type="text" placeholder="Description" maxlength="120" bind:value={fDesc} aria-label="description" />
 					<input class="famt" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" bind:value={fAmt} use:focusOnMount required aria-label="amount" />
+				</div>
+				<div class="frow wrap">
+					{#each tags as t (t.id)}
+						<button type="button" class="chip" class:on={fTagIds.includes(t.id)} on:click={() => toggleFormTag(t.id)}>
+							{t.x_name}
+						</button>
+					{/each}
+					<input
+						class="tag-new"
+						type="text"
+						placeholder="+ tag"
+						maxlength="40"
+						bind:value={newTagName}
+						enterkeyhint="done"
+						on:keydown={(e) => { if (e.key === 'Enter') { e.preventDefault(); createTag(); } }}
+						aria-label="new tag"
+					/>
+					{#if newTagName.trim()}
+						<button type="button" class="chip tag-add" on:click={createTag} aria-label="add tag">✓</button>
+					{/if}
 				</div>
 				<div class="frow">
 					<label class="bill-pick">
@@ -329,7 +434,7 @@
 	{#if loading}
 		<p class="hint center">Loading…</p>
 	{:else if !filtered.length}
-		<p class="hint center">No expenses{catFilter ? ' for this category' : ''} this month.</p>
+		<p class="hint center">No expenses{catFilter || tagFilter.length ? ' for this filter' : ''} {rangeMode ? 'in this range' : 'this month'}.</p>
 	{:else}
 		<div class="list">
 			{#each filtered as exp (exp.id)}
@@ -338,7 +443,12 @@
 						<span class="eemo emo" aria-hidden="true">{displayBudgetEmoji(catById[exp.x_studio_category] ?? { id: exp.x_studio_category })}</span>
 						<span class="einfo">
 							<span class="edesc">{exp.x_name}</span>
-							<span class="emeta">{fmtDay(exp.x_studio_date)} · {catById[exp.x_studio_category]?.label ?? exp.x_studio_category}</span>
+							<span class="emeta">
+								{fmtDay(exp.x_studio_date)} · {catById[exp.x_studio_category]?.label ?? exp.x_studio_category}
+								{#each exp.x_studio_tag_ids || [] as tid (tid)}
+									{#if tagById[tid]}<span class="tagpill">{tagById[tid].x_name}</span>{/if}
+								{/each}
+							</span>
 						</span>
 						<span class="eamt">{fmt(exp.x_studio_amount)}</span>
 					</button>
@@ -442,10 +552,82 @@
 		text-align: center;
 	}
 
+	.mlabel.dim { opacity: 0.35; }
+	.range-toggle {
+		width: 36px;
+		height: 36px;
+		border-radius: 10px;
+		color: var(--text-faint);
+		background: var(--surface);
+		border: 1px solid var(--border);
+		display: grid;
+		place-items: center;
+	}
+	.range-toggle.active {
+		color: var(--on-accent);
+		background: var(--teal);
+		border-color: var(--teal);
+	}
+
+	.range-row {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		padding: 10px 14px;
+		margin-bottom: 10px;
+	}
+	.range-row input[type='date'] { flex: 1; min-width: 0; }
+	.range-sep { color: var(--text-faint); }
+
 	.card {
 		background: var(--surface);
 		border: 1px solid var(--border);
 		border-radius: var(--radius-sm);
+	}
+
+	.tagbar {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		margin-bottom: 10px;
+	}
+	.chip {
+		padding: 5px 11px;
+		border-radius: 999px;
+		font-size: 0.78rem;
+		font-weight: 600;
+		color: var(--text-dim);
+		background: var(--surface-2);
+		border: 1px solid var(--border);
+	}
+	.chip.on {
+		color: var(--on-accent);
+		background: var(--teal);
+		border-color: var(--teal);
+	}
+	.tagpill {
+		display: inline-block;
+		margin-left: 4px;
+		padding: 1px 7px;
+		border-radius: 999px;
+		font-size: 0.68rem;
+		font-weight: 600;
+		color: var(--text-dim);
+		background: var(--surface-2);
+		border: 1px solid var(--border);
+	}
+	.wrap { flex-wrap: wrap; }
+	.tag-new {
+		width: 90px;
+		padding: 5px 11px !important;
+		border-radius: 999px !important;
+		font-size: 16px;
+	}
+	.tag-add {
+		color: var(--on-accent);
+		background: var(--teal);
+		border-color: var(--teal);
 	}
 
 	.bar {

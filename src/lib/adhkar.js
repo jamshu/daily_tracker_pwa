@@ -305,14 +305,7 @@ export const ADHKAR = {
 				reward: `Part of the post-prayer tasbīh that completes one hundred.`,
 				source: `Muslim`
 			},
-			{
-				ar: `لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ`,
-				tr: `Lā ilāha illallāhu wahdahu lā sharīka lah...`,
-				en: `There is no god but Allah alone, with no partner; His is the dominion and the praise, and He is able to do all things — said once to complete the hundred.`,
-				count: `1×`,
-				reward: `Whoever does this, his sins are forgiven even if they were like the foam of the sea.`,
-				source: `Muslim`
-			},
+			
 			ayatulKursi(`1×`, `Whoever recites it after each obligatory prayer, nothing stands between him and entering Paradise except death.`, `Al-Nasaʼi`),
 			...quls(`3×`, `Recited after each prayer (three times after Fajr and Maghrib) — protection that suffices against all harm.`, `Abu Dawud · Tirmidhi`),
 			{

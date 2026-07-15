@@ -1,0 +1,180 @@
+- generic [ref=f5e3]:
+  - banner [ref=f5e4]:
+    - generic [ref=f5e5]:
+      - generic [ref=f5e9]:
+        - heading "Daily Tracker" [level=1] [ref=f5e10]
+        - generic [ref=f5e11]: 🌅 Good morning · Tuesday 14 July
+      - generic [ref=f5e12]:
+        - button "mindfulness" [ref=f5e13] [cursor=pointer]
+        - button "report" [ref=f5e18] [cursor=pointer]
+        - button "budget" [ref=f5e24] [cursor=pointer]
+        - button "settings" [ref=f5e29] [cursor=pointer]
+    - generic [ref=f5e33]:
+      - button "previous day" [ref=f5e34] [cursor=pointer]: ‹
+      - button "Today Tuesday 14 July" [ref=f5e35] [cursor=pointer]:
+        - generic [ref=f5e36]: Today
+        - generic [ref=f5e37]: Tuesday 14 July
+      - button "next day" [disabled] [ref=f5e38]: ›
+  - generic [ref=f5e39]:
+    - button "W 8" [ref=f5e40] [cursor=pointer]:
+      - generic [ref=f5e41]: W
+      - generic [ref=f5e42]: "8"
+    - button "T 9" [ref=f5e44] [cursor=pointer]:
+      - generic [ref=f5e45]: T
+      - generic [ref=f5e46]: "9"
+    - button "F 10" [ref=f5e48] [cursor=pointer]:
+      - generic [ref=f5e49]: F
+      - generic [ref=f5e50]: "10"
+    - button "S 11" [ref=f5e52] [cursor=pointer]:
+      - generic [ref=f5e53]: S
+      - generic [ref=f5e54]: "11"
+    - button "S 12" [ref=f5e56] [cursor=pointer]:
+      - generic [ref=f5e57]: S
+      - generic [ref=f5e58]: "12"
+    - button "M 13" [ref=f5e60] [cursor=pointer]:
+      - generic [ref=f5e61]: M
+      - generic [ref=f5e62]: "13"
+    - button "T 14" [ref=f5e64] [cursor=pointer]:
+      - generic [ref=f5e65]: T
+      - generic [ref=f5e66]: "14"
+  - generic [ref=f5e68]:
+    - generic [ref=f5e73]:
+      - generic [ref=f5e74]: 0/100
+      - generic [ref=f5e75]: score
+    - generic [ref=f5e76]:
+      - paragraph [ref=f5e77]: A new day. Begin with Bismillah.
+      - generic [ref=f5e78]:
+        - generic [ref=f5e79]:
+          - generic [ref=f5e80]: 0/14
+          - generic [ref=f5e81]: prayer marks
+        - generic [ref=f5e82]:
+          - generic [ref=f5e83]: 0/3
+          - generic [ref=f5e84]: goals met
+        - generic [ref=f5e85]:
+          - generic [ref=f5e86]: 0/3
+          - generic [ref=f5e87]: deeds done
+      - generic [ref=f5e88]:
+        - generic [ref=f5e89]:
+          - generic [ref=f5e90]: Prayers
+          - generic [ref=f5e91]: 0/58 pts
+        - generic [ref=f5e93]:
+          - generic [ref=f5e94]: Activities
+          - generic [ref=f5e95]: 0/10 pts
+        - generic [ref=f5e97]:
+          - generic [ref=f5e98]: Deeds & Nawāfil
+          - generic [ref=f5e99]: 0/24 pts
+      - paragraph [ref=f5e101]: The score only measures your daily progress. The true reward is with God, weighed by your sincerity and intention — let it move you to do more, never to chase the number. May God accept your deeds and mine.
+  - heading "Prayers · Jamāʻah, Sunnah & Dhikr" [level=2] [ref=f5e102]:
+    - generic [ref=f5e103]: 🕌
+    - text: Prayers · Jamāʻah, Sunnah & Dhikr
+  - generic [ref=f5e104]:
+    - button "Fajr — S D" [ref=f5e106] [cursor=pointer]:
+      - generic [ref=f5e107]:
+        - generic [ref=f5e108]: 🌅
+        - text: Fajr
+      - generic [ref=f5e109]:
+        - generic [ref=f5e110]: —
+        - generic [ref=f5e111]: S
+        - generic [ref=f5e112]: D
+    - button "Dhuhr — S D" [ref=f5e114] [cursor=pointer]:
+      - generic [ref=f5e115]:
+        - generic [ref=f5e116]: ☀️
+        - text: Dhuhr
+      - generic [ref=f5e117]:
+        - generic [ref=f5e118]: —
+        - generic [ref=f5e119]: S
+        - generic [ref=f5e120]: D
+    - button "Asr — D" [ref=f5e122] [cursor=pointer]:
+      - generic [ref=f5e123]:
+        - generic [ref=f5e124]: 🌤️
+        - text: Asr
+      - generic [ref=f5e125]:
+        - generic [ref=f5e126]: —
+        - generic [ref=f5e127]: D
+    - button "Maghrib — S D" [ref=f5e129] [cursor=pointer]:
+      - generic [ref=f5e130]:
+        - generic [ref=f5e131]: 🌇
+        - text: Maghrib
+      - generic [ref=f5e132]:
+        - generic [ref=f5e133]: —
+        - generic [ref=f5e134]: S
+        - generic [ref=f5e135]: D
+    - button "Isha — S D" [ref=f5e137] [cursor=pointer]:
+      - generic [ref=f5e138]:
+        - generic [ref=f5e139]: 🌙
+        - text: Isha
+      - generic [ref=f5e140]:
+        - generic [ref=f5e141]: —
+        - generic [ref=f5e142]: S
+        - generic [ref=f5e143]: D
+  - button "Dhikr after Salah The remembrance to recite after every fard prayer" [ref=f5e144] [cursor=pointer]:
+    - generic [ref=f5e148]:
+      - strong [ref=f5e149]: Dhikr after Salah
+      - generic [ref=f5e150]: The remembrance to recite after every fard prayer
+  - button "Prayers & Dhikr Janaza, protective recitations and more — the full library" [ref=f5e153] [cursor=pointer]:
+    - generic [ref=f5e158]:
+      - strong [ref=f5e159]: Prayers & Dhikr
+      - generic [ref=f5e160]: Janaza, protective recitations and more — the full library
+  - heading "Voluntary Prayers" [level=2] [ref=f5e163]:
+    - generic [ref=f5e164]: ✨
+    - text: Voluntary Prayers
+  - generic [ref=f5e165]:
+    - button "Tahajjud Night prayer" [ref=f5e167] [cursor=pointer]:
+      - generic [ref=f5e169]:
+        - generic [ref=f5e170]: 🌌Tahajjud
+        - generic [ref=f5e171]: Night prayer
+    - button "Duha Forenoon prayer" [ref=f5e173] [cursor=pointer]:
+      - generic [ref=f5e175]:
+        - generic [ref=f5e176]: 🌞Duha
+        - generic [ref=f5e177]: Forenoon prayer
+    - button "Witr After Isha" [ref=f5e179] [cursor=pointer]:
+      - generic [ref=f5e181]:
+        - generic [ref=f5e182]: ✨Witr
+        - generic [ref=f5e183]: After Isha
+  - heading "Daily Deeds" [level=2] [ref=f5e184]:
+    - generic [ref=f5e185]: 🤲
+    - text: Daily Deeds
+  - generic [ref=f5e186]:
+    - generic [ref=f5e187]:
+      - button "Morning Adhkār After Fajr" [ref=f5e188] [cursor=pointer]:
+        - generic [ref=f5e190]:
+          - generic [ref=f5e191]: 🌄Morning Adhkār
+          - generic [ref=f5e192]: After Fajr
+      - button "View Morning Adhkār" [ref=f5e193] [cursor=pointer]
+    - generic [ref=f5e197]:
+      - button "Evening Adhkār After Asr / Maghrib" [ref=f5e198] [cursor=pointer]:
+        - generic [ref=f5e200]:
+          - generic [ref=f5e201]: 🌆Evening Adhkār
+          - generic [ref=f5e202]: After Asr / Maghrib
+      - button "View Evening Adhkār" [ref=f5e203] [cursor=pointer]
+    - button "Sadaqah Charity given" [ref=f5e208] [cursor=pointer]:
+      - generic [ref=f5e210]:
+        - generic [ref=f5e211]: 🤲Sadaqah
+        - generic [ref=f5e212]: Charity given
+  - heading "Activities" [level=2] [ref=f5e213]:
+    - generic [ref=f5e214]: 🎯
+    - text: Activities
+  - generic [ref=f5e215]:
+    - button "Exercise 0/30 min" [ref=f5e217] [cursor=pointer]:
+      - generic [ref=f5e218]: 🏃Exercise
+      - generic [ref=f5e219]: 0/30 min
+    - button "Read Qurʻan 0/5 pages" [ref=f5e222] [cursor=pointer]:
+      - generic [ref=f5e223]: 📖Read Qurʻan
+      - generic [ref=f5e224]: 0/5 pages
+    - button "Memorize Qurʻan 0/5 verses" [ref=f5e227] [cursor=pointer]:
+      - generic [ref=f5e228]: 🧠Memorize Qurʻan
+      - generic [ref=f5e229]: 0/5 verses
+  - button "+ Add activity" [ref=f5e231] [cursor=pointer]
+  - heading "Todo" [level=2] [ref=f5e232]:
+    - generic [ref=f5e233]: ✅
+    - text: Todo
+  - generic [ref=f5e235]:
+    - generic [ref=f5e236]: Todo
+    - paragraph [ref=f5e237]: No todos yet.
+    - button "Add todo" [ref=f5e238] [cursor=pointer]
+  - generic [ref=f5e242]:
+    - paragraph [ref=f5e246]: Loading a little motivation…
+    - generic [ref=f5e247]:
+      - button "copy quote" [disabled] [ref=f5e248]
+      - button "new quote" [disabled] [ref=f5e252]
+  - paragraph [ref=f5e256]: Stored on this device · 2026-07-14

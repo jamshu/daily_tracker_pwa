@@ -34,6 +34,33 @@
 	let remindBusy = false;
 	let remindStatus = '';
 
+	// export for local app
+	let exportBusy = false;
+	let exportError = '';
+
+	async function exportForLocal() {
+		exportBusy = true;
+		exportError = '';
+		try {
+			const res = await fetch(`${base}/api/export`);
+			if (!res.ok) {
+				const d = await res.json().catch(() => ({}));
+				throw new Error(d.error || 'Export failed');
+			}
+			const blob = await res.blob();
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = 'daily-tracker-export.json';
+			a.click();
+			URL.revokeObjectURL(url);
+		} catch (e) {
+			exportError = e.message;
+		} finally {
+			exportBusy = false;
+		}
+	}
+
 	// account deletion state
 	let deleteArmed = false;
 	let deleteText = '';
@@ -353,6 +380,20 @@
 			</div>
 		</div>
 	{/if}
+
+	<h2 class="section-title">Migrate to local app</h2>
+	<div class="card">
+		<div class="danger-row">
+			<span class="meta">
+				<span class="name">Export all data</span>
+				<span class="unit">Downloads a JSON file you can import into the Daily Tracker offline app. Does not include expense bill images.</span>
+			</span>
+			<button class="ghost" type="button" disabled={exportBusy} on:click={exportForLocal}>
+				{exportBusy ? 'Exporting…' : 'Export'}
+			</button>
+		</div>
+		{#if exportError}<p class="err" style="margin:0 14px 12px">{exportError}</p>{/if}
+	</div>
 
 	<h2 class="section-title">Account</h2>
 	<div class="card">

@@ -1,0 +1,229 @@
+- generic [ref=f3e3]:
+  - banner [ref=f3e4]:
+    - button "back" [ref=f3e5] [cursor=pointer]
+    - heading "Budget" [level=1] [ref=f3e8]
+    - button "Expenses" [ref=f3e9] [cursor=pointer]
+    - button "Report" [ref=f3e10] [cursor=pointer]
+  - generic [ref=f3e11]:
+    - button "previous month" [ref=f3e12] [cursor=pointer]: ‹
+    - generic [ref=f3e13]: July 2026
+    - button "next month" [disabled] [ref=f3e14] [cursor=pointer]: ›
+    - button "↑ Copy prev" [disabled] [ref=f3e15] [cursor=pointer]
+  - generic [ref=f3e16]:
+    - generic [ref=f3e17]:
+      - generic [ref=f3e18]: Opening
+      - spinbutton "opening balance" [ref=f3e19]: "0"
+    - generic [ref=f3e21]:
+      - generic [ref=f3e22]: Closing
+      - generic [ref=f3e23]: "0"
+  - generic [ref=f3e24]:
+    - generic [ref=f3e25]:
+      - generic [ref=f3e26]: 📊
+      - generic [ref=f3e27]: "0"
+      - generic [ref=f3e28]: budget
+    - generic [ref=f3e29]:
+      - generic [ref=f3e30]: 💸
+      - generic [ref=f3e31]: "0"
+      - generic [ref=f3e32]: actual
+    - generic [ref=f3e33]:
+      - generic [ref=f3e34]: ✅
+      - generic [ref=f3e35]: "0"
+      - generic [ref=f3e36]: under
+  - heading "Categories" [level=2] [ref=f3e37]
+  - generic [ref=f3e38]:
+    - generic [ref=f3e39]:
+      - generic [ref=f3e40]:
+        - generic [ref=f3e41]: 🏠Rent / Mortgage
+        - generic [ref=f3e42]: "0"
+      - generic [ref=f3e43]:
+        - generic [ref=f3e44]:
+          - generic [ref=f3e45]: Budget
+          - spinbutton "Rent / Mortgage budget" [ref=f3e46]: "0"
+        - generic [ref=f3e47]:
+          - generic [ref=f3e48]: Actual
+          - generic [ref=f3e49]:
+            - generic "Rent / Mortgage actual" [ref=f3e50]: "0"
+            - button "add expense to Rent / Mortgage" [ref=f3e51] [cursor=pointer]
+    - generic [ref=f3e55]:
+      - generic [ref=f3e56]:
+        - generic [ref=f3e57]: ⚡Electricity
+        - generic [ref=f3e58]: "0"
+      - generic [ref=f3e59]:
+        - generic [ref=f3e60]:
+          - generic [ref=f3e61]: Budget
+          - spinbutton "Electricity budget" [ref=f3e62]: "0"
+        - generic [ref=f3e63]:
+          - generic [ref=f3e64]: Actual
+          - generic [ref=f3e65]:
+            - generic "Electricity actual" [ref=f3e66]: "0"
+            - button "add expense to Electricity" [ref=f3e67] [cursor=pointer]
+    - generic [ref=f3e71]:
+      - generic [ref=f3e72]:
+        - generic [ref=f3e73]: 💧Water
+        - generic [ref=f3e74]: "0"
+      - generic [ref=f3e75]:
+        - generic [ref=f3e76]:
+          - generic [ref=f3e77]: Budget
+          - spinbutton "Water budget" [ref=f3e78]: "0"
+        - generic [ref=f3e79]:
+          - generic [ref=f3e80]: Actual
+          - generic [ref=f3e81]:
+            - generic "Water actual" [ref=f3e82]: "0"
+            - button "add expense to Water" [ref=f3e83] [cursor=pointer]
+    - generic [ref=f3e87]:
+      - generic [ref=f3e88]:
+        - generic [ref=f3e89]: 🌐Internet
+        - generic [ref=f3e90]: "0"
+      - generic [ref=f3e91]:
+        - generic [ref=f3e92]:
+          - generic [ref=f3e93]: Budget
+          - spinbutton "Internet budget" [ref=f3e94]: "0"
+        - generic [ref=f3e95]:
+          - generic [ref=f3e96]: Actual
+          - generic [ref=f3e97]:
+            - generic "Internet actual" [ref=f3e98]: "0"
+            - button "add expense to Internet" [ref=f3e99] [cursor=pointer]
+    - generic [ref=f3e103]:
+      - generic [ref=f3e104]:
+        - generic [ref=f3e105]: 📱Phone
+        - generic [ref=f3e106]: "0"
+      - generic [ref=f3e107]:
+        - generic [ref=f3e108]:
+          - generic [ref=f3e109]: Budget
+          - spinbutton "Phone budget" [ref=f3e110]: "0"
+        - generic [ref=f3e111]:
+          - generic [ref=f3e112]: Actual
+          - generic [ref=f3e113]:
+            - generic "Phone actual" [ref=f3e114]: "0"
+            - button "add expense to Phone" [ref=f3e115] [cursor=pointer]
+    - generic [ref=f3e119]:
+      - generic [ref=f3e120]:
+        - generic [ref=f3e121]: 🛒Grocery
+        - generic [ref=f3e122]: "0"
+      - generic [ref=f3e123]:
+        - generic [ref=f3e124]:
+          - generic [ref=f3e125]: Budget
+          - spinbutton "Grocery budget" [ref=f3e126]: "0"
+        - generic [ref=f3e127]:
+          - generic [ref=f3e128]: Actual
+          - generic [ref=f3e129]:
+            - generic "Grocery actual" [ref=f3e130]: "0"
+            - button "add expense to Grocery" [ref=f3e131] [cursor=pointer]
+    - generic [ref=f3e135]:
+      - generic [ref=f3e136]:
+        - generic [ref=f3e137]: 🍽️Food
+        - generic [ref=f3e138]: "0"
+      - generic [ref=f3e139]:
+        - generic [ref=f3e140]:
+          - generic [ref=f3e141]: Budget
+          - spinbutton "Food budget" [ref=f3e142]: "0"
+        - generic [ref=f3e143]:
+          - generic [ref=f3e144]: Actual
+          - generic [ref=f3e145]:
+            - generic "Food actual" [ref=f3e146]: "0"
+            - button "add expense to Food" [ref=f3e147] [cursor=pointer]
+    - generic [ref=f3e151]:
+      - generic [ref=f3e152]:
+        - generic [ref=f3e153]: 🎓School
+        - generic [ref=f3e154]: "0"
+      - generic [ref=f3e155]:
+        - generic [ref=f3e156]:
+          - generic [ref=f3e157]: Budget
+          - spinbutton "School budget" [ref=f3e158]: "0"
+        - generic [ref=f3e159]:
+          - generic [ref=f3e160]: Actual
+          - generic [ref=f3e161]:
+            - generic "School actual" [ref=f3e162]: "0"
+            - button "add expense to School" [ref=f3e163] [cursor=pointer]
+    - generic [ref=f3e167]:
+      - generic [ref=f3e168]:
+        - generic [ref=f3e169]: 🧸Kids Expenses
+        - generic [ref=f3e170]: "0"
+      - generic [ref=f3e171]:
+        - generic [ref=f3e172]:
+          - generic [ref=f3e173]: Budget
+          - spinbutton "Kids Expenses budget" [ref=f3e174]: "0"
+        - generic [ref=f3e175]:
+          - generic [ref=f3e176]: Actual
+          - generic [ref=f3e177]:
+            - generic "Kids Expenses actual" [ref=f3e178]: "0"
+            - button "add expense to Kids Expenses" [ref=f3e179] [cursor=pointer]
+    - generic [ref=f3e183]:
+      - generic [ref=f3e184]:
+        - generic [ref=f3e185]: 🚗Transport / Fuel
+        - generic [ref=f3e186]: "0"
+      - generic [ref=f3e187]:
+        - generic [ref=f3e188]:
+          - generic [ref=f3e189]: Budget
+          - spinbutton "Transport / Fuel budget" [ref=f3e190]: "0"
+        - generic [ref=f3e191]:
+          - generic [ref=f3e192]: Actual
+          - generic [ref=f3e193]:
+            - generic "Transport / Fuel actual" [ref=f3e194]: "0"
+            - button "add expense to Transport / Fuel" [ref=f3e195] [cursor=pointer]
+    - generic [ref=f3e199]:
+      - generic [ref=f3e200]:
+        - generic [ref=f3e201]: 🩺Medical
+        - generic [ref=f3e202]: "0"
+      - generic [ref=f3e203]:
+        - generic [ref=f3e204]:
+          - generic [ref=f3e205]: Budget
+          - spinbutton "Medical budget" [ref=f3e206]: "0"
+        - generic [ref=f3e207]:
+          - generic [ref=f3e208]: Actual
+          - generic [ref=f3e209]:
+            - generic "Medical actual" [ref=f3e210]: "0"
+            - button "add expense to Medical" [ref=f3e211] [cursor=pointer]
+    - generic [ref=f3e215]:
+      - generic [ref=f3e216]:
+        - generic [ref=f3e217]: 🎬Entertainment
+        - generic [ref=f3e218]: "0"
+      - generic [ref=f3e219]:
+        - generic [ref=f3e220]:
+          - generic [ref=f3e221]: Budget
+          - spinbutton "Entertainment budget" [ref=f3e222]: "0"
+        - generic [ref=f3e223]:
+          - generic [ref=f3e224]: Actual
+          - generic [ref=f3e225]:
+            - generic "Entertainment actual" [ref=f3e226]: "0"
+            - button "add expense to Entertainment" [ref=f3e227] [cursor=pointer]
+    - generic [ref=f3e231]:
+      - generic [ref=f3e232]:
+        - generic [ref=f3e233]: 👕Clothing
+        - generic [ref=f3e234]: "0"
+      - generic [ref=f3e235]:
+        - generic [ref=f3e236]:
+          - generic [ref=f3e237]: Budget
+          - spinbutton "Clothing budget" [ref=f3e238]: "0"
+        - generic [ref=f3e239]:
+          - generic [ref=f3e240]: Actual
+          - generic [ref=f3e241]:
+            - generic "Clothing actual" [ref=f3e242]: "0"
+            - button "add expense to Clothing" [ref=f3e243] [cursor=pointer]
+    - generic [ref=f3e247]:
+      - generic [ref=f3e248]:
+        - generic [ref=f3e249]: 🚦Fines / RTA
+        - generic [ref=f3e250]: "0"
+      - generic [ref=f3e251]:
+        - generic [ref=f3e252]:
+          - generic [ref=f3e253]: Budget
+          - spinbutton "Fines / RTA budget" [ref=f3e254]: "0"
+        - generic [ref=f3e255]:
+          - generic [ref=f3e256]: Actual
+          - generic [ref=f3e257]:
+            - generic "Fines / RTA actual" [ref=f3e258]: "0"
+            - button "add expense to Fines / RTA" [ref=f3e259] [cursor=pointer]
+    - generic [ref=f3e263]:
+      - generic [ref=f3e264]:
+        - generic [ref=f3e265]: 💰Other
+        - generic [ref=f3e266]: "0"
+      - generic [ref=f3e267]:
+        - generic [ref=f3e268]:
+          - generic [ref=f3e269]: Budget
+          - spinbutton "Other budget" [ref=f3e270]: "0"
+        - generic [ref=f3e271]:
+          - generic [ref=f3e272]: Actual
+          - generic [ref=f3e273]:
+            - generic "Other actual" [ref=f3e274]: "0"
+            - button "add expense to Other" [ref=f3e275] [cursor=pointer]
+  - button "Add category" [ref=f3e280] [cursor=pointer]

@@ -1,0 +1,76 @@
+- generic [ref=f2e3]:
+  - banner [ref=f2e4]:
+    - button "back" [ref=f2e5] [cursor=pointer]
+    - heading "Settings" [level=1] [ref=f2e8]
+  - heading "Profile" [level=2] [ref=f2e9]
+  - generic [ref=f2e11]:
+    - generic [ref=f2e12]:
+      - generic [ref=f2e13]: Sex
+      - generic [ref=f2e14]: Affects prayer scoring — a woman praying at home scores the same as in Jamāʻah.
+    - radiogroup "Sex" [ref=f2e15]:
+      - radio "Male" [checked] [ref=f2e16] [cursor=pointer]
+      - radio "Female" [ref=f2e17] [cursor=pointer]
+  - heading "Daily goals" [level=2] [ref=f2e18]
+  - generic [ref=f2e19]:
+    - generic [ref=f2e20]:
+      - generic [ref=f2e21]:
+        - generic [ref=f2e22]: Exercise
+        - generic [ref=f2e23]: Target in min
+      - generic [ref=f2e24]:
+        - button "decrease" [ref=f2e25] [cursor=pointer]: −
+        - spinbutton [ref=f2e26]: "30"
+        - button "increase" [ref=f2e27] [cursor=pointer]: +
+    - generic [ref=f2e28]:
+      - generic [ref=f2e29]:
+        - generic [ref=f2e30]: Read Qurʻan
+        - generic [ref=f2e31]: Target in pages
+      - generic [ref=f2e32]:
+        - button "decrease" [ref=f2e33] [cursor=pointer]: −
+        - spinbutton [ref=f2e34]: "5"
+        - button "increase" [ref=f2e35] [cursor=pointer]: +
+    - generic [ref=f2e36]:
+      - generic [ref=f2e37]:
+        - generic [ref=f2e38]: Memorize Qurʻan
+        - generic [ref=f2e39]: Target in verses
+      - generic [ref=f2e40]:
+        - button "decrease" [ref=f2e41] [cursor=pointer]: −
+        - spinbutton [ref=f2e42]: "5"
+        - button "increase" [ref=f2e43] [cursor=pointer]: +
+  - heading "Theme" [level=2] [ref=f2e44]
+  - generic [ref=f2e45]:
+    - button "Midnight Teal" [ref=f2e46] [cursor=pointer]
+    - button "Claude" [ref=f2e52] [cursor=pointer]
+    - button "GitHub Light" [ref=f2e58] [cursor=pointer]
+    - button "GitHub Dark" [ref=f2e64] [cursor=pointer]
+    - button "Rosé Pine" [ref=f2e70] [cursor=pointer]
+    - button "Nord" [ref=f2e76] [cursor=pointer]
+    - button "Catppuccin Latte" [pressed] [ref=f2e82] [cursor=pointer]
+    - button "Everforest Light" [ref=f2e90] [cursor=pointer]
+  - heading "Widgets" [level=2] [ref=f2e96]
+  - switch "Notes Show the daily notes field on the home screen." [ref=f2e98] [cursor=pointer]:
+    - generic [ref=f2e99]:
+      - generic [ref=f2e100]: Notes
+      - generic [ref=f2e101]: Show the daily notes field on the home screen.
+  - heading "Daily reminder" [level=2] [ref=f2e104]
+  - generic [ref=f2e105]:
+    - switch "Remind me to log my day A daily notification on this device. Works in the installed app." [checked] [ref=f2e106] [cursor=pointer]:
+      - generic [ref=f2e107]:
+        - generic [ref=f2e108]: Remind me to log my day
+        - generic [ref=f2e109]: A daily notification on this device. Works in the installed app.
+    - generic [ref=f2e112]:
+      - generic [ref=f2e113]: Time
+      - textbox [ref=f2e115]: 21:00
+  - heading "Backup" [level=2] [ref=f2e116]
+  - generic [ref=f2e117]:
+    - generic [ref=f2e118]:
+      - generic [ref=f2e119]:
+        - generic [ref=f2e120]: Export data
+        - generic [ref=f2e121]: All your data stays on this phone. Save a backup file so it survives losing or replacing the device.
+      - button "Export" [ref=f2e122] [cursor=pointer]
+    - generic [ref=f2e123]:
+      - generic [ref=f2e124]:
+        - generic [ref=f2e125]: Import backup
+        - generic [ref=f2e126]: Restores from a backup file. Replaces everything currently in the app.
+      - generic [ref=f2e127] [cursor=pointer]: Import
+  - button "Reset to defaults" [ref=f2e129] [cursor=pointer]
+  - paragraph [ref=f2e131]: Changes save automatically on this device.

@@ -1,0 +1,59 @@
+- generic [ref=f5e3]:
+  - banner [ref=f5e4]:
+    - button "back" [ref=f5e5] [cursor=pointer]
+    - heading "Expenses" [level=1] [ref=f5e8]
+  - generic [ref=f5e9]:
+    - button "previous month" [ref=f5e10] [cursor=pointer]: ‹
+    - generic [ref=f5e11]: July 2026
+    - button "next month" [disabled] [ref=f5e12] [cursor=pointer]: ›
+    - button "custom date range" [ref=f5e13] [cursor=pointer]
+  - generic [ref=f5e16]:
+    - combobox "filter by category" [ref=f5e17]:
+      - option "All categories" [selected]
+      - option "🏠 Rent / Mortgage"
+      - option "⚡ Electricity"
+      - option "💧 Water"
+      - option "🌐 Internet"
+      - option "📱 Phone"
+      - option "🛒 Grocery"
+      - option "🍽️ Food"
+      - option "🎓 School"
+      - option "🧸 Kids Expenses"
+      - option "🚗 Transport / Fuel"
+      - option "🩺 Medical"
+      - option "🎬 Entertainment"
+      - option "👕 Clothing"
+      - option "🚦 Fines / RTA"
+      - option "💰 Other"
+    - generic [ref=f5e18]: "0"
+  - generic [ref=f5e25]:
+    - generic [ref=f5e26]:
+      - combobox "category" [ref=f5e27]:
+        - option "Category…" [disabled] [selected]
+        - option "🏠 Rent / Mortgage"
+        - option "⚡ Electricity"
+        - option "💧 Water"
+        - option "🌐 Internet"
+        - option "📱 Phone"
+        - option "🛒 Grocery"
+        - option "🍽️ Food"
+        - option "🎓 School"
+        - option "🧸 Kids Expenses"
+        - option "🚗 Transport / Fuel"
+        - option "🩺 Medical"
+        - option "🎬 Entertainment"
+        - option "👕 Clothing"
+        - option "🚦 Fines / RTA"
+        - option "💰 Other"
+      - textbox "date" [ref=f5e28]: 2026-07-14
+    - generic [ref=f5e29]:
+      - textbox "description" [ref=f5e30]:
+        - /placeholder: Description
+      - spinbutton "amount" [active] [ref=f5e31]
+    - textbox "new tag" [ref=f5e33]:
+      - /placeholder: + tag
+    - generic [ref=f5e34]:
+      - generic [ref=f5e35] [cursor=pointer]: Attach bill
+      - button "Cancel" [ref=f5e38] [cursor=pointer]
+      - button "Add" [ref=f5e39] [cursor=pointer]
+  - paragraph [ref=f5e23]: No expenses this month.

@@ -1,0 +1,30 @@
+- generic [ref=f5e3]:
+  - banner [ref=f5e4]:
+    - button "back" [ref=f5e5] [cursor=pointer]
+    - heading "Expenses" [level=1] [ref=f5e8]
+  - generic [ref=f5e9]:
+    - button "previous month" [ref=f5e10] [cursor=pointer]: ‹
+    - generic [ref=f5e11]: July 2026
+    - button "next month" [disabled] [ref=f5e12] [cursor=pointer]: ›
+    - button "custom date range" [ref=f5e13] [cursor=pointer]
+  - generic [ref=f5e16]:
+    - combobox "filter by category" [ref=f5e17]:
+      - option "All categories" [selected]
+      - option "🏠 Rent / Mortgage"
+      - option "⚡ Electricity"
+      - option "💧 Water"
+      - option "🌐 Internet"
+      - option "📱 Phone"
+      - option "🛒 Grocery"
+      - option "🍽️ Food"
+      - option "🎓 School"
+      - option "🧸 Kids Expenses"
+      - option "🚗 Transport / Fuel"
+      - option "🩺 Medical"
+      - option "🎬 Entertainment"
+      - option "👕 Clothing"
+      - option "🚦 Fines / RTA"
+      - option "💰 Other"
+    - generic [ref=f5e18]: "0"
+  - button "Add expense" [ref=f5e20] [cursor=pointer]
+  - paragraph [ref=f5e23]: No expenses this month.

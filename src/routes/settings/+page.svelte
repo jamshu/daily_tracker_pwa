@@ -37,8 +37,10 @@
 	// export for local app
 	let exportBusy = false;
 	let exportError = '';
+	let exportUrl = null; // set after fetch; user taps the link (direct gesture = reliable on iOS)
 
-	async function exportForLocal() {
+	async function prepareExport() {
+		if (exportUrl) { URL.revokeObjectURL(exportUrl); exportUrl = null; }
 		exportBusy = true;
 		exportError = '';
 		try {
@@ -48,17 +50,16 @@
 				throw new Error(d.error || 'Export failed');
 			}
 			const blob = await res.blob();
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = 'daily-tracker-export.json';
-			a.click();
-			URL.revokeObjectURL(url);
+			exportUrl = URL.createObjectURL(blob);
 		} catch (e) {
 			exportError = e.message;
 		} finally {
 			exportBusy = false;
 		}
+	}
+
+	function clearExportUrl() {
+		setTimeout(() => { if (exportUrl) { URL.revokeObjectURL(exportUrl); exportUrl = null; } }, 1000);
 	}
 
 	// account deletion state
@@ -386,11 +387,20 @@
 		<div class="danger-row">
 			<span class="meta">
 				<span class="name">Export all data</span>
-				<span class="unit">Downloads a JSON file you can import into the Daily Tracker offline app. Does not include expense bill images.</span>
+				<span class="unit">Creates a JSON file to import into the Daily Tracker offline app. No expense bill images.</span>
 			</span>
-			<button class="ghost" type="button" disabled={exportBusy} on:click={exportForLocal}>
-				{exportBusy ? 'Exporting…' : 'Export'}
-			</button>
+			{#if exportUrl}
+				<a
+					class="ghost"
+					href={exportUrl}
+					download="daily-tracker-export.json"
+					on:click={clearExportUrl}
+				>Save file</a>
+			{:else}
+				<button class="ghost" type="button" disabled={exportBusy} on:click={prepareExport}>
+					{exportBusy ? 'Preparing…' : 'Export'}
+				</button>
+			{/if}
 		</div>
 		{#if exportError}<p class="err" style="margin:0 14px 12px">{exportError}</p>{/if}
 	</div>

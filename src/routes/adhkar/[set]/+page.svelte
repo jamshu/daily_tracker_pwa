@@ -1,9 +1,11 @@
 <script>
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { page } from '$app/stores';
 	import { ADHKAR } from '$lib/adhkar.js';
+	import { dateKey } from '$lib/store.js';
 	import { congratulate } from '$lib/toast.js';
 	import ImmersiveBg from '$lib/components/ImmersiveBg.svelte';
 	import CelebrationToast from '$lib/components/CelebrationToast.svelte';
@@ -17,8 +19,33 @@
 	let pulse = false; // brief scale-pop on each tap, like the tasbeeh counter
 
 	// tap counter — only for dhikr repeated more than once (e.g. "33× each").
-	// In-memory per screen; first integer in the count string is the target.
+	// Persisted per-day under `adhkar:<set>:<YYYY-MM-DD>` so counts survive an
+	// app close/reopen and reset naturally on a new day (same idea as the tasbeeh
+	// counter). First integer in the count string is the target.
 	let counts = {}; // { [index]: tapped }
+	let loadedSet = null;
+	const storeKey = (s) => `adhkar:${s}:${dateKey()}`;
+	function readCounts(s) {
+		if (!browser) return {};
+		try {
+			return JSON.parse(localStorage.getItem(storeKey(s)) || '{}') || {};
+		} catch {
+			return {};
+		}
+	}
+	function writeCounts(s) {
+		if (!browser) return;
+		try {
+			localStorage.setItem(storeKey(s), JSON.stringify(counts));
+		} catch {
+			// storage full/disabled — counts stay in memory for this session
+		}
+	}
+	// Load today's saved counts when the collection first shows or the set changes.
+	$: if (browser && set && set !== loadedSet) {
+		loadedSet = set;
+		counts = readCounts(set);
+	}
 	$: target = parseInt(item?.count, 10) || 1;
 	$: n = counts[active] || 0;
 	$: displayN = n === 0 ? 0 : n % target || target; // cycles 1..target per set
@@ -26,6 +53,7 @@
 	function tap() {
 		const next = n + 1;
 		counts = { ...counts, [active]: next };
+		writeCounts(set);
 		if (next % target === 0) congratulate();
 		pulse = false;
 		// retrigger the pop animation

@@ -6,6 +6,8 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import { settings, applyTheme, loadSettings } from '$lib/settings.js';
+	import { openWelcome } from '$lib/welcome.js';
+	import WelcomeModal from '$lib/components/WelcomeModal.svelte';
 	import { syncReminder } from '$lib/notify.js';
 	import * as localdb from '$lib/localdb.js';
 	import { get } from 'svelte/store';
@@ -50,6 +52,8 @@
 		await localdb.init();
 		await loadSettings();
 		ready = true;
+		// First run — no name stored yet: ask for it.
+		if (!get(settings).name) openWelcome();
 		// Re-assert the daily reminder on every app open (survives reboots/updates).
 		syncReminder(get(settings).reminderTime);
 	});
@@ -65,6 +69,7 @@
 
 {#if ready}
 	<slot />
+	<WelcomeModal />
 {:else}
 	<div class="boot"><span class="spinner" /></div>
 {/if}

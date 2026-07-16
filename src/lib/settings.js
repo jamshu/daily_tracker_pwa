@@ -16,6 +16,11 @@ export function coerceSex(v) {
 	return v === 'female' ? 'female' : 'male';
 }
 
+// User's display name — trimmed, capped, empty string when unset/invalid.
+export function coerceName(v) {
+	return typeof v === 'string' ? v.trim().slice(0, 40) : '';
+}
+
 // Reminder time is "HH:MM" or null (off).
 export function coerceReminder(v) {
 	return typeof v === 'string' && /^\d{2}:\d{2}$/.test(v) ? v : null;
@@ -39,6 +44,7 @@ export const settings = writable({
 	activities: defaultTargets(),
 	theme: initialTheme(),
 	sex: 'male',
+	name: '',
 	showNotes: false,
 	reminderTime: '21:00'
 });
@@ -70,6 +76,7 @@ function fromRaw(d) {
 		activities: coerce(d?.activities),
 		theme,
 		sex: coerceSex(d?.sex),
+		name: coerceName(d?.name),
 		showNotes: d?.showNotes === true,
 		// absent key (pre-existing installs / first run) keeps the 21:00 default
 		reminderTime: 'reminderTime' in (d || {}) ? coerceReminder(d.reminderTime) : '21:00'

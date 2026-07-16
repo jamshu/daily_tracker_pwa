@@ -268,7 +268,7 @@
 				<h1>Daily Tracker</h1>
 				<span class="greet"
 					><span class="emo" aria-hidden="true">{greeting.emoji}</span>
-					{greeting.text}
+					{greeting.text}{$settings.name ? `, ${$settings.name}` : ''}
 					<span class="dateline">· {todayLabel}</span></span
 				>
 			</div>

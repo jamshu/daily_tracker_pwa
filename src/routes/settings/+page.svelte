@@ -11,6 +11,7 @@
 	// form state: activity id -> target value
 	let form = Object.fromEntries(ACTIVITIES.map((a) => [a.id, a.target]));
 	let theme = DEFAULT_THEME;
+	let name = '';
 	let sex = 'male';
 	let showNotes = false;
 	let reminderOn = true;
@@ -37,6 +38,7 @@
 		await loadSettings();
 		form = { ...form, ...$settings.activities };
 		theme = $settings.theme;
+		name = $settings.name || '';
 		sex = $settings.sex === 'female' ? 'female' : 'male';
 		showNotes = $settings.showNotes === true;
 		reminderOn = $settings.reminderTime != null;
@@ -64,7 +66,7 @@
 		error = '';
 		try {
 			const rt = reminderOn ? reminderTime : null;
-			await saveSettings({ activities: form, theme, sex, showNotes, reminderTime: rt });
+			await saveSettings({ activities: form, theme, sex, name, showNotes, reminderTime: rt });
 			await syncReminder(rt);
 			refreshNotifState();
 			status = 'saved';
@@ -144,6 +146,22 @@
 
 	<h2 class="section-title">Profile</h2>
 	<div class="card">
+		<div class="name-row">
+			<span class="meta">
+				<span class="name">Your name</span>
+				<span class="unit">Used to greet you on the home screen.</span>
+			</span>
+			<input
+				class="name-input"
+				type="text"
+				placeholder="Your name"
+				bind:value={name}
+				on:input={scheduleAutoSave}
+				maxlength="40"
+				autocapitalize="words"
+				aria-label="Your name"
+			/>
+		</div>
 		<div class="sex-row">
 			<span class="meta">
 				<span class="name">Sex</span>
@@ -349,6 +367,33 @@
 		font-size: 1.6rem;
 		font-variation-settings: 'SOFT' 50;
 		letter-spacing: -0.02em;
+	}
+	.name-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 14px;
+		padding: 14px;
+		border-bottom: 1px solid var(--border);
+	}
+	.name-row .meta {
+		flex: 1;
+	}
+	.name-input {
+		flex: 0 1 45%;
+		min-width: 0;
+		padding: 9px 12px;
+		border-radius: 8px;
+		border: 1px solid var(--border);
+		background: var(--bg-soft);
+		color: var(--text);
+		font-family: inherit;
+		/* 16px min — smaller makes iOS Safari auto-zoom on focus and stay zoomed. */
+		font-size: 16px;
+	}
+	.name-input:focus {
+		outline: none;
+		border-color: var(--teal);
 	}
 	.sex-row {
 		display: flex;

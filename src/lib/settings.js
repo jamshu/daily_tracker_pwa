@@ -1,11 +1,10 @@
-// Per-user settings (currently just activity targets). Defaults come from
-// config.js; the user's saved overrides are loaded from /api/settings (which
-// reads x_studio_settings off their res.users record).
+// Per-user settings. Defaults come from config.js; saved overrides live in
+// on-device storage (localdb).
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
-import { base } from '$app/paths';
 import { ACTIVITIES } from './config.js';
 import { coerceTheme, DEFAULT_THEME } from './themes.js';
+import * as localdb from './localdb.js';
 
 function defaultTargets() {
 	const t = {};
@@ -15,6 +14,11 @@ function defaultTargets() {
 
 export function coerceSex(v) {
 	return v === 'female' ? 'female' : 'male';
+}
+
+// Reminder time is "HH:MM" or null (off).
+export function coerceReminder(v) {
+	return typeof v === 'string' && /^\d{2}:\d{2}$/.test(v) ? v : null;
 }
 
 // Start from the cached theme (same value the app.html pre-paint script used)
@@ -30,17 +34,13 @@ function initialTheme() {
 	return DEFAULT_THEME;
 }
 
-// { activities, theme, shareGlobal, sex, is_admin, showFifa, showNews, showNotes } — effective settings.
-// (Custom activities moved to Odoo-backed x_activities; see src/lib/activities.js.)
+// { activities, theme, sex, showNotes, reminderTime } — effective settings.
 export const settings = writable({
 	activities: defaultTargets(),
 	theme: initialTheme(),
-	shareGlobal: false,
 	sex: 'male',
-	is_admin: false,
-	showFifa: true,
-	showNews: true,
-	showNotes: false
+	showNotes: false,
+	reminderTime: '21:00'
 });
 
 // Apply a theme to <html> immediately and cache it for pre-paint (app.html).
@@ -64,71 +64,32 @@ function coerce(obj) {
 	return out;
 }
 
-// Reset to defaults when the user logs out, so the next user never briefly sees
-// the previous user's targets before loadSettings() returns. Theme stays on the
-// cached value to avoid a flash; loadSettings() applies the new user's theme.
-export function resetSettings() {
-	settings.set({
-		activities: defaultTargets(),
-		theme: initialTheme(),
-		shareGlobal: false,
-		sex: 'male',
-		is_admin: false,
-		showFifa: true,
-		showNews: true,
-		showNotes: false
-	});
+function fromRaw(d) {
+	const theme = coerceTheme(d?.theme);
+	return {
+		activities: coerce(d?.activities),
+		theme,
+		sex: coerceSex(d?.sex),
+		showNotes: d?.showNotes === true,
+		// absent key (pre-existing installs / first run) keeps the 21:00 default
+		reminderTime: 'reminderTime' in (d || {}) ? coerceReminder(d.reminderTime) : '21:00'
+	};
 }
 
 export async function loadSettings() {
 	if (!browser) return;
-	try {
-		const res = await fetch(`${base}/api/settings`);
-		if (!res.ok) return;
-		const d = await res.json();
-		const theme = coerceTheme(d?.settings?.theme);
-		settings.set({
-			activities: coerce(d?.settings?.activities),
-			theme,
-			shareGlobal: d?.settings?.shareGlobal === true,
-			sex: coerceSex(d?.settings?.sex),
-			is_admin: d?.settings?.is_admin === true,
-			showFifa: d?.settings?.showFifa !== false,
-			showNews: d?.settings?.showNews !== false,
-			showNotes: d?.settings?.showNotes === true
-		});
-		applyTheme(theme);
-	} catch {
-		/* keep defaults */
-	}
+	const d = localdb.getSettings();
+	if (!d) return; // first run — keep defaults
+	const s = fromRaw(d);
+	settings.set(s);
+	applyTheme(s.theme);
 }
 
-export async function saveSettings({ activities, theme, shareGlobal, sex, showFifa, showNews, showNotes }) {
-	const res = await fetch(`${base}/api/settings`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({
-			activities,
-			theme,
-			shareGlobal: shareGlobal === true,
-			sex: coerceSex(sex),
-			showFifa: showFifa !== false,
-			showNews: showNews !== false,
-			showNotes: showNotes === true
-		})
-	});
-	const d = await res.json().catch(() => ({}));
-	if (!res.ok || !d.ok) throw new Error(d.error || 'Could not save settings');
-	const savedTheme = coerceTheme(d?.settings?.theme ?? theme);
-	settings.set({
-		activities: coerce(d?.settings?.activities ?? activities),
-		theme: savedTheme,
-		shareGlobal: d?.settings?.shareGlobal === true,
-		sex: coerceSex(d?.settings?.sex ?? sex),
-		is_admin: d?.settings?.is_admin === true,
-		showFifa: d?.settings?.showFifa !== false,
-		showNews: d?.settings?.showNews !== false,
-		showNotes: d?.settings?.showNotes === true
-	});
-	applyTheme(savedTheme);
+export async function saveSettings(patch) {
+	let cur;
+	settings.update((v) => (cur = v));
+	const s = fromRaw({ ...cur, ...patch });
+	localdb.setSettings(s);
+	settings.set(s);
+	applyTheme(s.theme);
 }

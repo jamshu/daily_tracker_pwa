@@ -1,17 +1,12 @@
-import adapter from '@sveltejs/adapter-vercel';
+import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	preprocess: vitePreprocess(),
 	kit: {
-		// Vercel adapter: prerendered page shell is served statically, while the
-		// /api/odoo server route is deployed as a serverless function.
-		adapter: adapter(),
-		paths: {
-			// Only needed for sub-path hosting (e.g. GitHub Pages /repo-name/). Empty for root.
-			base: process.env.PUBLIC_BASE_PATH ? process.env.PUBLIC_BASE_PATH : ''
-		}
+		// Fully static build bundled into the Capacitor app — no server.
+		adapter: adapter()
 	}
 };
 

@@ -1,5 +1,5 @@
 <script>
-	import { base } from '$app/paths';
+	import * as localdb from '$lib/localdb.js';
 
 	let todos = [];
 	let loading = true;
@@ -34,10 +34,7 @@
 
 	async function load() {
 		try {
-			const res = await fetch(`${base}/api/todos`);
-			if (!res.ok) return;
-			const d = await res.json();
-			todos = d.todos ?? [];
+			todos = localdb.listTodos();
 		} catch { /* ignore */ } finally {
 			loading = false;
 		}
@@ -49,13 +46,7 @@
 		busy = true;
 		error = '';
 		try {
-			const res = await fetch(`${base}/api/todos`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ action: 'add', title, date: pickDate || '' })
-			});
-			const d = await res.json().catch(() => ({}));
-			if (!res.ok || !d.ok) throw new Error(d.error || 'Failed');
+			localdb.addTodo(title, pickDate || '');
 			adding = false;
 			newTitle = '';
 			pickDate = '';
@@ -72,30 +63,20 @@
 		const next = !t.x_studio_done;
 		todos = todos.map((x) => (x.id === t.id ? { ...x, x_studio_done: next } : x));
 		try {
-			await fetch(`${base}/api/todos`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ action: 'toggle', id: t.id })
-			});
+			localdb.toggleTodo(t.id);
 		} catch {
-			await load(); // revert from server on failure
+			await load(); // revert on failure
 		}
 	}
 
 	async function deleteTodo(id) {
 		error = '';
 		try {
-			const res = await fetch(`${base}/api/todos`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ action: 'delete', id })
-			});
-			const d = await res.json().catch(() => ({}));
-			if (!res.ok || !d.ok) throw new Error(d.error || 'Failed to delete');
+			localdb.deleteTodo(id);
 			todos = todos.filter((t) => t.id !== id);
 		} catch (e) {
 			error = e.message;
-			await load(); // revert to the authoritative server list
+			await load();
 		}
 	}
 

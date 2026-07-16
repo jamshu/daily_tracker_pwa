@@ -1,29 +1,27 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import { VitePWA } from 'vite-plugin-pwa';
+import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 
-
-// Vite envPrefix is VITE_ by default; allow PUBLIC_ vars on import.meta.env too,
-// and read them idiomatically via $env/dynamic/public in app code.
 export default defineConfig({
 	plugins: [
 		sveltekit(),
-		VitePWA({
-			strategies: 'injectManifest',
-			srcDir: 'src',
-			filename: 'sw.js',
+		// Offline PWA: precache the whole static build (incl. prerendered pages —
+		// the SvelteKit wrapper runs after the adapter, plain VitePWA misses them)
+		// so the installed app works with no internet. No push — data is on-device.
+		SvelteKitPWA({
+			strategies: 'generateSW',
 			registerType: 'autoUpdate',
-			// SvelteKit has no static index.html for vite-plugin-pwa to transform, so its
-			// auto-injected registration never runs. We register manually in src/lib/push.js.
+			// SvelteKit has no static index.html for the plugin to inject into —
+			// we register manually in +layout.svelte (web only, skipped in Capacitor).
 			injectRegister: false,
-			injectManifest: {
-				globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}']
+			workbox: {
+				globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,woff2}']
 			},
 			manifest: {
 				id: '/',
-				name: 'Daily Tracker',
+				name: 'Daily Tracker Local',
 				short_name: 'Tracker',
-				description: 'Daily ibadah & productivity tracker',
+				description: 'Daily ibadah & productivity tracker — all data on your device',
 				start_url: '/',
 				scope: '/',
 				display: 'standalone',

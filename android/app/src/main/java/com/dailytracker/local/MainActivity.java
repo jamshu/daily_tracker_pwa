@@ -1,4 +1,4 @@
-package com.jamshid.dailytracker;
+package com.dailytracker.local;
 
 import com.getcapacitor.BridgeActivity;
 

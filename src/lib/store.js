@@ -1,28 +1,14 @@
-// Odoo-backed data layer. Each day is one `x_dailytracker` record:
-//   x_studio_date    -> the day (YYYY-MM-DD), our key
-//   x_studio_json    -> JSON of { prayers, activities, deeds }
-//   x_studio_notes   -> HTML notes
-//   x_name           -> display name
+// Local data layer. Each day is one entry in localdb:
+//   dateKey (YYYY-MM-DD) -> { data: JSON of { prayers, activities, deeds }, notes: HTML }
 //
 // The UI edits an in-memory copy immediately (optimistic) and we debounce a
-// create/update back to Odoo per date. Reads/writes go through the /api/odoo
-// proxy (src/lib/odoo.js) — credentials never reach the browser.
+// write to on-device storage per date. Nothing leaves the phone.
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
 import { emptyDay, dayProgress, parseDay } from './config.js';
-import { odooClient } from './odoo.js';
-import { user } from './auth.js';
-import { settings, resetSettings } from './settings.js';
-import { resetGroups } from './groups.js';
-import { resetLeaderboard } from './leaderboard.js';
+import * as localdb from './localdb.js';
+import { settings } from './settings.js';
 
-const FIELDS = [
-	'id',
-	'x_studio_date',
-	'x_studio_json',
-	'x_studio_notes',
-	'create_uid'
-];
 const RANGE_DAYS = 35; // how many recent days to load for the week strip + history
 
 /* ----------------------------- date helpers ----------------------------- */
@@ -36,8 +22,8 @@ export function shiftKey(key, n) {
 	return dateKey(new Date(y, m - 1, d + n));
 }
 
-// Notes are rich text (HTML) from the editor and are stored verbatim in the
-// Odoo HTML field — no plain-text conversion.
+// Notes are rich text (HTML) from the editor and are stored verbatim —
+// no plain-text conversion.
 
 /* -------------------------------- records -------------------------------- */
 // record shape: { id: number|null, data: {prayers,activities,deeds}, notes }
@@ -79,37 +65,18 @@ export async function load() {
 	try {
 		const today = dateKey();
 		const start = shiftKey(today, -(RANGE_DAYS - 1));
-		const rows = await odooClient.searchRecords(
-			[
-				['x_studio_date', '>=', start],
-				['x_studio_date', '<=', today]
-			],
-			FIELDS
-		);
+		const days = localdb.getDays();
 		const map = {};
-		const myUid = get(user)?.uid;
-		for (const row of rows) {
-			const k = row.x_studio_date;
-			if (!k) continue;
-			// Secondary client-side guard: keep only records I created. The Odoo
-			// record rule (['create_uid','=',user.id]) is the real enforcement —
-			// this just avoids ever showing someone else's row if a rule is missing.
-			if (myUid != null && row.create_uid) {
-				const owner = Array.isArray(row.create_uid) ? row.create_uid[0] : row.create_uid;
-				if (owner !== myUid) continue;
-			}
-			map[k] = {
-				id: row.id,
-				data: parseData(row.x_studio_json),
-				notes: row.x_studio_notes || ''
-			};
+		for (const k in days) {
+			if (k < start || k > today) continue;
+			map[k] = { id: null, data: parseData(days[k].data), notes: days[k].notes || '' };
 		}
 		// merge so any unsaved local edits made before load finished survive
 		records.update((cur) => ({ ...map, ...cur }));
 		syncState.set('idle');
 	} catch (e) {
 		syncState.set('error');
-		syncError.set(e?.message || 'Could not load from Odoo');
+		syncError.set(e?.message || 'Could not load data');
 	}
 }
 
@@ -119,18 +86,11 @@ export async function load() {
  * Returns [{ date, data }] parsed via parseDay. Best-effort; throws on failure.
  */
 export async function loadReportRange(start, end) {
-	const domain = [['x_studio_date', '<=', end]];
-	if (start) domain.unshift(['x_studio_date', '>=', start]);
-	const rows = await odooClient.searchRecords(domain, FIELDS);
-	const myUid = get(user)?.uid;
+	const days = localdb.getDays();
 	const out = [];
-	for (const row of rows) {
-		if (!row.x_studio_date) continue;
-		if (myUid != null && row.create_uid) {
-			const owner = Array.isArray(row.create_uid) ? row.create_uid[0] : row.create_uid;
-			if (owner !== myUid) continue;
-		}
-		out.push({ date: row.x_studio_date, data: parseData(row.x_studio_json) });
+	for (const k in days) {
+		if (k > end || (start && k < start)) continue;
+		out.push({ date: k, data: parseData(days[k].data) });
 	}
 	return out;
 }
@@ -152,26 +112,15 @@ function scheduleSave(date) {
 async function doSave(date) {
 	const rec = get(records)[date];
 	if (!rec) return;
-	const fields = {
-		x_name: `Daily Tracker ${date}`,
-		x_studio_date: date,
-		x_studio_json: JSON.stringify(rec.data),
-		x_studio_notes: rec.notes || ''
-	};
 	try {
-		if (rec.id) {
-			await odooClient.updateRecord(rec.id, fields);
-		} else {
-			const id = await odooClient.createRecord(fields);
-			records.update((m) => ({ ...m, [date]: { ...m[date], id } }));
-		}
+		localdb.putDay(date, { data: JSON.stringify(rec.data), notes: rec.notes || '' });
 		syncState.set('saved');
 		setTimeout(() => {
 			if (get(syncState) === 'saved') syncState.set('idle');
 		}, 1500);
 	} catch (e) {
 		syncState.set('error');
-		syncError.set(e?.message || 'Could not save to Odoo');
+		syncError.set(e?.message || 'Could not save');
 	}
 }
 
@@ -270,10 +219,7 @@ export function setNotes(date, text) {
 
 /* -------------------------------- reset ---------------------------------- */
 
-// Wipe all in-memory user data. Without this, logging out then in as a different
-// user on the same browser would show the previous user's cached records until a
-// full page refresh (the stores are module singletons that survive SPA nav, and
-// load() merges new data UNDER any stale records).
+// Wipe all in-memory data (used after a backup import, before reload).
 export function resetData() {
 	for (const k in timers) clearTimeout(timers[k]);
 	for (const k in timers) delete timers[k];
@@ -282,20 +228,4 @@ export function resetData() {
 	selectedDate.set(dateKey());
 	syncState.set('idle');
 	syncError.set('');
-}
-
-// Clear everything the moment the session goes to "logged out" (covers both the
-// logout button and an expired-session redirect). Only on a real transition, so
-// the initial undefined -> null on first load doesn't fire.
-if (browser) {
-	let prev;
-	user.subscribe(($u) => {
-		if (prev && $u === null) {
-			resetData();
-			resetSettings();
-			resetGroups();
-			resetLeaderboard();
-		}
-		prev = $u;
-	});
 }

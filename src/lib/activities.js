@@ -1,11 +1,10 @@
-// Custom activities: definitions live in Odoo (x_activities / x_goals / x_units),
-// per-day logged values live in the day record (store.js, keyed by `act_<id>`).
-// This module holds the client-side stores + the modal flow state and talks to
-// the /api/activities and /api/units endpoints.
+// Custom activities: definitions live in localdb (on-device), per-day logged
+// values live in the day record (store.js, keyed by `act_<id>`). This module
+// holds the client-side stores + the modal flow state.
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
-import { base } from '$app/paths';
 import { congratulate } from './toast.js';
+import * as localdb from './localdb.js';
 
 /** User's own activities: [{ id, name, emoji, category, goal: { value, unit } | null }] */
 export const userActivities = writable([]);
@@ -34,78 +33,45 @@ export function closeActivityModal() {
 	editingActivity.set(null);
 }
 
-async function api(path, opts) {
-	const res = await fetch(`${base}${path}`, opts);
-	const d = await res.json().catch(() => ({}));
-	if (!res.ok || !d.ok) throw new Error(d.error || `HTTP ${res.status}`);
-	return d;
-}
-
-const jsonPost = (body) => ({
-	method: 'POST',
-	headers: { 'Content-Type': 'application/json' },
-	body: JSON.stringify(body)
-});
-
 export async function loadActivities() {
 	if (!browser) return;
-	try {
-		const d = await api('/api/activities', {});
-		userActivities.set(d.activities ?? []);
-		presets.set(d.presets ?? []);
-	} catch (e) {
-		console.error('[activities] load failed:', e?.message);
-	}
+	const d = localdb.listActivities();
+	userActivities.set(d.activities ?? []);
+	presets.set(d.presets ?? []);
 }
 
 export async function loadUnits() {
 	if (!browser) return;
-	try {
-		const d = await api('/api/units', {});
-		units.set(d.units ?? []);
-	} catch (e) {
-		console.error('[units] load failed:', e?.message);
-	}
+	units.set(localdb.listUnits() ?? []);
 }
 
 export async function addFromPreset(presetId) {
-	await api('/api/activities', jsonPost({ action: 'add-from-preset', presetId }));
+	localdb.addFromPreset(presetId);
 	await loadActivities();
 	congratulate('Activity added');
 }
 
 /** draft: { name, emoji, goal: { value, unitId } | null } */
 export async function addCustom(d) {
-	await api(
-		'/api/activities',
-		jsonPost({
-			action: 'add-custom',
-			name: d.name,
-			emoji: d.emoji || '',
-			goal: d.goal ? { value: d.goal.value, unitId: d.goal.unitId ?? null } : null
-		})
-	);
+	localdb.addCustomActivity({
+		name: d.name,
+		emoji: d.emoji || '',
+		goal: d.goal ? { value: d.goal.value, unitId: d.goal.unitId ?? null } : null
+	});
 	await loadActivities();
 	congratulate('Activity added');
 }
 
 /** goal: { value, unitId } | null (null removes the goal → boolean activity). */
 export async function setActivityGoal(id, goal) {
-	await api(
-		'/api/activities',
-		jsonPost({
-			action: 'set-goal',
-			id,
-			goal: goal ? { value: goal.value, unitId: goal.unitId } : null
-		})
-	);
+	localdb.setActivityGoal(id, goal ? { value: goal.value, unitId: goal.unitId } : null);
 	await loadActivities();
 	congratulate(goal ? 'Goal updated' : 'Goal removed');
 }
 
 export async function deleteActivity(id) {
 	try {
-		await api('/api/activities', jsonPost({ action: 'delete', id }));
+		localdb.deleteActivity(id);
 		await loadActivities();
 	} catch (e) {
 		console.error('[activities] delete failed:', e?.message);
@@ -115,7 +81,7 @@ export async function deleteActivity(id) {
 
 /** Create a custom unit, refresh the list, return the new { id, name }. */
 export async function createUnit(name) {
-	const d = await api('/api/units', jsonPost({ name }));
+	const unit = localdb.createUnit(name);
 	await loadUnits();
-	return d.unit;
+	return unit;
 }

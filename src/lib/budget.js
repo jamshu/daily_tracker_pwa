@@ -1,9 +1,9 @@
-// Custom budget store + API calls. Pure calculations (category defaults,
-// month-key arithmetic, aggregation) live in budgetCalc.js — re-exported here
-// so existing imports of '$lib/budget.js' keep working unchanged.
+// Custom budget store, backed by localdb. Pure calculations (category
+// defaults, month-key arithmetic, aggregation) live in budgetCalc.js —
+// re-exported here so existing imports of '$lib/budget.js' keep working.
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
-import { base } from '$app/paths';
+import * as localdb from './localdb.js';
 
 export {
 	DEFAULT_CATEGORIES,
@@ -27,29 +27,15 @@ let loaded = false;
 export async function loadBudget(force = false) {
 	if (!browser || (loaded && !force)) return;
 	loaded = true;
-	try {
-		const res = await fetch(`${base}/api/budget`);
-		const body = await res.json();
-		if (!body.ok) throw new Error(body.error || 'Could not load budget');
-		budgetData.set(body.data || {});
-	} catch {
-		loaded = false; // allow retry
-	}
+	budgetData.set(localdb.getBudget() || {});
 }
 
 export async function saveBudget(monthKeyVal, rows) {
-	// Merge updated month into full dataset before posting
+	// Merge updated month into full dataset before persisting
 	let current;
 	budgetData.update((d) => {
 		current = { ...d, [monthKeyVal]: rows };
 		return current;
 	});
-	const res = await fetch(`${base}/api/budget`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ data: current })
-	});
-	const body = await res.json().catch(() => ({}));
-	if (!res.ok || !body.ok) throw new Error(body.error || 'Could not save');
-	budgetData.set(body.data || current);
+	localdb.setBudget(current);
 }

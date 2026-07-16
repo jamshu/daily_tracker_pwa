@@ -1,20 +1,8 @@
-// Expense API helpers. Expenses are page-local state (no shared store), but
-// every mutation patches budgetData with the server's recomputed actual so
+// Expense helpers, backed by localdb. Expenses are page-local state (no shared
+// store), but every mutation patches budgetData with the recomputed actual so
 // the budget page stays consistent without a refetch.
-import { base } from '$app/paths';
 import { budgetData } from './budget.js';
-
-async function post(payload) {
-	const res = await fetch(`${base}/api/expenses`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(payload)
-	});
-	const body = await res.json().catch(() => ({}));
-	if (!res.ok || !body.ok) throw new Error(body.error || 'Could not save expense');
-	patchActual(body);
-	return body;
-}
+import * as localdb from './localdb.js';
 
 function patchActual({ month, category, actual }) {
 	if (!month || !category) return;
@@ -25,34 +13,33 @@ function patchActual({ month, category, actual }) {
 }
 
 export async function listExpenses({ month, from, to } = {}) {
-	const qs = from && to ? `from=${from}&to=${to}` : `month=${month}`;
-	const res = await fetch(`${base}/api/expenses?${qs}`);
-	const body = await res.json().catch(() => ({}));
-	if (!res.ok || !body.ok) throw new Error(body.error || 'Could not load expenses');
-	return { expenses: body.expenses, tags: body.tags ?? [] };
+	return localdb.listExpenses({ month, from, to });
 }
 
-export function addTag(name) {
-	return post({ action: 'addTag', name });
+export async function addTag(name) {
+	return { tag: localdb.addTag(name) };
 }
 
 export async function fetchBillImage(id) {
-	const res = await fetch(`${base}/api/expenses?image=${id}`);
-	const body = await res.json().catch(() => ({}));
-	if (!res.ok || !body.ok) throw new Error(body.error || 'Could not load image');
-	return body.image;
+	return localdb.getBill(id);
 }
 
-export function addExpense(payload) {
-	return post({ action: 'add', ...payload });
+export async function addExpense(payload) {
+	const body = await localdb.addExpense(payload);
+	patchActual(body);
+	return body;
 }
 
-export function updateExpense(id, payload) {
-	return post({ action: 'update', id, ...payload });
+export async function updateExpense(id, payload) {
+	const body = await localdb.updateExpense(id, payload);
+	patchActual(body);
+	return body;
 }
 
-export function deleteExpense(id) {
-	return post({ action: 'delete', id });
+export async function deleteExpense(id) {
+	const body = await localdb.deleteExpense(id);
+	patchActual(body);
+	return body;
 }
 
 /**

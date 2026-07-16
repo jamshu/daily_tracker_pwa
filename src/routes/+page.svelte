@@ -43,13 +43,7 @@
 	import LibraryLink from '$lib/components/LibraryLink.svelte';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	import { user, logout } from '$lib/auth.js';
-	import { settings, loadSettings } from '$lib/settings.js';
-	import { pendingInviteCount, loadGroups } from '$lib/groups.js';
-	import FifaCard from '$lib/components/FifaCard.svelte';
-	import { loadFifa } from '$lib/fifa.js';
-	import NewsCard from '$lib/components/NewsCard.svelte';
-	import { loadNews } from '$lib/news.js';
+	import { settings } from '$lib/settings.js';
 	import TodoWidget from '$lib/components/TodoWidget.svelte';
 
 	let todayK = dateKey();
@@ -59,8 +53,6 @@
 
 	onMount(() => {
 		load();
-		loadSettings();
-		loadGroups(); // for the leaderboard invite badge
 		loadActivities();
 		loadUnits();
 		// The PWA can stay open across midnight; re-check the clock so "today"
@@ -85,18 +77,6 @@
 		const m = {};
 		for (const a of list) (m[a.category || 'Other'] ??= []).push(a);
 		return Object.entries(m);
-	}
-
-	// Only fetch widget data when the user has the widget enabled. Settings load
-	// async, so trigger reactively once they resolve; loadFifa/loadNews each guard
-	// against refetching internally.
-	// ponytail: FIFA + News widgets temporarily disabled (App Store). Remove `false &&` to restore.
-	$: if (false && $settings.showFifa) loadFifa();
-	$: if (false && $settings.showNews) loadNews();
-
-	async function doLogout() {
-		await logout();
-		goto(`${base}/login`);
 	}
 
 	const SYNC_LABEL = {
@@ -288,7 +268,7 @@
 				<h1>Daily Tracker</h1>
 				<span class="greet"
 					><span class="emo" aria-hidden="true">{greeting.emoji}</span>
-					{greeting.text}{#if $user?.name}, {$user.name}{/if}
+					{greeting.text}
 					<span class="dateline">· {todayLabel}</span></span
 				>
 			</div>
@@ -303,14 +283,7 @@
 							<circle cx="12" cy="12" r="11" opacity="0.5" />
 						</svg>
 					</button>
-					<button class="gear trophy" on:click={() => goto(`${base}/leaderboard`)} title="Leaderboard" aria-label="leaderboard">
-					<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z" />
-						<path d="M5 4H3v2a3 3 0 0 0 3 3M19 4h2v2a3 3 0 0 1-3 3" />
-					</svg>
-					{#if $pendingInviteCount}<span class="badge">{$pendingInviteCount}</span>{/if}
-				</button>
-				<button class="gear" on:click={() => goto(`${base}/report`)} title="Report" aria-label="report">
+					<button class="gear" on:click={() => goto(`${base}/report`)} title="Report" aria-label="report">
 					<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M3 3v18h18" />
 						<rect x="7" y="12" width="3" height="5" />
@@ -329,13 +302,6 @@
 					<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<circle cx="12" cy="12" r="3" />
 						<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-					</svg>
-				</button>
-				<button class="logout" on:click={doLogout} title="Sign out" aria-label="sign out">
-					<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-						<polyline points="16 17 21 12 16 7" />
-						<line x1="21" y1="12" x2="9" y2="12" />
 					</svg>
 				</button>
 			</div>
@@ -498,24 +464,9 @@
 		<TodoWidget />
 	</div>
 
-	<!-- ponytail: FIFA + News widgets temporarily disabled (App Store). Remove `false &&` to restore. -->
-	{#if false && $settings.showFifa}
-		<h2 class="section-title fade-in" style="--fade-delay:0.58s">FIFA World Cup 2026</h2>
-		<div class="fade-in" style="--fade-delay:0.60s">
-			<FifaCard />
-		</div>
-	{/if}
-
-	{#if false && $settings.showNews}
-		<h2 class="section-title fade-in" style="--fade-delay:0.62s">World News</h2>
-		<div class="fade-in" style="--fade-delay:0.64s">
-			<NewsCard />
-		</div>
-	{/if}
-
 	<div class="fade-in" style="--fade-delay:0.66s"><QuoteCard /></div>
 
-	<p class="foot">Synced to Backend · {$selectedDate}</p>
+	<p class="foot">Stored on this device · {$selectedDate}</p>
 </div>
 
 <CelebrationToast />
@@ -578,28 +529,6 @@
 		align-items: center;
 		gap: 16px;
 	}
-	.logout {
-		width: 44px;
-		height: 44px;
-		border-radius: 11px;
-		display: grid;
-		place-items: center;
-		color: var(--text-dim);
-		background: var(--surface);
-		border: 1px solid var(--border);
-		transition: all 0.15s ease;
-	}
-	@media (hover: hover) {
-		.logout:hover {
-			color: var(--red);
-			border-color: var(--red);
-		}
-	}
-	.logout:active {
-		color: var(--red);
-		border-color: var(--red);
-		transform: scale(0.96);
-	}
 	.gear {
 		width: 44px;
 		height: 44px;
@@ -621,25 +550,6 @@
 		color: var(--text);
 		border-color: var(--teal);
 		transform: scale(0.96);
-	}
-	.trophy {
-		position: relative;
-	}
-	.trophy .badge {
-		position: absolute;
-		top: -6px;
-		right: -6px;
-		min-width: 16px;
-		height: 16px;
-		padding: 0 4px;
-		border-radius: 999px;
-		background: var(--red);
-		color: #fff;
-		font-size: 0.66rem;
-		font-weight: 700;
-		display: grid;
-		place-items: center;
-		line-height: 1;
 	}
 	.sync {
 		font-size: 0.72rem;

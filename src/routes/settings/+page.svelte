@@ -5,83 +5,35 @@
 	import { ACTIVITIES } from '$lib/config.js';
 	import { settings, loadSettings, saveSettings, applyTheme } from '$lib/settings.js';
 	import { THEMES, DEFAULT_THEME } from '$lib/themes.js';
-	import { getPermission } from '$lib/push.js';
-	import { deleteAccount } from '$lib/auth.js';
+	import { syncReminder } from '$lib/notify.js';
+	import * as localdb from '$lib/localdb.js';
 
 	// form state: activity id -> target value
 	let form = Object.fromEntries(ACTIVITIES.map((a) => [a.id, a.target]));
 	let theme = DEFAULT_THEME;
-	let shareGlobal = false;
 	let sex = 'male';
-	let showFifa = true;
-	let showNews = true;
 	let showNotes = false;
+	let reminderOn = true;
+	let reminderTime = '21:00';
 	let busy = false;
 	let status = ''; // '' | 'saving' | 'saved' | 'error'
 	let error = '';
 	let mounted = false;
 	let saveTimer = null;
 
-	// push notification state (only used to show "blocked" warning)
-	let pushPermission = 'unsupported';
-
-	// admin state
-	let isAdmin = false;
-	let announceTitle = '';
-	let announceBody = '';
-	let announceBusy = false;
-	let announceStatus = '';
-	let remindBusy = false;
-	let remindStatus = '';
-
-	// export for local app
+	// backup state
 	let exportBusy = false;
-	let exportError = '';
-	let exportUrl = null; // set after fetch; user taps the link (direct gesture = reliable on iOS)
-
-	async function prepareExport() {
-		if (exportUrl) { URL.revokeObjectURL(exportUrl); exportUrl = null; }
-		exportBusy = true;
-		exportError = '';
-		try {
-			const res = await fetch(`${base}/api/export`);
-			if (!res.ok) {
-				const d = await res.json().catch(() => ({}));
-				throw new Error(d.error || 'Export failed');
-			}
-			const blob = await res.blob();
-			exportUrl = URL.createObjectURL(blob);
-		} catch (e) {
-			exportError = e.message;
-		} finally {
-			exportBusy = false;
-		}
-	}
-
-	function clearExportUrl() {
-		setTimeout(() => { if (exportUrl) { URL.revokeObjectURL(exportUrl); exportUrl = null; } }, 1000);
-	}
-
-	// account deletion state
-	let deleteArmed = false;
-	let deleteText = '';
-	let deleteBusy = false;
-	let deleteError = '';
+	let importError = '';
 
 	onMount(async () => {
 		await loadSettings();
 		form = { ...form, ...$settings.activities };
 		theme = $settings.theme;
-		shareGlobal = $settings.shareGlobal === true;
 		sex = $settings.sex === 'female' ? 'female' : 'male';
-		showFifa = $settings.showFifa !== false;
-		showNews = $settings.showNews !== false;
 		showNotes = $settings.showNotes === true;
-		isAdmin = $settings.is_admin === true;
+		reminderOn = $settings.reminderTime != null;
+		if ($settings.reminderTime) reminderTime = $settings.reminderTime;
 		mounted = true;
-
-		// Only needed to show "blocked" warning
-		pushPermission = await getPermission();
 	});
 
 	function scheduleAutoSave() {
@@ -102,7 +54,9 @@
 		status = 'saving';
 		error = '';
 		try {
-			await saveSettings({ activities: form, theme, shareGlobal, sex, showFifa, showNews, showNotes });
+			const rt = reminderOn ? reminderTime : null;
+			await saveSettings({ activities: form, theme, sex, showNotes, reminderTime: rt });
+			syncReminder(rt);
 			status = 'saved';
 			setTimeout(() => { if (status === 'saved') status = ''; }, 2200);
 		} catch (e) {
@@ -120,56 +74,48 @@
 		scheduleAutoSave();
 	}
 
-	async function sendAnnouncement() {
-		announceBusy = true;
-		announceStatus = '';
+	async function exportBackup() {
+		exportBusy = true;
 		try {
-			const res = await fetch(`${base}/api/push/announce`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ title: announceTitle, message: announceBody })
-			});
-			const d = await res.json().catch(() => ({}));
-			if (!res.ok || !d.ok) throw new Error(d.error || 'Failed');
-			announceStatus = d.count != null ? `Sent to ${d.count} subscriber(s)` : 'Sent!';
-			announceTitle = '';
-			announceBody = '';
+			const json = await localdb.exportJSON();
+			const filename = `daily-tracker-backup-${new Date().toISOString().slice(0, 10)}.json`;
+			const { Capacitor } = await import('@capacitor/core');
+			if (Capacitor.isNativePlatform()) {
+				// <a download> is unreliable in WKWebView — write to cache + share sheet.
+				const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem');
+				const res = await Filesystem.writeFile({
+					path: filename,
+					directory: Directory.Cache,
+					data: json,
+					encoding: Encoding.UTF8
+				});
+				const { Share } = await import('@capacitor/share');
+				await Share.share({ title: 'Daily Tracker backup', url: res.uri });
+			} else {
+				const a = document.createElement('a');
+				a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+				a.download = filename;
+				a.click();
+				URL.revokeObjectURL(a.href);
+			}
 		} catch (e) {
-			announceStatus = e.message;
+			importError = e?.message || 'Export failed';
 		} finally {
-			announceBusy = false;
+			exportBusy = false;
 		}
 	}
 
-	async function sendReminder() {
-		remindBusy = true;
-		remindStatus = '';
+	async function importBackup(e) {
+		const file = e.target.files?.[0];
+		e.target.value = '';
+		if (!file) return;
+		importError = '';
 		try {
-			const res = await fetch(`${base}/api/push/remind`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' }
-			});
-			const d = await res.json().catch(() => ({}));
-			if (!res.ok || !d.ok) throw new Error(d.error || 'Failed');
-			remindStatus = 'Reminder sent!';
-		} catch (e) {
-			remindStatus = e.message;
-		} finally {
-			remindBusy = false;
-		}
-	}
-
-	async function doDeleteAccount() {
-		if (deleteText.trim().toUpperCase() !== 'DELETE') return;
-		deleteBusy = true;
-		deleteError = '';
-		try {
-			await deleteAccount();
-			goto(`${base}/login`);
-		} catch (e) {
-			deleteError = e?.message || 'Could not delete account';
-		} finally {
-			deleteBusy = false;
+			const obj = JSON.parse(await file.text());
+			await localdb.importJSON(obj);
+			location.reload();
+		} catch (err) {
+			importError = err?.message || 'Import failed — not a valid backup file';
 		}
 	}
 </script>
@@ -275,35 +221,6 @@
 
 	<h2 class="section-title">Widgets</h2>
 	<div class="card">
-		<!-- ponytail: FIFA + News toggles temporarily hidden (App Store). Change to {#if true} to restore. -->
-		{#if false}
-		<button
-			type="button"
-			class="toggle-row"
-			role="switch"
-			aria-checked={showFifa}
-			on:click={() => { showFifa = !showFifa; scheduleAutoSave(); }}
-		>
-			<span class="meta">
-				<span class="name">FIFA World Cup card</span>
-				<span class="unit">Show upcoming fixtures, results and standings on the home screen.</span>
-			</span>
-			<span class="switch" class:on={showFifa} aria-hidden="true"><span class="knob" /></span>
-		</button>
-		<button
-			type="button"
-			class="toggle-row"
-			role="switch"
-			aria-checked={showNews}
-			on:click={() => { showNews = !showNews; scheduleAutoSave(); }}
-		>
-			<span class="meta">
-				<span class="name">World News</span>
-				<span class="unit">Show the latest world headlines on the home screen.</span>
-			</span>
-			<span class="switch" class:on={showNews} aria-hidden="true"><span class="knob" /></span>
-		</button>
-		{/if}
 		<button
 			type="button"
 			class="toggle-row"
@@ -319,132 +236,56 @@
 		</button>
 	</div>
 
-	<h2 class="section-title">Privacy &amp; sharing</h2>
+	<h2 class="section-title">Daily reminder</h2>
 	<div class="card">
 		<button
 			type="button"
 			class="toggle-row"
 			role="switch"
-			aria-checked={shareGlobal}
-			on:click={() => { shareGlobal = !shareGlobal; scheduleAutoSave(); }}
+			aria-checked={reminderOn}
+			on:click={() => { reminderOn = !reminderOn; scheduleAutoSave(); }}
 		>
 			<span class="meta">
-				<span class="name">Share my score on the global leaderboard</span>
-				<span class="unit">Off by default. When on, your name and today's score are visible to everyone.</span>
+				<span class="name">Remind me to log my day</span>
+				<span class="unit">A daily notification on this device. Works in the installed app.</span>
 			</span>
-			<span class="switch" class:on={shareGlobal} aria-hidden="true"><span class="knob" /></span>
+			<span class="switch" class:on={reminderOn} aria-hidden="true"><span class="knob" /></span>
 		</button>
-		<p class="disclaimer">
-			Share only to encourage one another toward good. Keep your intention sincere — seek
-			acceptance from Allah, not the praise of people. “Actions are but by intentions.”
-		</p>
-	</div>
-
-	<h2 class="section-title">Notifications</h2>
-	<div class="card">
-		{#if pushPermission === 'denied'}
-			<p class="push-denied">Notifications are blocked in your browser settings. Re-enable them there to receive push reminders.</p>
-		{/if}
-	</div>
-
-	{#if isAdmin}
-		<h2 class="section-title">Admin</h2>
-		<div class="card">
-			<div class="admin-section">
-				<p class="admin-label">Send announcement to all subscribers</p>
-				<div class="admin-form">
-					<input class="admin-input" type="text" placeholder="Title" bind:value={announceTitle} maxlength="80" />
-					<textarea class="admin-input admin-textarea" rows="3" placeholder="Message (optional)" bind:value={announceBody}></textarea>
-					<button
-						class="admin-btn"
-						type="button"
-						disabled={announceBusy || !announceTitle.trim()}
-						on:click={sendAnnouncement}
-					>
-						{announceBusy ? 'Sending…' : 'Send announcement'}
-					</button>
-					{#if announceStatus}<p class="ok" style="margin:4px 0 0">{announceStatus}</p>{/if}
-				</div>
-			</div>
-			<div class="admin-section" style="border-top:1px solid var(--border);margin-top:4px;padding-top:4px;">
-				<p class="admin-label">Send score reminder to all subscribers</p>
-				<button
-					class="admin-btn"
-					type="button"
-					disabled={remindBusy}
-					on:click={sendReminder}
-					style="margin:8px 14px 14px;"
-				>
-					{remindBusy ? 'Sending…' : 'Send score reminder now'}
-				</button>
-				{#if remindStatus}<p class="ok" style="margin:0 14px 12px">{remindStatus}</p>{/if}
-			</div>
-		</div>
-	{/if}
-
-	<h2 class="section-title">Migrate to local app</h2>
-	<div class="card">
-		<div class="danger-row">
-			<span class="meta">
-				<span class="name">Export all data</span>
-				<span class="unit">Creates a JSON file to import into the Daily Tracker offline app. No expense bill images.</span>
-			</span>
-			{#if exportUrl}
-				<a
-					class="ghost"
-					href={exportUrl}
-					download="daily-tracker-export.json"
-					on:click={clearExportUrl}
-				>Save file</a>
-			{:else}
-				<button class="ghost" type="button" disabled={exportBusy} on:click={prepareExport}>
-					{exportBusy ? 'Preparing…' : 'Export'}
-				</button>
-			{/if}
-		</div>
-		{#if exportError}<p class="err" style="margin:0 14px 12px">{exportError}</p>{/if}
-	</div>
-
-	<h2 class="section-title">Account</h2>
-	<div class="card">
-		<div class="danger-row">
-			<span class="meta">
-				<span class="name">Delete account</span>
-				<span class="unit">Permanently deletes your account and all your data. This cannot be undone.</span>
-			</span>
-			{#if !deleteArmed}
-				<button class="danger-btn" type="button" on:click={() => { deleteArmed = true; deleteText = ''; deleteError = ''; }}>
-					Delete
-				</button>
-			{/if}
-		</div>
-		{#if deleteArmed}
-			<div class="danger-confirm">
-				<p class="danger-hint">Type <strong>DELETE</strong> to confirm:</p>
+		{#if reminderOn}
+			<div class="time-row">
+				<span class="meta"><span class="name">Time</span></span>
 				<input
-					class="admin-input"
-					type="text"
-					placeholder="DELETE"
-					autocapitalize="characters"
-					autocomplete="off"
-					bind:value={deleteText}
+					class="time-input"
+					type="time"
+					bind:value={reminderTime}
+					on:change={scheduleAutoSave}
 				/>
-				<div class="danger-actions">
-					<button class="ghost" type="button" disabled={deleteBusy} on:click={() => { deleteArmed = false; deleteText = ''; deleteError = ''; }}>
-						Cancel
-					</button>
-					<button
-						class="danger-btn"
-						type="button"
-						disabled={deleteBusy || deleteText.trim().toUpperCase() !== 'DELETE'}
-						on:click={doDeleteAccount}
-					>
-						{deleteBusy ? 'Deleting…' : 'Delete forever'}
-					</button>
-				</div>
 			</div>
 		{/if}
-		{#if deleteError}<p class="err" style="margin:0 14px 12px">{deleteError}</p>{/if}
+	</div>
+
+	<h2 class="section-title">Backup</h2>
+	<div class="card">
+		<div class="backup-row">
+			<span class="meta">
+				<span class="name">Export data</span>
+				<span class="unit">All your data stays on this phone. Save a backup file so it survives losing or replacing the device.</span>
+			</span>
+			<button class="backup-btn" type="button" disabled={exportBusy} on:click={exportBackup}>
+				{exportBusy ? 'Exporting…' : 'Export'}
+			</button>
+		</div>
+		<div class="backup-row">
+			<span class="meta">
+				<span class="name">Import backup</span>
+				<span class="unit">Restores from a backup file. Replaces everything currently in the app.</span>
+			</span>
+			<label class="backup-btn">
+				Import
+				<input type="file" accept=".json,application/json" on:change={importBackup} hidden />
+			</label>
+		</div>
+		{#if importError}<p class="err" style="margin:0 14px 12px">{importError}</p>{/if}
 	</div>
 
 	<div class="reset-row">
@@ -457,7 +298,7 @@
 		{:else if status === 'error'}<span class="err">{error}</span>{/if}
 	</div>
 
-	<p class="note">Changes save automatically to your account.</p>
+	<p class="note">Changes save automatically on this device.</p>
 </div>
 
 <style>
@@ -778,74 +619,15 @@
 		}
 	}
 
-	/* notifications */
-	.push-denied {
-		padding: 14px;
-		font-size: 0.84rem;
-		color: var(--text-faint);
-		margin: 0;
-	}
-
-	/* account deletion */
-	.danger-row {
+	/* daily reminder */
+	.time-row {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 14px;
-		padding: 14px;
-	}
-	.danger-row .meta {
-		flex: 1;
-	}
-	.danger-btn {
-		flex: 0 0 auto;
-		padding: 9px 16px;
-		border-radius: 8px;
-		font-weight: 700;
-		font-size: 0.84rem;
-		color: #fff;
-		background: var(--red, #dc2626);
-	}
-	.danger-btn:disabled {
-		opacity: 0.5;
-		cursor: default;
-	}
-	.danger-confirm {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
 		padding: 0 14px 14px;
 	}
-	.danger-hint {
-		margin: 0;
-		font-size: 0.84rem;
-		color: var(--text-dim);
-	}
-	.danger-actions {
-		display: flex;
-		justify-content: flex-end;
-		gap: 8px;
-	}
-
-	/* admin panel */
-	.admin-section {
-		padding: 4px 0;
-	}
-	.admin-label {
-		padding: 12px 14px 4px;
-		font-size: 0.84rem;
-		font-weight: 700;
-		color: var(--text-dim);
-		margin: 0;
-	}
-	.admin-form {
-		display: flex;
-		flex-direction: column;
-		align-items: stretch;
-		gap: 8px;
-		padding: 4px 14px 14px;
-	}
-	.admin-input {
+	.time-input {
 		padding: 8px 10px;
 		border-radius: 8px;
 		border: 1px solid var(--border);
@@ -855,27 +637,38 @@
 		/* 16px min — smaller makes iOS Safari auto-zoom on focus and stay zoomed. */
 		font-size: 16px;
 	}
-	.admin-input::placeholder {
-		color: var(--text-faint);
-	}
-	.admin-input:focus {
+	.time-input:focus {
 		outline: none;
 		border-color: var(--teal);
 	}
-	.admin-btn {
-		padding: 9px 14px;
+
+	/* backup */
+	.backup-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 14px;
+		padding: 14px;
+		border-bottom: 1px solid var(--border);
+	}
+	.backup-row:last-of-type {
+		border-bottom: none;
+	}
+	.backup-row .meta {
+		flex: 1;
+	}
+	.backup-btn {
+		flex: 0 0 auto;
+		padding: 9px 16px;
 		border-radius: 8px;
 		font-weight: 700;
 		font-size: 0.84rem;
 		color: var(--on-accent);
 		background: var(--teal);
+		cursor: pointer;
 	}
-	.admin-btn:disabled {
+	.backup-btn:disabled {
 		opacity: 0.5;
 		cursor: default;
-	}
-	.admin-textarea {
-		resize: vertical;
-		min-height: 68px;
 	}
 </style>

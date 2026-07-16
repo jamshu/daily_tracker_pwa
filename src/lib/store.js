@@ -162,20 +162,27 @@ function snapshotTarget(r, id, target) {
 }
 
 export function setActivity(date, activityId, value, target = null) {
+	const prev = Number(get(records)[date]?.data?.activities?.[activityId] ?? 0);
+	const next = Math.max(0, Math.round(value));
 	mutate(date, (r) => {
-		r.data.activities[activityId] = Math.max(0, Math.round(value));
+		r.data.activities[activityId] = next;
 		if (r.data.missed) delete r.data.missed[activityId]; // any value clears "missed"
 		snapshotTarget(r, activityId, target);
 	});
+	// Linked counters follow the daily activity by its delta (cumulative lifetime total).
+	localdb.adjustLinkedCounters(activityId, next - prev);
 }
 
 export function setCustomActivity(date, id, value, target = null) {
+	const prev = Number(get(records)[date]?.data?.customActivities?.[id] ?? 0);
+	const next = Math.max(0, Math.round(value));
 	mutate(date, (r) => {
 		if (!r.data.customActivities) r.data.customActivities = {};
-		r.data.customActivities[id] = Math.max(0, Math.round(value));
+		r.data.customActivities[id] = next;
 		if (r.data.missed) delete r.data.missed[id];
 		snapshotTarget(r, id, target);
 	});
+	localdb.adjustLinkedCounters(id, next - prev);
 }
 
 /** Mark an activity (standard or custom) as intentionally missed: value 0 + red flag. */

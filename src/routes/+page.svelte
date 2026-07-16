@@ -276,7 +276,13 @@
 				{#if SYNC_LABEL[$syncState]}
 					<span class="sync {$syncState}">{SYNC_LABEL[$syncState]}</span>
 				{/if}
-				<button class="gear" on:click={() => goto(`${base}/mindfulness`)} title="Mindfulness" aria-label="mindfulness">
+				<button class="gear" on:click={() => goto(`${base}/counters`)} title="Counters" aria-label="counters">
+						<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<rect x="3" y="7" width="18" height="10" rx="2" />
+							<path d="M8 7v10M13 7v10M18 7v10" />
+						</svg>
+					</button>
+					<button class="gear" on:click={() => goto(`${base}/mindfulness`)} title="Mindfulness" aria-label="mindfulness">
 						<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<circle cx="12" cy="12" r="3" />
 							<circle cx="12" cy="12" r="7.5" />

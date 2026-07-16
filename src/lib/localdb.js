@@ -34,6 +34,8 @@ function emptyDb() {
 		days: {}, // dateKey -> { data, notes }
 		settings: null,
 		activities: [],
+		counters: [], // [{ id, name, count, goal, linkActivity }] — persistent tally counters
+		countersSeeded: false, // one-time seed of the two default Quran counters
 		units: DEFAULT_UNITS,
 		budget: {}, // { 'YYYY-MM': { catId: { budget, actual, ... } } }
 		expenses: [], // rows with Odoo x_ field names
@@ -74,6 +76,14 @@ export async function init() {
 		} catch {
 			/* corrupt — start fresh rather than crash */
 		}
+	}
+	if (!db.countersSeeded) {
+		db.counters.push(
+			{ id: nextId(), name: 'Quran Pages', count: 0, goal: null, linkActivity: 'quran' },
+			{ id: nextId(), name: 'Memorize Quran', count: 0, goal: null, linkActivity: 'memorize' }
+		);
+		db.countersSeeded = true;
+		persist();
 	}
 	document.addEventListener('visibilitychange', () => {
 		if (document.visibilityState === 'hidden') flushNow();
@@ -189,6 +199,83 @@ export function createUnit(name) {
 	db.units.push(unit);
 	persist();
 	return unit;
+}
+
+/* -------------------------------- counters ------------------------------- */
+// Persistent named tally counters (e.g. "Quran pages read"). Unlike the
+// mindfulness dhikr counter these never auto-reset — value holds until the user
+// resets it. Backed up/exported for free via the `...db` spread.
+
+const coerceGoal = (g) => (Number(g) > 0 ? Math.round(Number(g)) : null);
+
+export function listCounters() {
+	return db.counters;
+}
+
+export function addCounter({ name, goal, linkActivity } = {}) {
+	const id = nextId();
+	db.counters.push({
+		id,
+		name: String(name || '').trim().slice(0, 60) || 'Counter',
+		count: 0,
+		goal: coerceGoal(goal),
+		linkActivity: linkActivity || null
+	});
+	persist();
+	return id;
+}
+
+/** Apply `delta` to every counter linked to `activityId` (from daily-activity edits). */
+export function adjustLinkedCounters(activityId, delta) {
+	if (!delta) return;
+	let changed = false;
+	for (const c of db.counters) {
+		if (c.linkActivity === activityId) {
+			c.count = Math.max(0, c.count + delta);
+			changed = true;
+		}
+	}
+	if (changed) persist();
+}
+
+function findCounter(id) {
+	const c = db.counters.find((x) => x.id === Number(id));
+	if (!c) throw new Error('Counter not found');
+	return c;
+}
+
+export function incrementCounter(id) {
+	const c = findCounter(id);
+	c.count += 1;
+	persist();
+	return c.count;
+}
+
+export function setCounterValue(id, n) {
+	const c = findCounter(id);
+	c.count = Math.max(0, Math.round(Number(n) || 0));
+	persist();
+	return c.count;
+}
+
+export function setCounterGoal(id, goal) {
+	findCounter(id).goal = coerceGoal(goal);
+	persist();
+}
+
+export function resetCounter(id) {
+	findCounter(id).count = 0;
+	persist();
+}
+
+export function renameCounter(id, name) {
+	findCounter(id).name = String(name || '').trim().slice(0, 60) || 'Counter';
+	persist();
+}
+
+export function deleteCounter(id) {
+	db.counters = db.counters.filter((x) => x.id !== Number(id));
+	persist();
 }
 
 /* --------------------------------- budget -------------------------------- */

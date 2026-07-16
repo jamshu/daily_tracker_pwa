@@ -52,6 +52,13 @@
 		requestAnimationFrame(() => (pulse = true));
 	}
 
+	function dec() {
+		if (!counter || count <= 0) return;
+		setValue(counter.id, count - 1); // clamps at 0 in localdb
+		pulse = false;
+		requestAnimationFrame(() => (pulse = true));
+	}
+
 	function doReset() {
 		if (!counter) return;
 		if (!confirmReset) {
@@ -193,6 +200,9 @@
 		</div>
 	{:else}
 		<div class="controls">
+			<button class="ctl" on:click={dec} disabled={count <= 0} aria-label="subtract one" title="−1">
+				<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /></svg>
+			</button>
 			<button class="ctl" class:confirm={confirmReset} on:click={doReset} aria-label="reset" title={confirmReset ? 'Tap again' : 'Reset'}>
 				<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /></svg>
 			</button>
@@ -361,6 +371,7 @@
 		transition: background 0.2s, color 0.2s;
 	}
 	.ctl:active { background: color-mix(in srgb, var(--text) 16%, transparent); color: var(--text); }
+	.ctl:disabled { opacity: 0.3; cursor: default; }
 	.ctl.confirm { background: color-mix(in srgb, var(--red) 30%, transparent); color: var(--red); }
 
 	.stage {

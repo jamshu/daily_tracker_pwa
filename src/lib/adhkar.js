@@ -90,6 +90,126 @@ export const ADHKAR = {
 				source: `Abu Dawud`
 			},
 			{
+				ar: `أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هَذَا الْيَوْمِ وَخَيْرَ مَا بَعْدَهُ، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هَذَا الْيَوْمِ وَشَرِّ مَا بَعْدَهُ، رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ، رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ`,
+				tr: `Asbahnā wa asbahal-mulku lillāh... Rabbi as'aluka khayra mā fī hādhal-yawm...`,
+				en: `We have reached the morning and the dominion belongs to Allah... My Lord, I ask You for the good of this day and the good that follows it, and take refuge in You from its evil; my Lord, I seek refuge in You from laziness and helpless old age, and from punishment in the Fire and the grave.`,
+				count: `1×`,
+				reward: `The Prophet ﷺ said this every morning and evening.`,
+				source: `Muslim`
+			},
+			{
+				ar: `أَصْبَحْنَا عَلَى فِطْرَةِ الْإِسْلَامِ، وَعَلَى كَلِمَةِ الْإِخْلَاصِ، وَعَلَى دِينِ نَبِيِّنَا مُحَمَّدٍ ﷺ، وَعَلَى مِلَّةِ أَبِينَا إِبْرَاهِيمَ حَنِيفًا مُسْلِمًا وَمَا كَانَ مِنَ الْمُشْرِكِينَ`,
+				tr: `Asbahnā ʻalā fitratil-islām...`,
+				en: `We rise upon the natural way of Islam, the word of sincere devotion, the religion of our Prophet Muhammad ﷺ, and the way of our father Ibrāhīm, who was upright and never of those who associate partners with Allah.`,
+				count: `1×`,
+				reward: `Affirms the day upon pure monotheism and the Sunnah.`,
+				source: `Ahmad`
+			},
+			{
+				ar: `اللَّهُمَّ إِنِّي أَصْبَحْتُ مِنْكَ فِي نِعْمَةٍ وَعَافِيَةٍ وَسِتْرٍ، فَأَتِمَّ عَلَيَّ نِعْمَتَكَ وَعَافِيَتَكَ وَسِتْرَكَ فِي الدُّنْيَا وَالْآخِرَةِ`,
+				tr: `Allāhumma innī asbahtu minka fī niʻmah...`,
+				en: `O Allah, I have entered the morning with blessing, well-being and covering from You; so complete Your blessing, well-being and covering upon me in this world and the next.`,
+				count: `3×`,
+				reward: `Fulfils the duty of gratitude for the day.`,
+				source: `Ibn as-Sunni`
+			},
+			{
+				ar: `اللَّهُمَّ مَا أَصْبَحَ بِي مِنْ نِعْمَةٍ أَوْ بِأَحَدٍ مِنْ خَلْقِكَ فَمِنْكَ وَحْدَكَ لَا شَرِيكَ لَكَ، فَلَكَ الْحَمْدُ وَلَكَ الشُّكْرُ`,
+				tr: `Allāhumma mā asbaha bī min niʻmah...`,
+				en: `O Allah, whatever blessing has come to me or to any of Your creation this morning is from You alone, with no partner; to You is all praise and all thanks.`,
+				count: `1×`,
+				reward: `Whoever says it has offered his day's thanks.`,
+				source: `Abu Dawud`
+			},
+			{
+				ar: `يَا رَبِّ لَكَ الْحَمْدُ كَمَا يَنْبَغِي لِجَلَالِ وَجْهِكَ وَعَظِيمِ سُلْطَانِكَ`,
+				tr: `Yā Rabbi lakal-hamd...`,
+				en: `O my Lord, to You is all praise as befits the majesty of Your Face and the greatness of Your might.`,
+				count: `1×`,
+				reward: `So beloved that the angels hastened to record its reward.`,
+				source: `Ibn Mājah`
+			},
+			{
+				ar: `اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ، اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي، اللَّهُمَّ اسْتُرْ عَوْرَاتِي وَآمِنْ رَوْعَاتِي، اللَّهُمَّ احْفَظْنِي مِنْ بَيْنِ يَدَيَّ وَمِنْ خَلْفِي وَعَنْ يَمِينِي وَعَنْ شِمَالِي وَمِنْ فَوْقِي، وَأَعُوذُ بِعَظَمَتِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي`,
+				tr: `Allāhumma innī as'alukal-ʻafwa wal-ʻāfiyah...`,
+				en: `O Allah, I ask You for pardon and well-being in this world and the next... O Allah, veil my faults and calm my fears, and guard me from before me and behind me, from my right and my left and from above me; and I seek refuge in Your greatness from being taken unaware from beneath me.`,
+				count: `1×`,
+				reward: `The Prophet ﷺ never left off saying it morning and evening.`,
+				source: `Abu Dawud · Ibn Mājah`
+			},
+			{
+				ar: `سُبْحَانَ اللَّهِ وَبِحَمْدِهِ، عَدَدَ خَلْقِهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ`,
+				tr: `SubhānAllāhi wa bihamdih, ʻadada khalqih...`,
+				en: `Glory and praise be to Allah, as many as His creation, as pleases Him, as the weight of His Throne, and as the ink of His words.`,
+				count: `3×`,
+				reward: `Outweighs a whole morning of remembrance.`,
+				source: `Muslim`
+			},
+			{
+				ar: `اللَّهُمَّ إِنِّي أَعُوذُ بِكَ أَنْ أُشْرِكَ بِكَ وَأَنَا أَعْلَمُ، وَأَسْتَغْفِرُكَ لِمَا لَا أَعْلَمُ`,
+				tr: `Allāhumma innī aʻūdhu bika an ushrika bik...`,
+				en: `O Allah, I seek refuge in You from knowingly associating anything with You, and I seek Your forgiveness for what I do unknowingly.`,
+				count: `3×`,
+				reward: `Removes both open and hidden shirk.`,
+				source: `Ahmad`
+			},
+			{
+				ar: `أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ`,
+				tr: `Aʻūdhu bikalimātillāhit-tāmmāt...`,
+				en: `I seek refuge in the perfect words of Allah from the evil of what He has created.`,
+				count: `3×`,
+				reward: `Nothing will harm the one who says it.`,
+				source: `Muslim`
+			},
+			{
+				ar: `اللَّهُمَّ عَالِمَ الْغَيْبِ وَالشَّهَادَةِ فَاطِرَ السَّمَاوَاتِ وَالْأَرْضِ، رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا أَنْتَ، أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي، وَمِنْ شَرِّ الشَّيْطَانِ وَشِرْكِهِ، وَأَنْ أَقْتَرِفَ عَلَى نَفْسِي سُوءًا أَوْ أَجُرَّهُ إِلَى مُسْلِمٍ`,
+				tr: `Allāhumma ʻālimal-ghaybi wash-shahādah...`,
+				en: `O Allah, Knower of the unseen and the seen, Originator of the heavens and the earth, Lord and Sovereign of all things, I bear witness that none has the right to be worshipped but You. I seek refuge in You from the evil of my soul, and from the evil and shirk of Satan, and from bringing evil upon myself or another Muslim.`,
+				count: `1×`,
+				reward: `Taught as protection to say morning, evening and at sleep.`,
+				source: `Tirmidhi`
+			},
+			{
+				ar: `يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ، أَصْلِحْ لِي شَأْنِي كُلَّهُ، وَلَا تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ`,
+				tr: `Yā Hayyu yā Qayyūm, bi-rahmatika astaghīth...`,
+				en: `O Ever-Living, O Sustainer, by Your mercy I seek help. Set right all my affairs, and do not leave me to myself for the blink of an eye.`,
+				count: `1×`,
+				reward: `The Prophet ﷺ counselled Fātimah to say it morning and evening.`,
+				source: `Al-Hakim · An-Nasaʼi`
+			},
+			{
+				ar: `اللَّهُمَّ إِنِّي أَصْبَحْتُ أُشْهِدُكَ وَأُشْهِدُ حَمَلَةَ عَرْشِكَ، وَمَلَائِكَتَكَ، وَجَمِيعَ خَلْقِكَ، أَنَّكَ أَنْتَ اللَّهُ لَا إِلَهَ إِلَّا أَنْتَ وَحْدَكَ لَا شَرِيكَ لَكَ، وَأَنَّ مُحَمَّدًا عَبْدُكَ وَرَسُولُكَ`,
+				tr: `Allāhumma innī asbahtu ush'hiduk...`,
+				en: `O Allah, I have entered the morning calling You to witness, and the bearers of Your Throne, Your angels and all Your creation, that You are Allah — none has the right to be worshipped but You alone, with no partner — and that Muhammad ﷺ is Your servant and Messenger.`,
+				count: `4×`,
+				reward: `Allah frees the one who says it four times from the Fire.`,
+				source: `Abu Dawud`
+			},
+			{
+				ar: `اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي، لَا إِلَهَ إِلَّا أَنْتَ، اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْكُفْرِ وَالْفَقْرِ، وَأَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ، لَا إِلَهَ إِلَّا أَنْتَ`,
+				tr: `Allāhumma ʻāfinī fī badanī...`,
+				en: `O Allah, grant my body health; O Allah, grant my hearing health; O Allah, grant my sight health — none has the right to be worshipped but You. O Allah, I seek refuge in You from disbelief and poverty, and from the punishment of the grave — none has the right to be worshipped but You.`,
+				count: `3×`,
+				reward: `A comprehensive plea for well-being of body and faith.`,
+				source: `Abu Dawud`
+			},
+			{
+				ar: `أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ رَبِّ الْعَالَمِينَ، اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَ هَذَا الْيَوْمِ: فَتْحَهُ وَنَصْرَهُ وَنُورَهُ وَبَرَكَتَهُ وَهُدَاهُ، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِيهِ وَشَرِّ مَا بَعْدَهُ`,
+				tr: `Asbahnā wa asbahal-mulku lillāhi Rabbil-ʻālamīn...`,
+				en: `We have reached the morning and the dominion belongs to Allah, Lord of the worlds. O Allah, I ask You for the good of this day — its opening, its victory, its light, its blessing and its guidance — and I take refuge in You from the evil in it and the evil that follows it.`,
+				count: `1×`,
+				reward: `Said by the Prophet ﷺ on rising each morning.`,
+				source: `Abu Dawud`
+			},
+			{
+				ar: `لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ`,
+				tr: `Lā ilāha illallāhu wahdahu lā sharīka lah...`,
+				en: `None has the right to be worshipped but Allah alone, with no partner; His is the dominion and His is the praise, and He is able to do all things.`,
+				count: `100×`,
+				reward: `Like freeing ten slaves; a shield from Satan all day.`,
+				source: `Bukhari · Muslim`
+			},
+			{
 				ar: `سُبْحَانَ اللَّهِ وَبِحَمْدِهِ`,
 				tr: `SubhānAllāhi wa bihamdih`,
 				en: `Glory and praise be to Allah.`,
@@ -167,6 +287,118 @@ export const ADHKAR = {
 				count: `7×`,
 				reward: `Allah will suffice him in whatever worries him of this world and the next.`,
 				source: `Abu Dawud`
+			},
+			{
+				ar: `أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هَذِهِ اللَّيْلَةِ وَخَيْرَ مَا بَعْدَهَا، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هَذِهِ اللَّيْلَةِ وَشَرِّ مَا بَعْدَهَا، رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ، رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ`,
+				tr: `Amsaynā wa amsal-mulku lillāh... Rabbi as'aluka khayra mā fī hādhihil-laylah...`,
+				en: `We have reached the evening and the dominion belongs to Allah... My Lord, I ask You for the good of this night and the good that follows it, and take refuge in You from its evil; my Lord, I seek refuge in You from laziness and helpless old age, and from punishment in the Fire and the grave.`,
+				count: `1×`,
+				reward: `The Prophet ﷺ said this every evening and morning.`,
+				source: `Muslim`
+			},
+			{
+				ar: `أَمْسَيْنَا عَلَى فِطْرَةِ الْإِسْلَامِ، وَعَلَى كَلِمَةِ الْإِخْلَاصِ، وَعَلَى دِينِ نَبِيِّنَا مُحَمَّدٍ ﷺ، وَعَلَى مِلَّةِ أَبِينَا إِبْرَاهِيمَ حَنِيفًا مُسْلِمًا وَمَا كَانَ مِنَ الْمُشْرِكِينَ`,
+				tr: `Amsaynā ʻalā fitratil-islām...`,
+				en: `We reach the evening upon the natural way of Islam, the word of sincere devotion, the religion of our Prophet Muhammad ﷺ, and the way of our father Ibrāhīm, who was upright and never of those who associate partners with Allah.`,
+				count: `1×`,
+				reward: `Affirms the night upon pure monotheism and the Sunnah.`,
+				source: `Ahmad`
+			},
+			{
+				ar: `اللَّهُمَّ إِنِّي أَمْسَيْتُ مِنْكَ فِي نِعْمَةٍ وَعَافِيَةٍ وَسِتْرٍ، فَأَتِمَّ عَلَيَّ نِعْمَتَكَ وَعَافِيَتَكَ وَسِتْرَكَ فِي الدُّنْيَا وَالْآخِرَةِ`,
+				tr: `Allāhumma innī amsaytu minka fī niʻmah...`,
+				en: `O Allah, I have entered the evening with blessing, well-being and covering from You; so complete Your blessing, well-being and covering upon me in this world and the next.`,
+				count: `3×`,
+				reward: `Fulfils the duty of gratitude for the night.`,
+				source: `Ibn as-Sunni`
+			},
+			{
+				ar: `اللَّهُمَّ مَا أَمْسَى بِي مِنْ نِعْمَةٍ أَوْ بِأَحَدٍ مِنْ خَلْقِكَ فَمِنْكَ وَحْدَكَ لَا شَرِيكَ لَكَ، فَلَكَ الْحَمْدُ وَلَكَ الشُّكْرُ`,
+				tr: `Allāhumma mā amsā bī min niʻmah...`,
+				en: `O Allah, whatever blessing has come to me or to any of Your creation this evening is from You alone, with no partner; to You is all praise and all thanks.`,
+				count: `1×`,
+				reward: `Whoever says it has offered his night's thanks.`,
+				source: `Abu Dawud`
+			},
+			{
+				ar: `يَا رَبِّ لَكَ الْحَمْدُ كَمَا يَنْبَغِي لِجَلَالِ وَجْهِكَ وَعَظِيمِ سُلْطَانِكَ`,
+				tr: `Yā Rabbi lakal-hamd...`,
+				en: `O my Lord, to You is all praise as befits the majesty of Your Face and the greatness of Your might.`,
+				count: `1×`,
+				reward: `So beloved that the angels hastened to record its reward.`,
+				source: `Ibn Mājah`
+			},
+			{
+				ar: `اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ، اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي، اللَّهُمَّ اسْتُرْ عَوْرَاتِي وَآمِنْ رَوْعَاتِي، اللَّهُمَّ احْفَظْنِي مِنْ بَيْنِ يَدَيَّ وَمِنْ خَلْفِي وَعَنْ يَمِينِي وَعَنْ شِمَالِي وَمِنْ فَوْقِي، وَأَعُوذُ بِعَظَمَتِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي`,
+				tr: `Allāhumma innī as'alukal-ʻafwa wal-ʻāfiyah...`,
+				en: `O Allah, I ask You for pardon and well-being in this world and the next... O Allah, veil my faults and calm my fears, and guard me from before me and behind me, from my right and my left and from above me; and I seek refuge in Your greatness from being taken unaware from beneath me.`,
+				count: `1×`,
+				reward: `The Prophet ﷺ never left off saying it evening and morning.`,
+				source: `Abu Dawud · Ibn Mājah`
+			},
+			{
+				ar: `سُبْحَانَ اللَّهِ وَبِحَمْدِهِ، عَدَدَ خَلْقِهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ`,
+				tr: `SubhānAllāhi wa bihamdih, ʻadada khalqih...`,
+				en: `Glory and praise be to Allah, as many as His creation, as pleases Him, as the weight of His Throne, and as the ink of His words.`,
+				count: `3×`,
+				reward: `Outweighs a whole evening of remembrance.`,
+				source: `Muslim`
+			},
+			{
+				ar: `اللَّهُمَّ إِنِّي أَعُوذُ بِكَ أَنْ أُشْرِكَ بِكَ وَأَنَا أَعْلَمُ، وَأَسْتَغْفِرُكَ لِمَا لَا أَعْلَمُ`,
+				tr: `Allāhumma innī aʻūdhu bika an ushrika bik...`,
+				en: `O Allah, I seek refuge in You from knowingly associating anything with You, and I seek Your forgiveness for what I do unknowingly.`,
+				count: `3×`,
+				reward: `Removes both open and hidden shirk.`,
+				source: `Ahmad`
+			},
+			{
+				ar: `اللَّهُمَّ عَالِمَ الْغَيْبِ وَالشَّهَادَةِ فَاطِرَ السَّمَاوَاتِ وَالْأَرْضِ، رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا أَنْتَ، أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي، وَمِنْ شَرِّ الشَّيْطَانِ وَشِرْكِهِ، وَأَنْ أَقْتَرِفَ عَلَى نَفْسِي سُوءًا أَوْ أَجُرَّهُ إِلَى مُسْلِمٍ`,
+				tr: `Allāhumma ʻālimal-ghaybi wash-shahādah...`,
+				en: `O Allah, Knower of the unseen and the seen, Originator of the heavens and the earth, Lord and Sovereign of all things, I bear witness that none has the right to be worshipped but You. I seek refuge in You from the evil of my soul, and from the evil and shirk of Satan, and from bringing evil upon myself or another Muslim.`,
+				count: `1×`,
+				reward: `Taught as protection to say evening, morning and at sleep.`,
+				source: `Tirmidhi`
+			},
+			{
+				ar: `يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ، أَصْلِحْ لِي شَأْنِي كُلَّهُ، وَلَا تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ`,
+				tr: `Yā Hayyu yā Qayyūm, bi-rahmatika astaghīth...`,
+				en: `O Ever-Living, O Sustainer, by Your mercy I seek help. Set right all my affairs, and do not leave me to myself for the blink of an eye.`,
+				count: `1×`,
+				reward: `The Prophet ﷺ counselled Fātimah to say it morning and evening.`,
+				source: `Al-Hakim · An-Nasaʼi`
+			},
+			{
+				ar: `اللَّهُمَّ إِنِّي أَمْسَيْتُ أُشْهِدُكَ وَأُشْهِدُ حَمَلَةَ عَرْشِكَ، وَمَلَائِكَتَكَ، وَجَمِيعَ خَلْقِكَ، أَنَّكَ أَنْتَ اللَّهُ لَا إِلَهَ إِلَّا أَنْتَ وَحْدَكَ لَا شَرِيكَ لَكَ، وَأَنَّ مُحَمَّدًا عَبْدُكَ وَرَسُولُكَ`,
+				tr: `Allāhumma innī amsaytu ush'hiduk...`,
+				en: `O Allah, I have entered the evening calling You to witness, and the bearers of Your Throne, Your angels and all Your creation, that You are Allah — none has the right to be worshipped but You alone, with no partner — and that Muhammad ﷺ is Your servant and Messenger.`,
+				count: `4×`,
+				reward: `Allah frees the one who says it four times from the Fire.`,
+				source: `Abu Dawud`
+			},
+			{
+				ar: `اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي، لَا إِلَهَ إِلَّا أَنْتَ، اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْكُفْرِ وَالْفَقْرِ، وَأَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ، لَا إِلَهَ إِلَّا أَنْتَ`,
+				tr: `Allāhumma ʻāfinī fī badanī...`,
+				en: `O Allah, grant my body health; O Allah, grant my hearing health; O Allah, grant my sight health — none has the right to be worshipped but You. O Allah, I seek refuge in You from disbelief and poverty, and from the punishment of the grave — none has the right to be worshipped but You.`,
+				count: `3×`,
+				reward: `A comprehensive plea for well-being of body and faith.`,
+				source: `Abu Dawud`
+			},
+			{
+				ar: `أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ رَبِّ الْعَالَمِينَ، اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَ هَذِهِ اللَّيْلَةِ: فَتْحَهَا وَنَصْرَهَا وَنُورَهَا وَبَرَكَتَهَا وَهُدَاهَا، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِيهَا وَشَرِّ مَا بَعْدَهَا`,
+				tr: `Amsaynā wa amsal-mulku lillāhi Rabbil-ʻālamīn...`,
+				en: `We have reached the evening and the dominion belongs to Allah, Lord of the worlds. O Allah, I ask You for the good of this night — its opening, its victory, its light, its blessing and its guidance — and I take refuge in You from the evil in it and the evil that follows it.`,
+				count: `1×`,
+				reward: `Said by the Prophet ﷺ on reaching each evening.`,
+				source: `Abu Dawud`
+			},
+			{
+				ar: `لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ`,
+				tr: `Lā ilāha illallāhu wahdahu lā sharīka lah...`,
+				en: `None has the right to be worshipped but Allah alone, with no partner; His is the dominion and His is the praise, and He is able to do all things.`,
+				count: `100×`,
+				reward: `Like freeing ten slaves; a shield from Satan.`,
+				source: `Bukhari · Muslim`
 			},
 			{
 				ar: `سُبْحَانَ اللَّهِ وَبِحَمْدِهِ`,

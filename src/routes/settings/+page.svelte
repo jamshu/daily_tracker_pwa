@@ -20,6 +20,14 @@
 	let error = '';
 	let mounted = false;
 	let saveTimer = null;
+	let notifDenied = false; // web: browser notifications blocked
+
+	function refreshNotifState() {
+		notifDenied =
+			typeof window !== 'undefined' &&
+			'Notification' in window &&
+			Notification.permission === 'denied';
+	}
 
 	// backup state
 	let exportBusy = false;
@@ -33,6 +41,7 @@
 		showNotes = $settings.showNotes === true;
 		reminderOn = $settings.reminderTime != null;
 		if ($settings.reminderTime) reminderTime = $settings.reminderTime;
+		refreshNotifState();
 		mounted = true;
 	});
 
@@ -56,7 +65,8 @@
 		try {
 			const rt = reminderOn ? reminderTime : null;
 			await saveSettings({ activities: form, theme, sex, showNotes, reminderTime: rt });
-			syncReminder(rt);
+			await syncReminder(rt);
+			refreshNotifState();
 			status = 'saved';
 			setTimeout(() => { if (status === 'saved') status = ''; }, 2200);
 		} catch (e) {
@@ -261,6 +271,9 @@
 					on:change={scheduleAutoSave}
 				/>
 			</div>
+			{#if notifDenied}
+				<p class="notif-hint">Notifications are blocked in your browser — enable them in site settings to receive reminders.</p>
+			{/if}
 		{/if}
 	</div>
 
@@ -626,6 +639,13 @@
 		justify-content: space-between;
 		gap: 14px;
 		padding: 0 14px 14px;
+	}
+	.notif-hint {
+		margin: 0;
+		padding: 0 14px 14px;
+		font-size: 0.8rem;
+		line-height: 1.4;
+		color: var(--red, #f87171);
 	}
 	.time-input {
 		padding: 8px 10px;

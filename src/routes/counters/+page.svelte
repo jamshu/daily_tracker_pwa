@@ -172,7 +172,17 @@
 		if (Math.abs(dx) > 60) go(dx < 0 ? 1 : -1);
 		startX = null;
 	}
+
+	// ←/→ to switch counters. Skipped while a sheet is open so arrow keys still
+	// move the cursor inside its name/goal inputs.
+	function onKey(e) {
+		if (sheet) return;
+		if (e.key === 'ArrowLeft') go(-1);
+		else if (e.key === 'ArrowRight') go(1);
+	}
 </script>
+
+<svelte:window on:keydown={onKey} />
 
 <svelte:head><title>Counters</title></svelte:head>
 
@@ -184,10 +194,20 @@
 		<button class="icon" on:click={() => (sheet = 'menu')} aria-label="counters menu" title="Counters" disabled={!list.length}>
 			<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
 		</button>
+		{#if list.length > 1}
+			<button class="nav" on:click={() => go(-1)} aria-label="previous counter" title="Previous">
+				<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+			</button>
+		{/if}
 		<div class="label">
 			<p class="name">{counter ? counter.name : 'Counters'}</p>
 			{#if goal}<p class="sub">{count} / {goal}</p>{/if}
 		</div>
+		{#if list.length > 1}
+			<button class="nav" on:click={() => go(1)} aria-label="next counter" title="Next">
+				<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+			</button>
+		{/if}
 		<button class="icon" on:click={openCreate} aria-label="new counter" title="New counter">
 			<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14" /></svg>
 		</button>
@@ -341,6 +361,26 @@
 	}
 	.icon:disabled { opacity: 0.35; cursor: default; }
 	.icon:active { background: color-mix(in srgb, var(--text) 16%, transparent); }
+	/* Lighter than .icon — the bar already carries three filled circles. */
+	.nav {
+		flex: none;
+		display: grid;
+		place-items: center;
+		width: 34px;
+		height: 34px;
+		border: none;
+		border-radius: 50%;
+		background: transparent;
+		color: var(--text-dim, inherit);
+		cursor: pointer;
+	}
+	@media (hover: hover) {
+		.nav:hover {
+			color: var(--text);
+			background: color-mix(in srgb, var(--text) 8%, transparent);
+		}
+	}
+	.nav:active { background: color-mix(in srgb, var(--text) 16%, transparent); }
 	.label { flex: 1; text-align: center; min-width: 0; }
 	.label .name {
 		margin: 0;

@@ -15,7 +15,16 @@ export default defineConfig({
 			// we register manually in +layout.svelte (web only, skipped in Capacitor).
 			injectRegister: false,
 			workbox: {
-				globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,woff2}']
+				globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,woff2}'],
+				// Any page navigation that isn't an exact precache hit (hard reload,
+				// PWA launch, deep link) is served the cached app shell, which then
+				// client-routes to the URL — so the app opens offline instead of
+				// falling through to the network and failing.
+				navigateFallback: '/',
+				// Only real page navigations get the shell — never requests for files
+				// (assets, the manifest, sw.js), which must resolve to their own bytes.
+				navigateFallbackDenylist: [/\/[^/?]+\.[^/?]+$/],
+				cleanupOutdatedCaches: true
 			},
 			manifest: {
 				id: '/',

@@ -8,7 +8,6 @@
 	import { settings, applyTheme, loadSettings } from '$lib/settings.js';
 	import { openWelcome } from '$lib/welcome.js';
 	import WelcomeModal from '$lib/components/WelcomeModal.svelte';
-	import { syncReminder } from '$lib/notify.js';
 	import * as localdb from '$lib/localdb.js';
 	import { get } from 'svelte/store';
 
@@ -57,8 +56,9 @@
 		ready = true;
 		// First run — no name stored yet: ask for it.
 		if (!get(settings).name) openWelcome();
-		// Re-assert the daily reminder on every app open (survives reboots/updates).
-		syncReminder(get(settings).reminderTime);
+		// Reminders are server-sent web push now (see src/lib/push.js + Odoo), so
+		// there is nothing to re-arm on open — and notification permission is only
+		// ever requested from a tap in Settings, never on load.
 	});
 
 	onDestroy(() => {

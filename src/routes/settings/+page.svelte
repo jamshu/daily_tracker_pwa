@@ -5,7 +5,7 @@
 	import { ACTIVITIES } from '$lib/config.js';
 	import { settings, loadSettings, saveSettings, applyTheme } from '$lib/settings.js';
 	import { THEMES, DEFAULT_THEME } from '$lib/themes.js';
-	import { syncReminder } from '$lib/notify.js';
+	import { pushSupported, currentSubscription, subscribePush, unsubscribePush, syncSubscription } from '$lib/push.js';
 	import * as localdb from '$lib/localdb.js';
 
 	// form state: activity id -> target value
@@ -23,11 +23,54 @@
 	let saveTimer = null;
 	let notifDenied = false; // web: browser notifications blocked
 
+	// Push state for the reminder card. Reminders are sent by Odoo as web push,
+	// so "on" means this device has a live subscription registered server-side.
+	let pushReady = false; // has the initial subscription check finished
+	let pushBusy = false;
+	let pushError = '';
+	let supported = false;
+
 	function refreshNotifState() {
 		notifDenied =
 			typeof window !== 'undefined' &&
 			'Notification' in window &&
 			Notification.permission === 'denied';
+	}
+
+	// Must run off a real click — browsers only show the permission prompt from a
+	// user gesture, and a dismissed/blocked origin resolves 'denied' silently.
+	async function toggleReminder() {
+		if (pushBusy) return;
+		pushBusy = true;
+		pushError = '';
+		try {
+			if (reminderOn) {
+				await unsubscribePush();
+				reminderOn = false;
+			} else {
+				await subscribePush({ name, reminderTime });
+				reminderOn = true;
+			}
+			refreshNotifState();
+			await save();
+		} catch (e) {
+			pushError = e?.message || 'Could not update reminders';
+			refreshNotifState();
+		} finally {
+			pushBusy = false;
+		}
+	}
+
+	// Time changed while reminders are on — re-register so Odoo reschedules.
+	async function onReminderTimeChange() {
+		scheduleAutoSave();
+		if (!reminderOn) return;
+		pushError = '';
+		try {
+			await syncSubscription({ name, reminderTime });
+		} catch (e) {
+			pushError = e?.message || 'Could not update the reminder time';
+		}
 	}
 
 	// backup state
@@ -41,9 +84,16 @@
 		name = $settings.name || '';
 		sex = $settings.sex === 'female' ? 'female' : 'male';
 		showNotes = $settings.showNotes === true;
-		reminderOn = $settings.reminderTime != null;
 		if ($settings.reminderTime) reminderTime = $settings.reminderTime;
 		refreshNotifState();
+
+		// The real source of truth for "reminders on" is whether this device has a
+		// live push subscription — not the stored setting, which can go stale if
+		// permission was revoked in browser settings.
+		supported = pushSupported();
+		reminderOn = supported ? Boolean(await currentSubscription()) : false;
+		pushReady = true;
+
 		mounted = true;
 	});
 
@@ -67,7 +117,6 @@
 		try {
 			const rt = reminderOn ? reminderTime : null;
 			await saveSettings({ activities: form, theme, sex, name, showNotes, reminderTime: rt });
-			await syncReminder(rt);
 			refreshNotifState();
 			status = 'saved';
 			setTimeout(() => { if (status === 'saved') status = ''; }, 2200);
@@ -271,11 +320,20 @@
 			class="toggle-row"
 			role="switch"
 			aria-checked={reminderOn}
-			on:click={() => { reminderOn = !reminderOn; scheduleAutoSave(); }}
+			disabled={!pushReady || pushBusy || !supported}
+			on:click={toggleReminder}
 		>
 			<span class="meta">
 				<span class="name">Remind me to log my day</span>
-				<span class="unit">A daily notification on this device. Works in the installed app.</span>
+				<span class="unit">
+					{#if !supported}
+						This browser doesn't support notifications.
+					{:else if pushBusy}
+						Working…
+					{:else}
+						A daily notification, even when the app is closed.
+					{/if}
+				</span>
 			</span>
 			<span class="switch" class:on={reminderOn} aria-hidden="true"><span class="knob" /></span>
 		</button>
@@ -286,12 +344,17 @@
 					class="time-input"
 					type="time"
 					bind:value={reminderTime}
-					on:change={scheduleAutoSave}
+					on:change={onReminderTimeChange}
 				/>
 			</div>
-			{#if notifDenied}
-				<p class="notif-hint">Notifications are blocked in your browser — enable them in site settings to receive reminders.</p>
-			{/if}
+		{/if}
+		{#if pushError}
+			<p class="notif-hint">{pushError}</p>
+		{:else if notifDenied}
+			<p class="notif-hint">Notifications are blocked in your browser — enable them in site settings to receive reminders.</p>
+		{/if}
+		{#if supported && !reminderOn && !pushError}
+			<p class="disclaimer">Turning this on registers this device so reminders can be delivered while the app is closed.</p>
 		{/if}
 	</div>
 

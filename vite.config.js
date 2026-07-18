@@ -5,32 +5,35 @@ import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 export default defineConfig({
 	plugins: [
 		sveltekit(),
-		// Offline PWA: precache the whole static build (incl. prerendered pages —
-		// the SvelteKit wrapper runs after the adapter, plain VitePWA misses them)
-		// so the installed app works with no internet. No push — data is on-device.
+		// Offline PWA: precache the whole build (incl. prerendered pages — the
+		// SvelteKit wrapper runs after the adapter, plain VitePWA misses them) so
+		// the installed app works with no internet.
+		//
+		// injectManifest (not generateSW) because we hand-write src/sw.js: a
+		// generated Workbox SW cannot carry a `push` listener, and web push is the
+		// whole point of the reminder feature. src/sw.js therefore owns BOTH the
+		// offline navigation fallback and the push handlers.
 		SvelteKitPWA({
-			strategies: 'generateSW',
+			strategies: 'injectManifest',
+			// @vite-pwa/sveltekit compiles SvelteKit's own src/service-worker.js and
+			// injects the precache manifest into it, so the source name is fixed.
+			srcDir: 'src',
+			// Source is fixed (SvelteKit compiles src/service-worker.js); `filename`
+			// controls the emitted name. Keep it sw.js so already-installed clients
+			// keep updating the same registration instead of orphaning it.
+			filename: 'sw.js',
 			registerType: 'autoUpdate',
 			// SvelteKit has no static index.html for the plugin to inject into —
-			// we register manually in +layout.svelte (web only, skipped in Capacitor).
+			// we register manually in +layout.svelte.
 			injectRegister: false,
-			workbox: {
-				globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,woff2}'],
-				// Any page navigation that isn't an exact precache hit (hard reload,
-				// PWA launch, deep link) is served the cached app shell, which then
-				// client-routes to the URL — so the app opens offline instead of
-				// falling through to the network and failing.
-				navigateFallback: '/',
-				// Only real page navigations get the shell — never requests for files
-				// (assets, the manifest, sw.js), which must resolve to their own bytes.
-				navigateFallbackDenylist: [/\/[^/?]+\.[^/?]+$/],
-				cleanupOutdatedCaches: true
+			injectManifest: {
+				globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,woff2}']
 			},
 			manifest: {
 				id: '/',
 				name: 'Daily Tracker Local',
 				short_name: 'Tracker',
-				description: 'Daily ibadah & productivity tracker — all data on your device',
+				description: 'Daily ibadah & productivity tracker — your tracked data stays on your device',
 				start_url: '/',
 				scope: '/',
 				display: 'standalone',

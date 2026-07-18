@@ -5,36 +5,44 @@
 <div class="wrap">
 	<article>
 		<h1>Privacy Policy</h1>
-		<p class="meta">Daily Deed Tracker &mdash; Effective June 29, 2026</p>
+		<p class="meta">Daily Deed Tracker &mdash; Effective July 18, 2026</p>
 
 		<section>
-			<h2>What We Collect</h2>
+			<h2>Stays On Your Device</h2>
+			<p>There are no accounts, and there is no sign-in. Everything you track is stored only in this app on this device:</p>
 			<ul>
-				<li><strong>Account information:</strong> name and email address used to create your account.</li>
-				<li><strong>Activity data:</strong> daily deed logs, habit entries, and productivity records you create.</li>
+				<li><strong>Activity data:</strong> daily deed logs, prayers, habit entries, and productivity records.</li>
 				<li><strong>Budget data:</strong> financial entries you record within the app.</li>
-				<li><strong>Push notification tokens:</strong> FCM/APNs device tokens, stored only to deliver notifications you request.</li>
+				<li><strong>Your name and preferences:</strong> the name you enter on first launch, plus your goals and theme.</li>
 			</ul>
+			<p>None of this is uploaded. Clearing the app's storage or uninstalling it deletes this data permanently, so use Settings &rarr; Export to keep a backup.</p>
 		</section>
 
 		<section>
-			<h2>How We Use It</h2>
-			<p>Your data is used solely to operate the app — display your records, sync across devices, and send notifications you enable. We do not sell, share, or use your data for advertising.</p>
+			<h2>What Leaves Your Device (Only If You Enable Reminders)</h2>
+			<p>Daily reminders are the one feature that needs a server, because a notification has to reach you while the app is closed. If — and only if — you turn on <em>Remind me to log my day</em>, we store:</p>
+			<ul>
+				<li><strong>A push subscription:</strong> the anonymous endpoint your browser generates so notifications can be delivered to this device.</li>
+				<li><strong>A random device identifier</strong> created for this install.</li>
+				<li><strong>Your reminder time and time zone,</strong> so the reminder arrives at the right moment.</li>
+				<li><strong>The name you entered,</strong> used only to label the device record.</li>
+			</ul>
+			<p>Your tracked data — deeds, prayers, budget — is never sent, even with reminders on. Turning reminders off deletes the subscription and any queued reminders.</p>
 		</section>
 
 		<section>
 			<h2>Third-Party Services</h2>
 			<ul>
-				<li><strong>Odoo</strong> — backend database where your account and activity data is stored.</li>
-				<li><strong>Firebase (Google FCM)</strong> — delivers push notifications to your device.</li>
-				<li><strong>Vercel</strong> — hosts the app and serves all web requests.</li>
+				<li><strong>Odoo</strong> — stores the push subscription described above and sends the reminder notifications. Nothing else is stored there.</li>
+				<li><strong>Vercel</strong> — hosts the app and serves web requests.</li>
+				<li><strong>Your browser's push service</strong> (e.g. Apple, Google, or Mozilla, depending on your device) — relays the notification to you. This is chosen by your browser, not by us.</li>
 			</ul>
-			<p>Each service processes data only as needed to provide the above functions.</p>
+			<p>We do not sell or share your data, and we do not use it for advertising.</p>
 		</section>
 
 		<section>
 			<h2>Data Retention &amp; Deletion</h2>
-			<p>Your data is retained for as long as your account is active. To request deletion of your account and all associated data, email us at <a href="mailto:support@dailytracker.odoo.com">support@dailytracker.odoo.com</a>.</p>
+			<p>Turning off reminders in Settings removes your push subscription and pending reminders. To have any remaining record removed, email <a href="mailto:support@dailytracker.odoo.com">support@dailytracker.odoo.com</a>. On-device data is deleted by clearing the app's storage or uninstalling.</p>
 		</section>
 
 		<section>

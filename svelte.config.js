@@ -1,12 +1,15 @@
-import adapter from '@sveltejs/adapter-static';
+import adapter from '@sveltejs/adapter-vercel';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	preprocess: vitePreprocess(),
 	kit: {
-		// Fully static build bundled into the Capacitor app — no server.
-		adapter: adapter()
+		// Vercel: pages are still prerendered (see +layout.js) and precached by the
+		// service worker, but we need serverless routes under /api so the Odoo admin
+		// API key stays server-side — a fully static build can't hold a secret.
+		adapter: adapter(),
+		prerender: { handleUnseenRoutes: 'ignore' }
 	}
 };
 

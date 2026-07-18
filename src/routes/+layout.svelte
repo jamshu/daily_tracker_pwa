@@ -15,18 +15,20 @@
 	let ready = false;
 	let backBtnHandle = null;
 
+	// Register the PWA service worker so the app loads offline. Prod build only
+	// (dev serves no sw.js). Deliberately independent of Capacitor — this must
+	// run for every web/PWA visit, not be gated behind the native shim import.
+	function registerServiceWorker() {
+		if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+			navigator.serviceWorker.register('/sw.js').catch(() => {});
+		}
+	}
+
 	// Native (Capacitor) shell init: status bar, splash hide, Android back button.
 	// All guarded by isNativePlatform() so the web build is a no-op.
 	async function initNative() {
 		const { Capacitor } = await import('@capacitor/core');
-		if (!Capacitor.isNativePlatform()) {
-			// Web/PWA: register the precache service worker so the app loads offline.
-			// Dev serves no sw.js — only register the built one.
-			if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-				navigator.serviceWorker.register('/sw.js').catch(() => {});
-			}
-			return;
-		}
+		if (!Capacitor.isNativePlatform()) return;
 		try {
 			const { StatusBar, Style } = await import('@capacitor/status-bar');
 			await StatusBar.setStyle({ style: Style.Dark }); // light text on dark theme
@@ -48,6 +50,7 @@
 	}
 
 	onMount(async () => {
+		registerServiceWorker();
 		await initNative();
 		await localdb.init();
 		await loadSettings();

@@ -6,6 +6,7 @@
 // own auto-created res.partner keyed by a UUID in `ref`.
 import { json } from '@sveltejs/kit';
 import { adminExecute, findOrCreateDevicePartner, odooConfigured } from '$lib/server/odoo.js';
+import { rescheduleForPartner } from '$lib/server/reminders.js';
 
 export const prerender = false;
 
@@ -35,17 +36,30 @@ export async function POST({ request }) {
 		]);
 
 		// Upsert by endpoint. `keys` is a JSON *string* in Odoo, not a dict.
+		//
+		// Write rather than unlink+create: mail.push rows carry an FK to
+		// mail.push.device, so once Odoo has queued a push the row can't be
+		// deleted — the follow-up create would then violate unique(endpoint).
+		const keysJson = JSON.stringify({ p256dh: keys.p256dh, auth: keys.auth });
 		const existing = await adminExecute('mail.push.device', 'search', [[['endpoint', '=', endpoint]]]);
-		if (existing.length) await adminExecute('mail.push.device', 'unlink', [existing]);
-		await adminExecute('mail.push.device', 'create', [
-			{
-				partner_id: partnerId,
-				endpoint,
-				keys: JSON.stringify({ p256dh: keys.p256dh, auth: keys.auth })
+		if (existing.length) {
+			await adminExecute('mail.push.device', 'write', [existing, { partner_id: partnerId, keys: keysJson }]);
+		} else {
+			try {
+				await adminExecute('mail.push.device', 'create', [{ partner_id: partnerId, endpoint, keys: keysJson }]);
+			} catch (err) {
+				// Lost a race with a concurrent subscribe — fall back to updating.
+				const again = await adminExecute('mail.push.device', 'search', [[['endpoint', '=', endpoint]]]);
+				if (!again.length) throw err;
+				await adminExecute('mail.push.device', 'write', [again, { partner_id: partnerId, keys: keysJson }]);
 			}
-		]);
+		}
 
-		return json({ ok: true, partnerId });
+		// Schedule straight away. Waiting for the nightly cron would mean enabling
+		// a reminder at 21:00 produces nothing until the next cron run.
+		const scheduled = await rescheduleForPartner(partnerId, { reminderTime, tz });
+
+		return json({ ok: true, partnerId, scheduled });
 	} catch (e) {
 		console.error('[push/subscribe] failed:', e?.message);
 		return json({ ok: false, error: e?.message || 'Subscribe failed' }, { status: 500 });

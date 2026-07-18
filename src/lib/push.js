@@ -5,9 +5,12 @@
 // /api/push/subscribe) against a res.partner in Odoo — the app itself has no
 // accounts, so a per-device UUID is the identity.
 import { browser } from '$app/environment';
-import { env } from '$env/dynamic/public';
+// static (not dynamic) because every page is prerendered with ssr=false —
+// $env/dynamic/public needs a server to inject values at request time, so it
+// arrives empty in the client bundle. static inlines the value at build time.
+import { PUBLIC_VAPID_PUBLIC_KEY } from '$env/static/public';
 
-const VAPID_PUBLIC_KEY = env.PUBLIC_VAPID_PUBLIC_KEY || '';
+const VAPID_PUBLIC_KEY = PUBLIC_VAPID_PUBLIC_KEY || '';
 const DEVICE_KEY = 'push_device_id';
 
 export function pushSupported() {

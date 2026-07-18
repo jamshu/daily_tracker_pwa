@@ -1,6 +1,7 @@
-// Remove a device's push subscription and cancel its pending reminders.
+// Remove a device's push subscription, its reminder preference, and any
+// reminders already queued for it.
 import { json } from '@sveltejs/kit';
-import { adminExecute, odooConfigured } from '$lib/server/odoo.js';
+import { adminExecute, odooConfigured, deletePreference } from '$lib/server/odoo.js';
 
 export const prerender = false;
 
@@ -18,15 +19,14 @@ export async function POST({ request }) {
 			if (ids.length) await adminExecute('mail.push.device', 'unlink', [ids]);
 		}
 
-		// Drop queued reminders so they don't keep firing at a dead endpoint.
 		if (deviceId) {
 			const partners = await adminExecute('res.partner', 'search', [[['ref', '=', `dtl-device-${deviceId}`]]], {
 				limit: 1
 			});
 			if (partners.length) {
-				const pending = await adminExecute('mail.scheduled.message', 'search', [
-					[['partner_ids', 'in', partners]]
-				]);
+				await deletePreference(partners[0]);
+				// Drop queued reminders so they don't fire at a dead endpoint.
+				const pending = await adminExecute('mail.scheduled.message', 'search', [[['partner_ids', 'in', partners]]]);
 				if (pending.length) await adminExecute('mail.scheduled.message', 'unlink', [pending]);
 			}
 		}

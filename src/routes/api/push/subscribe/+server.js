@@ -1,12 +1,20 @@
-// Store a device's push subscription in Odoo.
+// Register a device's push subscription in Odoo.
 //
-// Source of truth is Odoo's native mail.push.device (partner-keyed), written
-// with the admin key and upserted by `endpoint` — an endpoint is unique per
-// browser/device subscription. The app has no accounts, so each device gets its
-// own auto-created res.partner keyed by a UUID in `ref`.
+// Two records per device:
+//   mail.push.device  — Odoo's native delivery target (partner-keyed)
+//   x_preference      — the reminder time/timezone, read by the Odoo scheduled
+//                       action "Daily Tracker: queue push reminders", which
+//                       creates the mail.scheduled.message rows.
+//
+// The app never schedules anything itself; all recurring logic lives in Odoo.
 import { json } from '@sveltejs/kit';
-import { adminExecute, findOrCreateDevicePartner, odooConfigured } from '$lib/server/odoo.js';
-import { rescheduleForPartner } from '$lib/server/reminders.js';
+import {
+	adminExecute,
+	findOrCreateDevicePartner,
+	odooConfigured,
+	upsertPreference,
+	triggerReminderCron
+} from '$lib/server/odoo.js';
 
 export const prerender = false;
 
@@ -23,23 +31,12 @@ export async function POST({ request }) {
 		}
 
 		const partnerId = await findOrCreateDevicePartner({ deviceId, name });
+		await adminExecute('res.partner', 'write', [[partnerId], { tz: tz || 'UTC' }]);
 
-		// Persist scheduling prefs on the partner so the cron can rebuild the
-		// schedule without the app being open. tz is a native field; the reminder
-		// time rides in `comment` as JSON (these are dedicated device partners).
-		await adminExecute('res.partner', 'write', [
-			[partnerId],
-			{
-				tz: tz || 'UTC',
-				comment: JSON.stringify({ reminderTime: reminderTime || null, deviceId })
-			}
-		]);
-
-		// Upsert by endpoint. `keys` is a JSON *string* in Odoo, not a dict.
-		//
-		// Write rather than unlink+create: mail.push rows carry an FK to
-		// mail.push.device, so once Odoo has queued a push the row can't be
-		// deleted — the follow-up create would then violate unique(endpoint).
+		// Upsert by endpoint, writing rather than delete-then-create: mail.push
+		// rows hold an FK to mail.push.device, so once Odoo has queued a push the
+		// row can't be deleted and the follow-up create would violate
+		// unique(endpoint).
 		const keysJson = JSON.stringify({ p256dh: keys.p256dh, auth: keys.auth });
 		const existing = await adminExecute('mail.push.device', 'search', [[['endpoint', '=', endpoint]]]);
 		if (existing.length) {
@@ -55,11 +52,12 @@ export async function POST({ request }) {
 			}
 		}
 
-		// Schedule straight away. Waiting for the nightly cron would mean enabling
-		// a reminder at 21:00 produces nothing until the next cron run.
-		const scheduled = await rescheduleForPartner(partnerId, { reminderTime, tz });
+		await upsertPreference({ partnerId, deviceId, endpoint, reminderTime, tz, name });
 
-		return json({ ok: true, partnerId, scheduled });
+		// Kick the daily cron so a reminder enabled this evening still queues today.
+		await triggerReminderCron().catch(() => {});
+
+		return json({ ok: true, partnerId });
 	} catch (e) {
 		console.error('[push/subscribe] failed:', e?.message);
 		return json({ ok: false, error: e?.message || 'Subscribe failed' }, { status: 500 });

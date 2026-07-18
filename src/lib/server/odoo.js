@@ -79,6 +79,50 @@ export async function botPartnerId() {
 	return _botPartnerId;
 }
 
+const PREF_MODEL = 'x_preference';
+const REMINDER_CRON = 'Daily Tracker: queue push reminders';
+
+/**
+ * Store this device's reminder preference. An Odoo scheduled action reads these
+ * rows daily and creates the mail.scheduled.message reminders, so the app never
+ * schedules anything itself.
+ */
+export async function upsertPreference({ partnerId, deviceId, endpoint, reminderTime, tz, name }) {
+	const vals = {
+		x_name: `${name?.trim() || 'Device'} — ${reminderTime || 'off'}`,
+		x_partner_id: partnerId,
+		x_device_id: deviceId,
+		x_endpoint: endpoint,
+		x_reminder_time: reminderTime || false,
+		x_tz: tz || 'UTC'
+	};
+	const existing = await adminExecute(PREF_MODEL, 'search', [[['x_partner_id', '=', partnerId]]]);
+	if (existing.length) {
+		await adminExecute(PREF_MODEL, 'write', [existing, vals]);
+		return existing[0];
+	}
+	return adminExecute(PREF_MODEL, 'create', [vals]);
+}
+
+export async function deletePreference(partnerId) {
+	const ids = await adminExecute(PREF_MODEL, 'search', [[['x_partner_id', '=', partnerId]]]);
+	if (ids.length) await adminExecute(PREF_MODEL, 'unlink', [ids]);
+}
+
+/**
+ * Run the reminder cron now.
+ *
+ * The cron normally runs daily, but a user who enables reminders at 21:00 would
+ * otherwise get nothing until the next run — so we kick it on subscribe. It is
+ * idempotent (clears each partner's pending reminders before recreating).
+ */
+export async function triggerReminderCron() {
+	const ids = await adminExecute('ir.cron', 'search', [[['name', '=', REMINDER_CRON]]], { limit: 1 });
+	if (!ids.length) return false;
+	await adminExecute('ir.cron', 'method_direct_trigger', [ids]);
+	return true;
+}
+
 /**
  * Find-or-create the res.partner representing one device.
  * `ref` holds the device UUID so repeat calls reuse the same partner.
